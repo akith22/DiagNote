@@ -15,11 +15,20 @@ public class UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+
+    public Boolean emailValidation(String email){
+        if (userRepository.existsByEmail(email)){
+            return  true;
+        }else{
+            return false;
+        }
+    }
+
+
     public User registerUser(UserRegistrationDto registrationDto) {
         if (userRepository.existsByEmail(registrationDto.getEmail())) {
-            throw new RuntimeException("Email already exists");
+            throw new RuntimeException("Exist");
         }
-
         User user = new User();
         user.setName(registrationDto.getName());
         user.setEmail(registrationDto.getEmail());

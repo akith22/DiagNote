@@ -1,1 +1,22 @@
 @import "tailwindcss";
+
+@theme {
+    --font-roboto: "Roboto", sans-serif; 
+    --font-Montserrat: "Montserrat", serif;
+  }
+
+
+
+@theme {
+    --color-primary-1: #00B4D8;
+    --color-primary-1-hover: #336BC8;
+    --color-primary-2: #E02029;
+    --color-primary-2-hover: #96040B;
+    --color-secondary-1: #98D2C0;
+    --color-secondary-2: #F6F8D5;
+  }
+
+  body{
+    margin-top: 64px;
+  }
+  
