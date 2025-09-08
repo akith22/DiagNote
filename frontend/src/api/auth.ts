@@ -20,7 +20,8 @@ export interface RegisterRequest {
 
 export const loginUser = async (data: LoginRequest) => {
     const response = await API.post('/auth/login', data);
-    const token = response.data.token;
+
+    const token = response.data.accessToken;
     localStorage.setItem("jwt", token);
     API.defaults.headers.common['Authorization'] = `Bearer ${token}`; // set for future
     return response;

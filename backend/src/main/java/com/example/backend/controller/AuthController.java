@@ -1,5 +1,7 @@
 package com.example.backend.controller;
 
+import com.example.backend.dto.AuthRequest;
+import com.example.backend.dto.AuthResponse;
 import com.example.backend.dto.UserRegistrationDto;
 import com.example.backend.model.User;
 import com.example.backend.repository.UserRepository;
@@ -9,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -48,5 +52,23 @@ public class AuthController {
         }
         User registeredUser = userService.registerUser(registrationDto);
         return ResponseEntity.ok("User registered successfully with email: " + registeredUser.getEmail());
+    }
+    @PostMapping("/login")
+    public ResponseEntity<?> createAuthenticationToken(@RequestBody AuthRequest authRequest) throws Exception {
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(authRequest.getEmail(), authRequest.getPassword())
+            );
+        } catch (Exception e) {
+            throw new Exception("Incorrect username or password", e);
+        }
+
+        final UserDetails userDetails = userDetailsService.loadUserByUsername(authRequest.getEmail());
+        final String jwt = jwtUtil.generateToken(userDetails);
+
+        User user = userRepository.findByEmail(authRequest.getEmail())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return ResponseEntity.ok(new AuthResponse(authRequest.getEmail(), jwt, user.getRole().name()));
     }
 }

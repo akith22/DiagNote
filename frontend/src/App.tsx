@@ -5,12 +5,14 @@ import "./App.css";
 import axios from "axios";
 import { Route, Routes } from "react-router-dom";
 import Register from "./assets/pages/Register";
+import Login from "./assets/pages/Login";
 
 function App() {
   return (
     <>
       <Routes>
-        <Route path="/" element={<Register />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
       </Routes>
     </>
   );
