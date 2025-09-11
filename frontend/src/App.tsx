@@ -6,6 +6,7 @@ import axios from "axios";
 import { Route, Routes } from "react-router-dom";
 import Register from "./assets/pages/Register";
 import Login from "./assets/pages/Login";
+import DoctorDashboard from "./assets/pages/doctor/DoctorDashboard";
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
       </Routes>
     </>
   );

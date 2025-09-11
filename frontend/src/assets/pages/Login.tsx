@@ -9,7 +9,7 @@ const Login = () => {
     try {
       const res = await loginUser(formData);
       console.log(res);
-      // navigate('/dashboard');
+      navigate("/dashboard");
     } catch {
       alert("Login failed");
     }
