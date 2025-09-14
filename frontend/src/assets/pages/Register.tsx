@@ -49,13 +49,18 @@ const Register = () => {
         {/* AuthForm appears after role selection */}
         {selectedRole && (
           <>
+            <p className="mb-4 text-center text-white">
+              Registering as:{" "}
+              <span className="font-semibold">{selectedRole}</span>
+            </p>
+
             <AuthForm
               isRegister
               onSubmit={(data) =>
                 handleRegister({ ...data, role: selectedRole })
               }
             />
-            ~
+
             <p className="text-sm text-center mt-4">
               Already have an account?{" "}
               <a href="/login" className="text-primary-2 hover:underline">

@@ -8,8 +8,23 @@ const Login = () => {
   const handleLogin = async (formData: { email: string; password: string }) => {
     try {
       const res = await loginUser(formData);
-      console.log(res);
-      navigate("/dashboard");
+      console.log(res.role);
+
+      switch (res.role) {
+        case "DOCTOR":
+          navigate("/doctor/dashboard");
+          break;
+        case "PATIENT":
+          navigate("/patient/dashboard");
+          break;
+        case "LABTECH":
+          navigate("/labtech/dashboard");
+          break;
+        default:
+          navigate("/");
+      }
+
+      // navigate("/dashboard");
     } catch {
       alert("Login failed");
     }

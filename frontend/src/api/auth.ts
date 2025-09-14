@@ -1,10 +1,8 @@
 // src/api/auth.ts
 import axios from 'axios';
+import type { AuthResponse, User } from "../types/index.ts";
+import  API  from '../services/api';
 
-const API = axios.create({
-    baseURL: '/api', // Update with your backend URL
-    withCredentials: true,
-});
 
 export interface LoginRequest {
     email: string;
@@ -18,16 +16,62 @@ export interface RegisterRequest {
     role: string;
 }
 
-export const loginUser = async (data: LoginRequest) => {
-    const response = await API.post('/auth/login', data);
-
-    const token = response.data.accessToken;
-    localStorage.setItem("jwt", token);
-    API.defaults.headers.common['Authorization'] = `Bearer ${token}`; // set for future
-    return response;
+// Store token and user data in localStorage
+export const storeAuthData = (authData: AuthResponse, userData: User) => {
+  localStorage.setItem('token', authData.accessToken);
+  localStorage.setItem('user', JSON.stringify(userData));
 };
 
-// export const registerUser = (data: RegisterRequest) => API.post('/auth/register', data);
+// Remove auth data from localStorage
+export const clearAuthData = () => {
+  localStorage.removeItem('token');
+  localStorage.removeItem('user');
+};
+
+// Get stored token
+export const getToken = (): string | null => {
+  return localStorage.getItem('token');
+};
+
+// Get stored user data
+export const getUser = (): User | null => {
+  const userStr = localStorage.getItem('user');
+  return userStr ? JSON.parse(userStr) : null;
+};
+
+// Check if user is authenticated
+export const isAuthenticated = (): boolean => {
+  return !!getToken();
+};
+
+// Check if user has specific role
+export const hasRole = (role: string): boolean => {
+  const user = getUser();
+  return user ? user.role === role : false;
+};
+
+export const loginUser = async (data: LoginRequest) => {
+    try{
+        const response = await API.post('/auth/login', data);
+        const authData : AuthResponse = response.data;
+
+        const userData: User = {
+            userId: 0, // This would come from your backend
+            name: "", // This would come from your backend
+            email: authData.email,
+            role: authData.role,
+        };
+        
+        storeAuthData(authData, userData);
+        return authData;
+    }catch(error:any){
+        throw new Error(error.response?.data?.message || "Login failed");
+    }
+    // const token = response.data.accessToken;
+    // localStorage.setItem("jwt", token);
+    // API.defaults.headers.common['Authorization'] = `Bearer ${token}`; // set for future
+    // return authData;
+};
 
 export const registerUser = async (data: RegisterRequest) => {
             try {
@@ -35,7 +79,7 @@ export const registerUser = async (data: RegisterRequest) => {
 
                 // If the registration is successful
                 // showMessage(response.data.message || "Registration successful", true);
-                return true;
+                return response.data;
             } catch (error) {
                 let errorMsg = "Registration failed due to an unexpected error";
                  if (axios.isAxiosError(error)) {
@@ -61,37 +105,13 @@ export const registerUser = async (data: RegisterRequest) => {
         }
 
 
-API.interceptors.request.use((config) => {
-    const token = localStorage.getItem('jwt');
-    if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-});
+// Logout function
+export const logout = () => {
+  clearAuthData();
+  window.location.href = '/login';
+};
 
 
 
-export const doctorService = {
-  getProfile: async () => {
-    const response = await API.get('/doctor/profile');
-    return response.data;
-  },
 
-  saveProfile: async (profileData: {
-    specialization: string;
-    licenseNumber: string;
-    availableTimes: string;
-  }) => {
-    const response = await API.post('/doctor/profile', profileData);
-    return response.data;
-  },
 
-  updateProfile: async (profileData: {
-    specialization: string;
-    licenseNumber: string;
-    availableTimes: string;
-  }) => {
-    const response = await API.put('/doctor/profile', profileData);
-    return response.data;
-  },
-  };

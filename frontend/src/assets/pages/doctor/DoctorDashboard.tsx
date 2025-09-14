@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import type { DoctorProfile, DoctorDetails, User } from "../../../types";
-import { doctorService } from "../../../api/auth";
+import { doctorService } from "../../../services/DoctorService";
+``;
 import UserProfile from "../../../components/common/UserProfile";
 import DoctorProfileForm from "./DoctorProfileForm";
 import DoctorProfileView from "./DoctorProfileView";
@@ -55,7 +56,7 @@ const DoctorDashboard: React.FC = () => {
     userId: 0, // This would come from your auth context
     name: profile.name,
     email: profile.email,
-    role: "DOCTOR",
+    role: "",
   };
 
   return (
