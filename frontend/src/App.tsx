@@ -9,6 +9,7 @@ import Login from "./assets/pages/Login";
 import DoctorDashboard from "./assets/pages/doctor/DoctorDashboard";
 import ProtectedRoute from "./context/ProtectedRoute";
 import PatientDashboard from "./assets/pages/patient/PatientDashboard";
+import LabTechDashboard from "./assets/pages/labtech/LabTechDashboard";
 
 function App() {
   return (
@@ -32,6 +33,16 @@ function App() {
           element={
             <ProtectedRoute requiredRole="PATIENT">
               <PatientDashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Lab Tech Routes */}
+        <Route
+          path="/labtech/dashboard"
+          element={
+            <ProtectedRoute requiredRole="LABTECH">
+              <LabTechDashboard />
             </ProtectedRoute>
           }
         />

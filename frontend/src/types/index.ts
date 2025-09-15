@@ -26,3 +26,29 @@ export interface DoctorProfile {
   availableTimes: string | null;
   profileComplete: boolean;
 }
+
+export interface PatientDetails {
+  gender: string;
+  address: string;
+  age: number;
+}
+
+export interface PatientProfile {
+  name: string;
+  email: string;
+  gender: string | null;
+  address: string | null;
+  age: number | null;
+  profileComplete: boolean;
+}
+
+export interface LabTechDetails {
+  department: string;
+}
+
+export interface LabTechProfile {
+  name: string;
+  email: string;
+  department: string | null;
+  profileComplete: boolean;
+}

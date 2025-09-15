@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from "react";
-import type { PatientProfile, PatientDetails, User } from "../../../types";
+import type { LabTechProfile, LabTechDetails, User } from "../../../types";
 import { getUser, logout } from "../../../api/auth";
-import { patientService } from "../../../services/PatientService";
+import { labTechService } from "../../../services/LabTechService";
 import LoadingSpinner from "../../../components/common/LoadingSpinner";
 import UserProfile from "../../../components/common/UserProfile";
-import PatientProfileForm from "./PatientProfileForm";
-import PatientProfileView from "./PatientProfileView";
+import LabTechProfileForm from "./LabTechProfileForm";
+import LabTechProfileView from "./LabTechProfileView";
 
-const PatientDashboard: React.FC = () => {
-  const [profile, setProfile] = useState<PatientProfile | null>(null);
+const LabTechDashboard: React.FC = () => {
+  const [profile, setProfile] = useState<LabTechProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [error, setError] = useState("");
@@ -24,7 +24,7 @@ const PatientDashboard: React.FC = () => {
     try {
       setLoading(true);
       setError("");
-      const profileData = await patientService.getProfile();
+      const profileData = await labTechService.getProfile();
       setProfile(profileData);
     } catch (err: any) {
       setError(err.response?.data?.message || "Failed to fetch profile");
@@ -33,15 +33,15 @@ const PatientDashboard: React.FC = () => {
     }
   };
 
-  const handleSaveProfile = async (data: PatientDetails) => {
+  const handleSaveProfile = async (data: LabTechDetails) => {
     try {
       setError("");
       setSuccess("");
       if (profile?.profileComplete) {
-        await patientService.updateProfile(data);
+        await labTechService.updateProfile(data);
         setSuccess("Profile updated successfully");
       } else {
-        await patientService.saveProfile(data);
+        await labTechService.saveProfile(data);
         setSuccess("Profile saved successfully");
       }
       setEditing(false);
@@ -53,13 +53,13 @@ const PatientDashboard: React.FC = () => {
 
   const handleDeleteProfile = async () => {
     if (
-      window.confirm("Are you sure you want to delete your personal details?")
+      window.confirm("Are you sure you want to delete your department details?")
     ) {
       try {
         setError("");
         setSuccess("");
-        await patientService.deleteProfile();
-        setSuccess("Personal details deleted successfully");
+        await labTechService.deleteProfile();
+        setSuccess("Department details deleted successfully");
         setEditing(false);
         await fetchProfile();
       } catch (err: any) {
@@ -83,7 +83,7 @@ const PatientDashboard: React.FC = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Patient Dashboard</h1>
+        <h1 className="text-2xl font-bold">Lab Technician Dashboard</h1>
         <button
           onClick={handleLogout}
           className="bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700"
@@ -107,13 +107,11 @@ const PatientDashboard: React.FC = () => {
       <UserProfile user={user} />
 
       {editing || !profile?.profileComplete ? (
-        <PatientProfileForm
+        <LabTechProfileForm
           initialData={
             profile?.profileComplete
               ? {
-                  gender: profile.gender || "",
-                  address: profile.address || "",
-                  age: profile.age || 0,
+                  department: profile.department || "",
                 }
               : undefined
           }
@@ -122,7 +120,7 @@ const PatientDashboard: React.FC = () => {
           onCancel={() => setEditing(false)}
         />
       ) : (
-        <PatientProfileView
+        <LabTechProfileView
           profile={profile}
           onEdit={() => setEditing(true)}
           onDelete={handleDeleteProfile}
@@ -132,4 +130,4 @@ const PatientDashboard: React.FC = () => {
   );
 };
 
-export default PatientDashboard;
+export default LabTechDashboard;
