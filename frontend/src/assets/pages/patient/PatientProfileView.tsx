@@ -30,7 +30,7 @@ const PatientProfileView: React.FC<PatientProfileViewProps> = ({
           Personal Details
         </h2>
         <div className="flex space-x-2">
-          <button
+          {/* <button
             onClick={onEdit}
             className="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200"
             aria-label="Edit personal details"
@@ -49,7 +49,7 @@ const PatientProfileView: React.FC<PatientProfileViewProps> = ({
               />
             </svg>
             Edit
-          </button>
+          </button> */}
           <button
             onClick={onDelete}
             className="bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors duration-200"
