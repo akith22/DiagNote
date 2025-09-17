@@ -7,12 +7,12 @@ import DoctorProfileView from "./DoctorProfileView";
 import LoadingSpinner from "../../../components/common/LoadingSpinner";
 
 // Icons (assuming you're using react-icons)
-import { 
-  FiCalendar, 
-  FiUsers, 
-  FiUserCheck, 
-  FiBarChart2, 
-  FiSettings, 
+import {
+  FiCalendar,
+  FiUsers,
+  FiUserCheck,
+  FiBarChart2,
+  FiSettings,
   FiStar,
   FiEdit3,
   FiX,
@@ -21,8 +21,10 @@ import {
   FiAward,
   FiMapPin,
   FiPhone,
-  FiMail
+  FiMail,
+  FiLogOut,
 } from "react-icons/fi";
+import { logout } from "../../../api/auth";
 
 const DoctorDashboard: React.FC = () => {
   const [profile, setProfile] = useState<DoctorProfile | null>(null);
@@ -62,6 +64,10 @@ const DoctorDashboard: React.FC = () => {
     }
   };
 
+  const handleLogout = () => {
+    logout();
+  };
+
   if (loading) return <LoadingSpinner />;
 
   if (!profile) {
@@ -74,7 +80,7 @@ const DoctorDashboard: React.FC = () => {
             </div>
           </div>
           <p className="text-center">Error loading profile: {error}</p>
-          <button 
+          <button
             onClick={fetchProfile}
             className="mt-4 w-full py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-md transition-colors"
           >
@@ -102,7 +108,7 @@ const DoctorDashboard: React.FC = () => {
             Doctor Dashboard
           </h1>
         </div>
-        
+
         <div className="flex items-center space-x-4">
           {!editing && profile.profileComplete && (
             <button
@@ -113,6 +119,14 @@ const DoctorDashboard: React.FC = () => {
               Edit Profile
             </button>
           )}
+
+          <button
+            onClick={handleLogout}
+            className="flex items-center py-2 px-4 bg-red-100 text-red-700 rounded-lg shadow hover:bg-red-200 transition-all duration-300"
+          >
+            <FiLogOut className="mr-2" />
+            Logout
+          </button>
         </div>
       </header>
 
@@ -125,7 +139,10 @@ const DoctorDashboard: React.FC = () => {
               <div className="w-24 h-24 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mb-4">
                 <div className="w-20 h-20 bg-gradient-to-br from-blue-200 to-indigo-200 rounded-full flex items-center justify-center">
                   <span className="text-2xl font-bold text-blue-600">
-                    {user.name.split(' ').map(n => n[0]).join('')}
+                    {user.name
+                      .split(" ")
+                      .map((n) => n[0])
+                      .join("")}
                   </span>
                 </div>
               </div>
@@ -135,20 +152,20 @@ const DoctorDashboard: React.FC = () => {
                 {user.role}
               </div>
             </div>
-            
+
             <div className="space-y-4 border-t border-gray-100 pt-6">
               <div className="flex items-center text-gray-700">
                 <FiAward className="text-blue-500 mr-3" />
                 <span>{profile.specialization || "Not specified"}</span>
               </div>
-              
+
               {profile.licenseNumber && (
                 <div className="flex items-center text-gray-700">
                   <FiStar className="text-blue-500 mr-3" />
                   <span>License: {profile.licenseNumber}</span>
                 </div>
               )}
-              
+
               {profile.availableTimes && (
                 <div className="flex items-center text-gray-700">
                   <FiClock className="text-blue-500 mr-3" />
@@ -156,7 +173,7 @@ const DoctorDashboard: React.FC = () => {
                 </div>
               )}
             </div>
-            
+
             {/* <div className="mt-8 pt-6 border-t border-gray-100">
               <h3 className="font-medium text-gray-700 mb-3">Quick Stats</h3>
               <div className="grid grid-cols-2 gap-3">
@@ -178,36 +195,56 @@ const DoctorDashboard: React.FC = () => {
           {/* Navigation Tabs */}
           <div className="bg-white rounded-2xl shadow-lg mb-8 overflow-hidden">
             <div className="flex overflow-x-auto">
-              <button 
-                className={`px-6 py-4 font-medium flex items-center ${activeTab === "profile" ? "text-blue-600 border-b-2 border-blue-600" : "text-gray-500"}`}
+              <button
+                className={`px-6 py-4 font-medium flex items-center ${
+                  activeTab === "profile"
+                    ? "text-blue-600 border-b-2 border-blue-600"
+                    : "text-gray-500"
+                }`}
                 onClick={() => setActiveTab("profile")}
               >
                 <FiUserCheck className="mr-2" />
                 Profile
               </button>
-              <button 
-                className={`px-6 py-4 font-medium flex items-center ${activeTab === "schedule" ? "text-blue-600 border-b-2 border-blue-600" : "text-gray-500"}`}
+              <button
+                className={`px-6 py-4 font-medium flex items-center ${
+                  activeTab === "schedule"
+                    ? "text-blue-600 border-b-2 border-blue-600"
+                    : "text-gray-500"
+                }`}
                 onClick={() => setActiveTab("schedule")}
               >
                 <FiCalendar className="mr-2" />
                 Schedule
               </button>
-              <button 
-                className={`px-6 py-4 font-medium flex items-center ${activeTab === "patients" ? "text-blue-600 border-b-2 border-blue-600" : "text-gray-500"}`}
+              <button
+                className={`px-6 py-4 font-medium flex items-center ${
+                  activeTab === "patients"
+                    ? "text-blue-600 border-b-2 border-blue-600"
+                    : "text-gray-500"
+                }`}
                 onClick={() => setActiveTab("patients")}
               >
                 <FiUsers className="mr-2" />
                 Patients
               </button>
-              <button 
-                className={`px-6 py-4 font-medium flex items-center ${activeTab === "reports" ? "text-blue-600 border-b-2 border-blue-600" : "text-gray-500"}`}
+              <button
+                className={`px-6 py-4 font-medium flex items-center ${
+                  activeTab === "reports"
+                    ? "text-blue-600 border-b-2 border-blue-600"
+                    : "text-gray-500"
+                }`}
                 onClick={() => setActiveTab("reports")}
               >
                 <FiBarChart2 className="mr-2" />
                 Reports
               </button>
-              <button 
-                className={`px-6 py-4 font-medium flex items-center ${activeTab === "settings" ? "text-blue-600 border-b-2 border-blue-600" : "text-gray-500"}`}
+              <button
+                className={`px-6 py-4 font-medium flex items-center ${
+                  activeTab === "settings"
+                    ? "text-blue-600 border-b-2 border-blue-600"
+                    : "text-gray-500"
+                }`}
                 onClick={() => setActiveTab("settings")}
               >
                 <FiSettings className="mr-2" />
@@ -234,14 +271,16 @@ const DoctorDashboard: React.FC = () => {
           <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-gray-800 flex items-center">
-                {editing || !profile.profileComplete ? "Edit Profile" : "Professional Profile"}
+                {editing || !profile.profileComplete
+                  ? "Edit Profile"
+                  : "Professional Profile"}
                 {profile.profileComplete && !editing && (
                   <span className="ml-3 text-xs bg-green-100 text-green-800 py-1 px-2 rounded-full">
                     Complete
                   </span>
                 )}
               </h2>
-              
+
               {editing && (
                 <button
                   onClick={() => setEditing(false)}
