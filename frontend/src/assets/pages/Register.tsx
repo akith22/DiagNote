@@ -15,7 +15,7 @@ const Register = () => {
   }) => {
     try {
       await registerUser(formData);
-      // navigate("/login");
+      navigate("/login");
     } catch {
       alert("Registration failed");
     }
