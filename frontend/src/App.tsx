@@ -10,6 +10,7 @@ import DoctorDashboard from "./assets/pages/doctor/DoctorDashboard";
 import ProtectedRoute from "./context/ProtectedRoute";
 import PatientDashboard from "./assets/pages/patient/PatientDashboard";
 import LabTechDashboard from "./assets/pages/labtech/LabTechDashboard";
+import DoctorSearch from "./assets/pages/DoctorSearch";
 
 function App() {
   return (
@@ -46,6 +47,8 @@ function App() {
             </ProtectedRoute>
           }
         />
+      {/* Public doctor search */}
+      <Route path="/search-doctor" element={<DoctorSearch />} />
       </Routes>
     </>
   );
