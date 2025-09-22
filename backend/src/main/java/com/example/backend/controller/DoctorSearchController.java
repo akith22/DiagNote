@@ -15,7 +15,7 @@ public class DoctorSearchController {
 
     @Autowired
     private DoctorService doctorService;
-    
+
     @GetMapping
     public ResponseEntity<List<DoctorProfileResponse>> searchDoctors(@RequestParam String search) {
         return ResponseEntity.ok(doctorService.searchDoctors(search));

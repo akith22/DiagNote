@@ -55,6 +55,7 @@ public class SecurityConfig{
                                 .requestMatchers("/api/doctors/**").permitAll()
                                 .requestMatchers("/api/patient/**").hasRole("PATIENT")
                                 .requestMatchers("/api/labtech/**").hasRole("LABTECH")
+                                .requestMatchers("/api/appointments/**").permitAll()
                                 .anyRequest().authenticated()
                 );
 
