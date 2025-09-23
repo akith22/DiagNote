@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import type { DoctorProfile, DoctorDetails, User } from "../../../types";
 import { doctorService } from "../../../services/DoctorService";
-//import UserProfile from "../../../components/common/UserProfile";
 import DoctorProfileForm from "./DoctorProfileForm";
 import DoctorProfileView from "./DoctorProfileView";
+import AppointmentManager from "./AppointmentManager"; // ✅ Import AppointmentManager
 import LoadingSpinner from "../../../components/common/LoadingSpinner";
 
 // Icons
@@ -77,7 +77,9 @@ const DoctorDashboard: React.FC = () => {
               <FiX className="text-red-500 text-2xl" />
             </div>
           </div>
-          <h3 className="text-xl font-semibold text-center mb-2 text-gray-800">Error Loading Profile</h3>
+          <h3 className="text-xl font-semibold text-center mb-2 text-gray-800">
+            Error Loading Profile
+          </h3>
           <p className="text-center text-gray-600 mb-6">{error}</p>
           <button
             onClick={fetchProfile}
@@ -106,7 +108,9 @@ const DoctorDashboard: React.FC = () => {
             <FiHeart className="text-blue-600 text-2xl" />
           </div>
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-800">Doctor Dashboard</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
+              Doctor Dashboard
+            </h1>
             <p className="text-gray-500">Manage your practice and profile</p>
           </div>
         </div>
@@ -167,7 +171,9 @@ const DoctorDashboard: React.FC = () => {
                 <FiAward className="text-blue-600 mr-3 text-lg" />
                 <div>
                   <p className="text-sm text-gray-500">Specialization</p>
-                  <p className="font-medium">{profile.specialization || "Not specified"}</p>
+                  <p className="font-medium">
+                    {profile.specialization || "Not specified"}
+                  </p>
                 </div>
               </div>
 
@@ -191,8 +197,6 @@ const DoctorDashboard: React.FC = () => {
                 </div>
               )}
             </div>
-
-           
           </div>
         </div>
 
@@ -238,56 +242,56 @@ const DoctorDashboard: React.FC = () => {
             </div>
           )}
 
-          {/* Profile Section */}
-          <div className="bg-white rounded-2xl shadow-sm p-6 md:p-8 border border-gray-100">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-bold text-gray-800 flex items-center">
-                {editing || !profile.profileComplete
-                  ? "Edit Professional Profile"
-                  : "Professional Profile"}
-                {profile.profileComplete && !editing && (
-                  <span className="ml-3 text-xs bg-green-100 text-green-800 py-1 px-2.5 rounded-full">
-                    Complete
-                  </span>
-                )}
-              </h2>
+          {/* Content Switch */}
+          {activeTab === "profile" && (
+            <div className="bg-white rounded-2xl shadow-sm p-6 md:p-8 border border-gray-100">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-bold text-gray-800 flex items-center">
+                  {editing || !profile.profileComplete
+                    ? "Edit Professional Profile"
+                    : "Professional Profile"}
+                  {profile.profileComplete && !editing && (
+                    <span className="ml-3 text-xs bg-green-100 text-green-800 py-1 px-2.5 rounded-full">
+                      Complete
+                    </span>
+                  )}
+                </h2>
 
-              {editing && (
-                <button
-                  onClick={() => setEditing(false)}
-                  className="text-gray-500 hover:text-gray-700 flex items-center text-sm py-1.5 px-3 bg-gray-100 rounded-lg"
-                >
-                  <FiX className="mr-1" />
-                  Cancel
-                </button>
+                {editing && (
+                  <button
+                    onClick={() => setEditing(false)}
+                    className="text-gray-500 hover:text-gray-700 flex items-center text-sm py-1.5 px-3 bg-gray-100 rounded-lg"
+                  >
+                    <FiX className="mr-1" />
+                    Cancel
+                  </button>
+                )}
+              </div>
+
+              {editing || !profile.profileComplete ? (
+                <DoctorProfileForm
+                  initialData={
+                    profile.profileComplete
+                      ? {
+                          specialization: profile.specialization || "",
+                          licenseNumber: profile.licenseNumber || "",
+                          availableTimes: profile.availableTimes || "",
+                        }
+                      : undefined
+                  }
+                  onSubmit={handleSaveProfile}
+                  isEditing={profile.profileComplete}
+                />
+              ) : (
+                <DoctorProfileView
+                  profile={profile}
+                  onEdit={() => setEditing(true)}
+                />
               )}
             </div>
+          )}
 
-            {editing || !profile.profileComplete ? (
-              <DoctorProfileForm
-                initialData={
-                  profile.profileComplete
-                    ? {
-                        specialization: profile.specialization || "",
-                        licenseNumber: profile.licenseNumber || "",
-                        availableTimes: profile.availableTimes || "",
-                      }
-                    : undefined
-                }
-                onSubmit={handleSaveProfile}
-                isEditing={profile.profileComplete}
-              />
-            ) : (
-              <DoctorProfileView
-                profile={profile}
-                onEdit={() => setEditing(true)}
-              />
-            )}
-          </div>
-
-          {/* Additional Dashboard Cards */}
-          
-          
+          {activeTab === "schedule" && <AppointmentManager />}
         </div>
       </div>
     </div>
