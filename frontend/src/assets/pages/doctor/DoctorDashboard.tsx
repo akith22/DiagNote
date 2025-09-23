@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import type { DoctorProfile, DoctorDetails, User } from "../../../types";
 import { doctorService } from "../../../services/DoctorService";
-import UserProfile from "../../../components/common/UserProfile";
+//import UserProfile from "../../../components/common/UserProfile";
 import DoctorProfileForm from "./DoctorProfileForm";
 import DoctorProfileView from "./DoctorProfileView";
 import LoadingSpinner from "../../../components/common/LoadingSpinner";
@@ -19,9 +19,6 @@ import {
   FiCheck,
   FiClock,
   FiAward,
-  FiMapPin,
-  FiPhone,
-  FiMail,
   FiLogOut,
   FiHeart,
 } from "react-icons/fi";
@@ -195,19 +192,7 @@ const DoctorDashboard: React.FC = () => {
               )}
             </div>
 
-            <div className="mt-8 pt-6 border-t border-gray-100">
-              <h3 className="font-medium text-gray-700 mb-4 text-sm uppercase tracking-wide">Quick Stats</h3>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="bg-blue-50 p-4 rounded-xl text-center border border-blue-100">
-                  <div className="text-2xl font-bold text-blue-700">42</div>
-                  <div className="text-xs text-gray-600 mt-1">Patients</div>
-                </div>
-                <div className="bg-teal-50 p-4 rounded-xl text-center border border-teal-100">
-                  <div className="text-2xl font-bold text-teal-700">16</div>
-                  <div className="text-xs text-gray-600 mt-1">Appointments</div>
-                </div>
-              </div>
-            </div>
+           
           </div>
         </div>
 
@@ -301,59 +286,8 @@ const DoctorDashboard: React.FC = () => {
           </div>
 
           {/* Additional Dashboard Cards */}
-          {!editing && profile.profileComplete && activeTab === "profile" && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
-              <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
-                <h3 className="font-bold text-lg text-gray-800 mb-4 flex items-center">
-                  <FiClock className="text-blue-600 mr-2" />
-                  Today's Appointments
-                </h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between p-3 bg-blue-50 rounded-xl border border-blue-100">
-                    <div>
-                      <p className="font-medium text-gray-800">John Doe</p>
-                      <p className="text-sm text-gray-600">10:00 AM - 10:30 AM</p>
-                    </div>
-                    <span className="bg-blue-100 text-blue-800 text-xs px-2.5 py-1 rounded-full font-medium">Check-up</span>
-                  </div>
-                  <div className="flex items-center justify-between p-3 bg-blue-50 rounded-xl border border-blue-100">
-                    <div>
-                      <p className="font-medium text-gray-800">Jane Smith</p>
-                      <p className="text-sm text-gray-600">2:15 PM - 2:45 PM</p>
-                    </div>
-                    <span className="bg-green-100 text-green-800 text-xs px-2.5 py-1 rounded-full font-medium">Follow-up</span>
-                  </div>
-                </div>
-                <button className="mt-4 w-full py-2.5 text-center text-blue-600 hover:text-blue-800 font-medium text-sm bg-blue-50 rounded-lg">
-                  View All Appointments →
-                </button>
-              </div>
-              
-              <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
-                <h3 className="font-bold text-lg text-gray-800 mb-4 flex items-center">
-                  <FiBarChart2 className="text-blue-600 mr-2" />
-                  Weekly Summary
-                </h3>
-                <div className="space-y-3">
-                  <div className="flex justify-between py-2 border-b border-gray-100">
-                    <span className="text-gray-600">Completed Appointments</span>
-                    <span className="font-medium text-blue-700">12</span>
-                  </div>
-                  <div className="flex justify-between py-2 border-b border-gray-100">
-                    <span className="text-gray-600">New Patients</span>
-                    <span className="font-medium text-blue-700">3</span>
-                  </div>
-                  <div className="flex justify-between py-2">
-                    <span className="text-gray-600">Cancellations</span>
-                    <span className="font-medium text-blue-700">2</span>
-                  </div>
-                </div>
-                <button className="mt-4 w-full py-2.5 text-center text-blue-600 hover:text-blue-800 font-medium text-sm bg-blue-50 rounded-lg">
-                  View Full Report →
-                </button>
-              </div>
-            </div>
-          )}
+          
+          
         </div>
       </div>
     </div>

@@ -38,12 +38,12 @@ public class DoctorAppointmentController {
 
     // 🔹 Filtering Endpoints
 
-    // By Status
+  /*  // By Status
     @GetMapping("/filter/status")
     public ResponseEntity<List<Appointment>> getAppointmentsByStatus(@RequestParam Appointment.Status status) {
         return ResponseEntity.ok(doctorAppointmentService.getAppointmentsByStatus(status));
     }
-
+*/
     // By Time Range
    /* @GetMapping("/filter/time")
     public ResponseEntity<List<Appointment>> getAppointmentsByTimeRange(
@@ -52,7 +52,7 @@ public class DoctorAppointmentController {
         return ResponseEntity.ok(doctorAppointmentService.getAppointmentsByTimeRange(start, end));
     }*/
 
-    // By Month
+   /* // By Month
     @GetMapping("/filter/month")
     public ResponseEntity<List<Appointment>> getAppointmentsByMonth(
             @RequestParam int month,

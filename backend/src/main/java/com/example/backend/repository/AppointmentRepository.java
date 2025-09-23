@@ -10,20 +10,17 @@ import java.util.List;
 
 public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
 
-    // Filter by doctor and between two dates
-    List<Appointment> findByDoctorIdAndDateBetween(Long doctorId, LocalDateTime start, LocalDateTime end);
+    List<Appointment> findByDoctorId(Long doctorId);
 
-    // Filter by doctor and status
     List<Appointment> findByDoctorIdAndStatus(Long doctorId, Status status);
 
-    // Filter by doctor, status, and between dates
-    List<Appointment> findByDoctorIdAndStatusAndDateBetween(Long doctorId, Status status, LocalDateTime start, LocalDateTime end);
+    List<Appointment> findByDoctorIdAndDateAfterOrderByDateAsc(Long doctorId, LocalDateTime from);
 
-    // Custom query for month
-    @Query("SELECT a FROM Appointment a WHERE a.doctorId = :doctorId AND MONTH(a.date) = :month AND YEAR(a.date) = :year")
-    List<Appointment> findByDoctorAndMonth(Long doctorId, int month, int year);
+    List<Appointment> findByDoctorIdAndDateBeforeOrderByDateDesc(Long doctorId, LocalDateTime to);
 
-    // Custom query for week
-    @Query("SELECT a FROM Appointment a WHERE a.doctorId = :doctorId AND FUNCTION('WEEK', a.date) = :week AND YEAR(a.date) = :year")
-    List<Appointment> findByDoctorAndWeek(Long doctorId, int week, int year);
+    // Pending appointments for a doctor
+    List<Appointment> findByDoctorIdAndStatusOrderByDateAsc(Long doctorId, Status status);
+
+    // Optionally find upcoming accepted
+    List<Appointment> findByDoctorIdAndStatusAndDateAfterOrderByDateAsc(Long doctorId, Status status, LocalDateTime from);
 }

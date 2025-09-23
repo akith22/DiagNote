@@ -47,7 +47,7 @@ public class DoctorAppointmentService {
     }
 
     // 🔹 Appointment Filtering
-
+/*
     // By Status
     public List<Appointment> getAppointmentsByStatus(Appointment.Status status) {
         Long doctorId = getLoggedInDoctor().getId().longValue();
@@ -78,7 +78,7 @@ public class DoctorAppointmentService {
                                                                  LocalDateTime end) {
         Long doctorId = getLoggedInDoctor().getId().longValue();
         return appointmentRepository.findByDoctorIdAndStatusAndDateBetween(doctorId, status, start, end);
-    }
+    }*/
 
     // 🔹 Helper to get logged-in doctor
     private Doctor getLoggedInDoctor() {
