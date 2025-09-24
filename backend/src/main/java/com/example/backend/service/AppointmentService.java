@@ -2,19 +2,19 @@ package com.example.backend.service;
 
 import com.example.backend.dto.AppointmentRequest;
 import com.example.backend.dto.AppointmentResponse;
-import com.example.backend.model.Appointment;
-import com.example.backend.model.AppointmentStatus;
-import com.example.backend.model.Doctor;
-import com.example.backend.model.Patient;
+import com.example.backend.model.*;
 import com.example.backend.repository.AppointmentRepository;
 import com.example.backend.repository.DoctorRepository;
 import com.example.backend.repository.PatientRepository;
+import com.example.backend.repository.UserRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,6 +23,9 @@ public class AppointmentService {
     private final AppointmentRepository appointmentRepository;
     private final DoctorRepository doctorRepository;
     private final PatientRepository patientRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     public AppointmentService(AppointmentRepository appointmentRepository,
                               DoctorRepository doctorRepository,
@@ -41,13 +44,10 @@ public class AppointmentService {
         Doctor doctor = doctorRepository.findById(request.getDoctorId())
                 .orElseThrow(() -> new RuntimeException("Doctor not found"));
 
-        Patient patient = patientRepository.findById(request.getPatientId())
-                .orElseThrow(() -> new RuntimeException("Patient not found"));
+        User user = userRepository.findByEmail(request.getPatientEmail()).orElseThrow();
 
-        // Check if doctor is already booked
-        if (appointmentRepository.existsByDoctorAndAppointmentDateTime(doctor, request.getAppointmentDateTime())) {
-            return null; // Instead of throwing exception
-        }
+        Patient patient = patientRepository.findById(user.getUserId())
+                .orElseThrow(() -> new RuntimeException("Patient not found"));
 
         Appointment appt = new Appointment();
         appt.setDoctor(doctor);
@@ -67,9 +67,12 @@ public class AppointmentService {
         return list.stream().map(this::mapToResponse).collect(Collectors.toList());
     }
 
-    public List<AppointmentResponse> getAppointmentsForPatient(Integer patientId) {
+    public List<AppointmentResponse> getAppointmentsForPatient(String patientEmail) {
+
+        User user = userRepository.findByEmail(patientEmail).orElseThrow(() -> new RuntimeException("User not found"));
+
         List<Appointment> list = appointmentRepository.findByPatientIdAndStatusIn(
-                patientId, Arrays.asList(AppointmentStatus.CONFIRMED, AppointmentStatus.PENDING)
+                user.getUserId(), Arrays.asList(AppointmentStatus.CONFIRMED, AppointmentStatus.PENDING)
         );
         return list.stream().map(this::mapToResponse).collect(Collectors.toList());
     }

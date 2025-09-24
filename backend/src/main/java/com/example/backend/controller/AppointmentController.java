@@ -4,6 +4,7 @@ import com.example.backend.dto.AppointmentRequest;
 import com.example.backend.dto.AppointmentResponse;
 import com.example.backend.service.AppointmentService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -12,7 +13,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/appointments")
-@CrossOrigin(origins = "http://localhost:5173")
+@PreAuthorize("hasRole('PATIENT')")
 public class AppointmentController {
 
     private final AppointmentService appointmentService;
@@ -40,9 +41,9 @@ public class AppointmentController {
         return ResponseEntity.ok(appointmentService.getAppointmentsForDoctor(doctorId));
     }
 
-    @GetMapping("/patient/{patientId}")
-    public ResponseEntity<List<AppointmentResponse>> getPatientAppointments(@PathVariable Integer patientId) {
-        return ResponseEntity.ok(appointmentService.getAppointmentsForPatient(patientId));
+    @GetMapping("/patient/{patientEmail}")
+    public ResponseEntity<List<AppointmentResponse>> getPatientAppointments(@PathVariable String patientEmail) {
+        return ResponseEntity.ok(appointmentService.getAppointmentsForPatient(patientEmail));
     }
 
     @DeleteMapping("/{appointmentId}")

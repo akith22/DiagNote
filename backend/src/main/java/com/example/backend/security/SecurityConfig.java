@@ -50,12 +50,10 @@ public class SecurityConfig{
         http.csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth ->
-                        auth.requestMatchers("/api/auth/**").permitAll()
-                                //.requestMatchers("/api/doctor/**").hasRole("DOCTOR")
-                                .requestMatchers("/api/doctors/**").permitAll()
-                                .requestMatchers("/api/patient/**").hasRole("PATIENT")
+                                auth.requestMatchers("/api/auth/**").permitAll()
+                                .requestMatchers("/api/doctor/**").hasRole("DOCTOR")
+                                .requestMatchers("/api/patient/**", "/api/appointments/**").hasRole("PATIENT")
                                 .requestMatchers("/api/labtech/**").hasRole("LABTECH")
-                                .requestMatchers("/api/appointments/**").permitAll()
                                 .anyRequest().authenticated()
                 );
 

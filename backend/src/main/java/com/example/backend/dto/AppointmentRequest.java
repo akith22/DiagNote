@@ -4,14 +4,14 @@ import java.time.LocalDateTime;
 
 public class AppointmentRequest {
     private Integer doctorId;
-    private Integer patientId;
+    private String patientEmail;
     private LocalDateTime appointmentDateTime;
 
     public Integer getDoctorId() { return doctorId; }
     public void setDoctorId(Integer doctorId) { this.doctorId = doctorId; }
 
-    public Integer getPatientId() { return patientId; }
-    public void setPatientId(Integer patientId) { this.patientId = patientId; }
+    public String getPatientEmail() { return patientEmail; }
+    public void setPatientId(String patientEmail) { this.patientEmail = patientEmail; }
 
     public LocalDateTime getAppointmentDateTime() { return appointmentDateTime; }
     public void setAppointmentDateTime(LocalDateTime appointmentDateTime) { this.appointmentDateTime = appointmentDateTime; }

@@ -6,8 +6,9 @@ import LoadingSpinner from "../../../components/common/LoadingSpinner";
 import UserProfile from "../../../components/common/UserProfile";
 import PatientProfileForm from "./PatientProfileForm";
 import PatientProfileView from "./PatientProfileView";
+import Appointments from "./Appointments"; // Correct path based on your structure
 
-// Icons (assuming you're using react-icons)
+// Icons
 import { 
   FiCalendar, 
   FiUsers, 
@@ -213,8 +214,6 @@ const PatientDashboard: React.FC = () => {
                 </div>
               )}
             </div>
-            
-            {/* F */}
           </div>
         </div>
 
@@ -261,109 +260,58 @@ const PatientDashboard: React.FC = () => {
             </div>
           </div>
 
-          {/* Profile Section */}
+          {/* Profile / Appointments Section */}
           <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-800 flex items-center">
-                {editing || !profile?.profileComplete ? "Edit Profile" : "Personal Profile"}
-                {profile?.profileComplete && !editing && (
-                  <span className="ml-3 text-xs bg-green-100 text-green-800 py-1 px-2 rounded-full">
-                    Complete
-                  </span>
+            {activeTab === "profile" && (
+              <>
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-2xl font-bold text-gray-800 flex items-center">
+                    {editing || !profile?.profileComplete ? "Edit Profile" : "Personal Profile"}
+                    {profile?.profileComplete && !editing && (
+                      <span className="ml-3 text-xs bg-green-100 text-green-800 py-1 px-2 rounded-full">
+                        Complete
+                      </span>
+                    )}
+                  </h2>
+                  
+                  {editing && (
+                    <button
+                      onClick={() => setEditing(false)}
+                      className="text-gray-500 hover:text-gray-700 flex items-center"
+                    >
+                      <FiX className="mr-1" />
+                      Cancel
+                    </button>
+                  )}
+                </div>
+
+                {editing || !profile?.profileComplete ? (
+                  <PatientProfileForm
+                    initialData={
+                      profile?.profileComplete
+                        ? {
+                            gender: profile.gender || "",
+                            address: profile.address || "",
+                            age: profile.age || 0,
+                          }
+                        : undefined
+                    }
+                    onSubmit={handleSaveProfile}
+                    isEditing={profile?.profileComplete || false}
+                    onCancel={() => setEditing(false)}
+                  />
+                ) : (
+                  <PatientProfileView
+                    profile={profile}
+                    onEdit={() => setEditing(true)}
+                    onDelete={handleDeleteProfile}
+                  />
                 )}
-              </h2>
-              
-              {editing && (
-                <button
-                  onClick={() => setEditing(false)}
-                  className="text-gray-500 hover:text-gray-700 flex items-center"
-                >
-                  <FiX className="mr-1" />
-                  Cancel
-                </button>
-              )}
-            </div>
-
-            {editing || !profile?.profileComplete ? (
-              <PatientProfileForm
-                initialData={
-                  profile?.profileComplete
-                    ? {
-                        gender: profile.gender || "",
-                        address: profile.address || "",
-                        age: profile.age || 0,
-                      }
-                    : undefined
-                }
-                onSubmit={handleSaveProfile}
-                isEditing={profile?.profileComplete || false}
-                onCancel={() => setEditing(false)}
-              />
-            ) : (
-              <PatientProfileView
-                profile={profile}
-                onEdit={() => setEditing(true)}
-                onDelete={handleDeleteProfile}
-              />
+              </>
             )}
-          </div>
 
-          {/* Additional Dashboard Cards */}
-          {!editing && profile?.profileComplete && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
-              {/* <div className="bg-white rounded-2xl shadow-lg p-6">
-                <h3 className="font-bold text-lg text-gray-800 mb-4 flex items-center">
-                  <FiCalendar className="text-blue-500 mr-2" />
-                  Upcoming Appointments
-                </h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
-                    <div>
-                      <p className="font-medium">Dr. Sarah Johnson</p>
-                      <p className="text-sm text-gray-600">Cardiology • Tomorrow, 10:00 AM</p>
-                    </div>
-                    <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">Confirmed</span>
-                  </div>
-                  <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
-                    <div>
-                      <p className="font-medium">Dr. Michael Chen</p>
-                      <p className="text-sm text-gray-600">Dermatology • June 15, 2:30 PM</p>
-                    </div>
-                    <span className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">Pending</span>
-                  </div>
-                </div>
-                <button className="mt-4 w-full py-2 text-center text-blue-600 hover:text-blue-800 font-medium text-sm">
-                  View All Appointments →
-                </button>
-              </div>
-              
-              <div className="bg-white rounded-2xl shadow-lg p-6">
-                <h3 className="font-bold text-lg text-gray-800 mb-4 flex items-center">
-                  <FiHeart className="text-blue-500 mr-2" />
-                  Recent Prescriptions
-                </h3>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center p-2 hover:bg-gray-50 rounded">
-                    <div>
-                      <p className="font-medium">Atorvastatin</p>
-                      <p className="text-xs text-gray-600">20mg, once daily</p>
-                    </div>
-                    <span className="text-xs text-gray-500">05/20/2023</span>
-                  </div>
-                  <div className="flex justify-between items-center p-2 hover:bg-gray-50 rounded">
-                    <div>
-                      <p className="font-medium">Metformin</p>
-                      <p className="text-xs text-gray-600">500mg, twice daily</p>
-                    </div>
-                    <span className="text-xs text-gray-500">05/15/2023</span>
-                  </div>
-                </div>
-                <button className="mt-4 w-full py-2 text-center text-blue-600 hover:text-blue-800 font-medium text-sm">
-                  View Medication History →
-                </button>
-              </div> */}
-            </div>
-          )}
+            {activeTab === "appointments" && <Appointments patientEmail={user.email} />}
+          </div>
         </div>
       </div>
     </div>

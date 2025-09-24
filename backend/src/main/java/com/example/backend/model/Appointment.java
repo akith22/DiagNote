@@ -1,12 +1,17 @@
 package com.example.backend.model;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "appointments", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"doctor_id", "date"})
 })
+@DynamicInsert
+@DynamicUpdate
 public class Appointment {
 
     @Id
