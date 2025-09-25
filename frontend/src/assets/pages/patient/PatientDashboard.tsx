@@ -1,32 +1,25 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react"; 
 import type { PatientProfile, PatientDetails, User } from "../../../types";
 import { getUser, logout } from "../../../api/auth";
 import { patientService } from "../../../services/PatientService";
 import LoadingSpinner from "../../../components/common/LoadingSpinner";
-import UserProfile from "../../../components/common/UserProfile";
 import PatientProfileForm from "./PatientProfileForm";
 import PatientProfileView from "./PatientProfileView";
-import Appointments from "./Appointments"; // Correct path based on your structure
+import Appointments from "./Appointments";
+import { Link } from "react-router-dom";
 
 // Icons
 import { 
   FiCalendar, 
-  FiUsers, 
   FiUser, 
   FiBarChart2, 
   FiSettings, 
-  FiStar,
   FiEdit3,
   FiX,
   FiCheck,
-  FiClock,
-  FiAward,
-  FiMapPin,
-  FiPhone,
-  FiMail,
   FiHeart,
   FiLogOut,
-  FiTrash2
+  FiMapPin
 } from "react-icons/fi";
 
 const PatientDashboard: React.FC = () => {
@@ -75,9 +68,7 @@ const PatientDashboard: React.FC = () => {
   };
 
   const handleDeleteProfile = async () => {
-    if (
-      window.confirm("Are you sure you want to delete your personal details?")
-    ) {
+    if (window.confirm("Are you sure you want to delete your personal details?")) {
       try {
         setError("");
         setSuccess("");
@@ -95,9 +86,7 @@ const PatientDashboard: React.FC = () => {
     logout();
   };
 
-  if (loading) {
-    return <LoadingSpinner />;
-  }
+  if (loading) return <LoadingSpinner />;
 
   if (!user) {
     return (
@@ -126,6 +115,14 @@ const PatientDashboard: React.FC = () => {
         </div>
         
         <div className="flex items-center space-x-4">
+          {/* Doctor Search Button */}
+          <Link
+            to="/patient/search-doctor"
+            className="flex items-center py-2 px-4 bg-green-500 text-white rounded-lg shadow hover:bg-green-600 transition-all duration-300 hover:shadow-md"
+          >
+            Search Doctors
+          </Link>
+
           {!editing && profile?.profileComplete && (
             <button
               onClick={() => setEditing(true)}
@@ -135,6 +132,7 @@ const PatientDashboard: React.FC = () => {
               Edit Profile
             </button>
           )}
+
           <button
             onClick={handleLogout}
             className="flex items-center py-2 px-4 bg-red-100 text-red-700 rounded-lg shadow hover:bg-red-200 transition-all duration-300"
@@ -149,12 +147,8 @@ const PatientDashboard: React.FC = () => {
       {success && (
         <div className="mb-6 bg-green-50 border-l-4 border-green-500 p-4 rounded-lg shadow-sm">
           <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <FiCheck className="h-5 w-5 text-green-400" />
-            </div>
-            <div className="ml-3">
-              <p className="text-sm text-green-700">{success}</p>
-            </div>
+            <FiCheck className="h-5 w-5 text-green-400" />
+            <p className="ml-3 text-sm text-green-700">{success}</p>
           </div>
         </div>
       )}
@@ -162,19 +156,15 @@ const PatientDashboard: React.FC = () => {
       {error && (
         <div className="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-lg shadow-sm">
           <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <FiX className="h-5 w-5 text-red-400" />
-            </div>
-            <div className="ml-3">
-              <p className="text-sm text-red-700">{error}</p>
-            </div>
+            <FiX className="h-5 w-5 text-red-400" />
+            <p className="ml-3 text-sm text-red-700">{error}</p>
           </div>
         </div>
       )}
 
       {/* Main Content */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left Column - User Profile Card */}
+        {/* Left Column - Profile Card */}
         <div className="lg:col-span-1">
           <div className="bg-white rounded-2xl shadow-lg p-6 sticky top-8">
             <div className="flex flex-col items-center text-center mb-6">
@@ -217,9 +207,9 @@ const PatientDashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Right Column - Content Area */}
+        {/* Right Column */}
         <div className="lg:col-span-2">
-          {/* Navigation Tabs */}
+          {/* Tabs */}
           <div className="bg-white rounded-2xl shadow-lg mb-8 overflow-hidden">
             <div className="flex overflow-x-auto">
               <button 
@@ -235,13 +225,6 @@ const PatientDashboard: React.FC = () => {
               >
                 <FiCalendar className="mr-2" />
                 Appointments
-              </button>
-              <button 
-                className={`px-6 py-4 font-medium flex items-center ${activeTab === "prescriptions" ? "text-blue-600 border-b-2 border-blue-600" : "text-gray-500"}`}
-                onClick={() => setActiveTab("prescriptions")}
-              >
-                <FiHeart className="mr-2" />
-                Prescriptions
               </button>
               <button 
                 className={`px-6 py-4 font-medium flex items-center ${activeTab === "reports" ? "text-blue-600 border-b-2 border-blue-600" : "text-gray-500"}`}
@@ -260,20 +243,14 @@ const PatientDashboard: React.FC = () => {
             </div>
           </div>
 
-          {/* Profile / Appointments Section */}
+          {/* Content */}
           <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8">
             {activeTab === "profile" && (
               <>
                 <div className="flex justify-between items-center mb-6">
                   <h2 className="text-2xl font-bold text-gray-800 flex items-center">
                     {editing || !profile?.profileComplete ? "Edit Profile" : "Personal Profile"}
-                    {profile?.profileComplete && !editing && (
-                      <span className="ml-3 text-xs bg-green-100 text-green-800 py-1 px-2 rounded-full">
-                        Complete
-                      </span>
-                    )}
                   </h2>
-                  
                   {editing && (
                     <button
                       onClick={() => setEditing(false)}

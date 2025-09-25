@@ -13,7 +13,7 @@ const Appointments: React.FC<Props> = ({ patientEmail }) => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  const [doctorId, setDoctorId] = useState<number | null>(null);
+  const [doctorEmail, setDoctorEmail] = useState<string | null>(null);
   const [appointmentDateTime, setAppointmentDateTime] = useState("");
 
   useEffect(() => {
@@ -34,7 +34,7 @@ const Appointments: React.FC<Props> = ({ patientEmail }) => {
   };
 
   const handleBookAppointment = async () => {
-    if (!doctorId || !appointmentDateTime) {
+    if (!doctorEmail || !appointmentDateTime) {
       setError("Please select a doctor and appointment time");
       return;
     }
@@ -42,12 +42,12 @@ const Appointments: React.FC<Props> = ({ patientEmail }) => {
       setError("");
       setSuccess("");
       await appointmentService.bookAppointment({
-        doctorId,
+        doctorEmail,
         patientEmail,
         appointmentDateTime,
       });
       setSuccess("Appointment booked successfully");
-      setDoctorId(null);
+      setDoctorEmail(null);
       setAppointmentDateTime("");
       fetchAppointments();
     } catch (err: any) {
@@ -76,10 +76,10 @@ const Appointments: React.FC<Props> = ({ patientEmail }) => {
         <h3 className="font-bold mb-2">Book a Doctor</h3>
         <div className="flex flex-col md:flex-row gap-4">
           <input
-            type="number"
+            type="string"
             placeholder="Doctor ID"
-            value={doctorId || ""}
-            onChange={(e) => setDoctorId(Number(e.target.value))}
+            value={doctorEmail || ""}
+            onChange={(e) => setDoctorEmail(e.target.value)}
             className="border border-gray-300 rounded px-3 py-2 flex-1"
           />
           <input
@@ -113,7 +113,7 @@ const Appointments: React.FC<Props> = ({ patientEmail }) => {
               className="flex justify-between items-center p-4 border rounded-lg shadow-sm"
             >
               <div>
-                <p className="font-medium">Doctor ID: {appt.doctorId}</p>
+                <p className="font-medium">Doctor Name: {appt.doctorName}</p>
                 <p className="text-gray-600 flex items-center">
                   <FiClock className="mr-1" />
                   {new Date(appt.appointmentDateTime).toLocaleString()}

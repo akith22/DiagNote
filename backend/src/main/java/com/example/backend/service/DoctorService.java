@@ -86,8 +86,8 @@ public class DoctorService {
         doctorRepository.deleteByUser(user);
     }
 
-    public List<DoctorProfileResponse> searchDoctors(String keyword) {
-        return doctorRepository.searchDoctors(keyword).stream()
+    public List<DoctorProfileResponse> searchDoctors(String name, String specization) {
+        return doctorRepository.searchDoctors(name, specization).stream()
                 .map(d -> new DoctorProfileResponse(
                         d.getUser().getName(),
                         d.getUser().getEmail(),

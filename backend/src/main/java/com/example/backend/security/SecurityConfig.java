@@ -52,7 +52,7 @@ public class SecurityConfig{
                 .authorizeHttpRequests(auth ->
                                 auth.requestMatchers("/api/auth/**").permitAll()
                                 .requestMatchers("/api/doctor/**").hasRole("DOCTOR")
-                                .requestMatchers("/api/patient/**", "/api/appointments/**").hasRole("PATIENT")
+                                .requestMatchers("/api/patient/**", "/api/doctors", "/api/appointments/**").hasRole("PATIENT")
                                 .requestMatchers("/api/labtech/**").hasRole("LABTECH")
                                 .anyRequest().authenticated()
                 );

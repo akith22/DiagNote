@@ -10,7 +10,6 @@ public class AppointmentResponse {
     private String patientName;
     private LocalDateTime appointmentDateTime;
     private String status;
-    private String notes;
 
     public Integer getAppointmentId() { return appointmentId; }
     public void setAppointmentId(Integer appointmentId) { this.appointmentId = appointmentId; }
@@ -33,6 +32,4 @@ public class AppointmentResponse {
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
 
-    public String getNotes() { return notes; }
-    public void setNotes(String notes) { this.notes = notes; }
 }

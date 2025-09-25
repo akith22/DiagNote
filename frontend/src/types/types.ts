@@ -1,5 +1,5 @@
 export interface AppointmentRequest {
-  doctorId: number;
+  doctorEmail: string;
   patientEmail: string;
   appointmentDateTime: string;
 }
@@ -7,6 +7,10 @@ export interface AppointmentRequest {
 export interface AppointmentResponse {
   appointmentId: number;
   doctorId: number;
+  doctorName: string;
   patientId: number;
+  patientName: string;
   appointmentDateTime: string;
+  status: string;
+  notes: string
 }

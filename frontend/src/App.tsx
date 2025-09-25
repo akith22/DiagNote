@@ -12,7 +12,6 @@ import PatientDashboard from "./assets/pages/patient/PatientDashboard";
 import LabTechDashboard from "./assets/pages/labtech/LabTechDashboard";
 import DoctorSearch from "./assets/pages/DoctorSearch";
 
-
 function App() {
   return (
     <>
@@ -20,6 +19,7 @@ function App() {
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+
         {/* Doctor Routes */}
         <Route
           path="/doctor/dashboard"
@@ -29,6 +29,7 @@ function App() {
             </ProtectedRoute>
           }
         />
+
         {/* Patient Routes */}
         <Route
           path="/patient/dashboard"
@@ -38,13 +39,13 @@ function App() {
             </ProtectedRoute>
           }
         />
-  
-        <Route 
-        path="/patient/search-doctor" element={
-          <ProtectedRoute requiredRole="PATIENT">
-            <DoctorSearch />
-          </ProtectedRoute>
-        } 
+        <Route
+          path="/patient/search-doctor"
+          element={
+            <ProtectedRoute requiredRole="PATIENT">
+              <DoctorSearch />
+            </ProtectedRoute>
+          }
         />
 
         {/* Lab Tech Routes */}
@@ -56,9 +57,7 @@ function App() {
             </ProtectedRoute>
           }
         />
-      
       </Routes>
-
     </>
   );
 }

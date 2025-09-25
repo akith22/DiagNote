@@ -37,11 +37,11 @@ public class AppointmentService {
 
     @Transactional
     public AppointmentResponse bookAppointment(AppointmentRequest request) {
-        if (request.getDoctorId() == null || request.getAppointmentDateTime() == null) {
+        if (request.getDoctorEmail() == null || request.getAppointmentDateTime() == null) {
             throw new IllegalArgumentException("Doctor and appointmentDateTime are required");
         }
 
-        Doctor doctor = doctorRepository.findById(request.getDoctorId())
+        User doctor = userRepository.findByEmail(request.getDoctorEmail())
                 .orElseThrow(() -> new RuntimeException("Doctor not found"));
 
         User user = userRepository.findByEmail(request.getPatientEmail()).orElseThrow();
@@ -49,8 +49,10 @@ public class AppointmentService {
         Patient patient = patientRepository.findById(user.getUserId())
                 .orElseThrow(() -> new RuntimeException("Patient not found"));
 
+        Doctor doctor1 = doctorRepository.findById(doctor.getUserId()).orElseThrow();
+
         Appointment appt = new Appointment();
-        appt.setDoctor(doctor);
+        appt.setDoctor(doctor1);
         appt.setPatient(patient);
         appt.setAppointmentDateTime(request.getAppointmentDateTime());
         appt.setStatus(AppointmentStatus.CONFIRMED);
