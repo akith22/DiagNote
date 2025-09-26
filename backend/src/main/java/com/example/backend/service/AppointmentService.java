@@ -55,7 +55,7 @@ public class AppointmentService {
         appt.setDoctor(doctor1);
         appt.setPatient(patient);
         appt.setAppointmentDateTime(request.getAppointmentDateTime());
-        appt.setStatus(AppointmentStatus.CONFIRMED);
+        appt.setStatus(AppointmentStatus.PENDING);
 
         Appointment saved = appointmentRepository.save(appt);
         return mapToResponse(saved);

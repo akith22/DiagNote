@@ -4,6 +4,9 @@ import "react-calendar/dist/Calendar.css";
 import { appointmentService } from "../../services/AppointmentsService";
 import API from "../../services/api";
 import { getUser } from "../../api/auth"; // <-- import getUser
+import DateTimePicker from "../../components/common/DateTimeCalender";
+import { data, Navigate } from "react-router-dom";
+import { parse } from "date-fns";
 
 interface Doctor {
   name: string;
@@ -23,7 +26,7 @@ export default function DoctorSearch() {
   // Booking modal states
   const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
   const [showModal, setShowModal] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [booking, setBooking] = useState(false);
 
   // Feedback messages
@@ -44,14 +47,6 @@ export default function DoctorSearch() {
     "Surgery",
   ];
 
-  // Parse availableTimes to an array of date strings
-  const parseAvailableDates = (availableTimes: string): string[] => {
-    if (!availableTimes) return [];
-    return availableTimes
-      .split(",")
-      .map((entry) => entry.trim().split(" ")[0])
-      .map((d) => new Date(d).toDateString());
-  };
 
   const handleSearch = async () => {
     if (!search.trim() && !specializationFilter) return;
@@ -80,6 +75,19 @@ export default function DoctorSearch() {
     setSuccess("");
     setError("");
   };
+
+
+  function toISOStringNoShift(dateStr: string) {
+  // "2025-09-26 14:30"
+  const [datePart, timePart] = dateStr.split(" ");
+  const [year, month, day] = datePart.split("-").map(Number);
+  const [hours, minutes] = timePart.split(":").map(Number);
+
+  // Create a Date in UTC without shifting
+  const date = new Date(Date.UTC(year, month - 1, day, hours, minutes, 0));
+
+  return date.toISOString();
+}
 
   const openBookingModal = (doctor: Doctor) => {
     setSelectedDoctor(doctor);
@@ -114,30 +122,18 @@ export default function DoctorSearch() {
       setBooking(true);
       setError("");
       setSuccess("");
-
-      // ✅ Capture real current time in IST
-      const now = new Date();
-      const istOffset = 5.5 * 60 * 60 * 1000; // IST offset in ms
-      const istNow = new Date(now.getTime() + istOffset - now.getTimezoneOffset() * 60000);
-
-      // ✅ Merge selected date with IST current time
-      const appointmentDateTime = new Date(
-        selectedDate.getFullYear(),
-        selectedDate.getMonth(),
-        selectedDate.getDate(),
-        istNow.getHours(),
-        istNow.getMinutes(),
-        istNow.getSeconds()
-      ).toISOString();
-
+      const iso = toISOStringNoShift(selectedDate);
+      
       await appointmentService.bookAppointment({
         doctorEmail: selectedDoctor.email,
         patientEmail: user.email, // logged-in user email
-        appointmentDateTime,
+        appointmentDateTime: iso,
       });
 
       setSuccess("Appointment booked successfully");
-      closeModal();
+
+      window.location.href = "/patient/dashboard";
+
     } catch (err: any) {
       console.error("Booking error:", err);
       setError(err.response?.data?.message || "Failed to book appointment");
@@ -242,29 +238,14 @@ export default function DoctorSearch() {
               {success && <p className="text-green-600 mb-2">{success}</p>}
               {error && <p className="text-red-600 mb-2">{error}</p>}
 
-              <p className="mb-2 text-gray-600">
-                Available dates are shown in{" "}
-                <span className="text-green-600 font-medium">green</span>
-              </p>
-
-              <Calendar
-                onChange={(date) => setSelectedDate(date as Date)}
-                value={selectedDate}
-                tileDisabled={({ date }) => {
-                  const availableDates = parseAvailableDates(selectedDoctor.availableTimes);
-                  return !availableDates.includes(date.toDateString());
-                }}
-                tileClassName={({ date }) => {
-                  const availableDates = parseAvailableDates(selectedDoctor.availableTimes);
-                  return availableDates.includes(date.toDateString())
-                    ? "bg-green-200 text-green-800 rounded-full"
-                    : "";
-                }}
-              />
-
+               <DateTimePicker
+                  availableTimes={selectedDoctor.availableTimes.split(",").map(item => item.trim().replace(/^"|"$/g, ""))}
+                  onChange={(date) => setSelectedDate(date)}
+                />
               {selectedDate && (
                 <p className="mt-3 text-sm">
-                  Selected: <span className="font-medium">{selectedDate.toDateString()}</span>
+                  Selected: 
+                  <span className="font-medium">{selectedDate}</span>
                 </p>
               )}
 

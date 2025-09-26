@@ -33,28 +33,6 @@ const Appointments: React.FC<Props> = ({ patientEmail }) => {
     }
   };
 
-  const handleBookAppointment = async () => {
-    if (!doctorEmail || !appointmentDateTime) {
-      setError("Please select a doctor and appointment time");
-      return;
-    }
-    try {
-      setError("");
-      setSuccess("");
-      await appointmentService.bookAppointment({
-        doctorEmail,
-        patientEmail,
-        appointmentDateTime,
-      });
-      setSuccess("Appointment booked successfully");
-      setDoctorEmail(null);
-      setAppointmentDateTime("");
-      fetchAppointments();
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Failed to book appointment");
-    }
-  };
-
   const handleCancel = async (id: number) => {
     if (window.confirm("Are you sure you want to cancel this appointment?")) {
       try {
@@ -71,32 +49,6 @@ const Appointments: React.FC<Props> = ({ patientEmail }) => {
     <div>
       <h2 className="text-2xl font-bold text-gray-800 mb-4">My Appointments</h2>
 
-      {/* Book Appointment Form */}
-      <div className="mb-6 p-4 bg-blue-50 rounded-lg shadow-sm">
-        <h3 className="font-bold mb-2">Book a Doctor</h3>
-        <div className="flex flex-col md:flex-row gap-4">
-          <input
-            type="string"
-            placeholder="Doctor ID"
-            value={doctorEmail || ""}
-            onChange={(e) => setDoctorEmail(e.target.value)}
-            className="border border-gray-300 rounded px-3 py-2 flex-1"
-          />
-          <input
-            type="datetime-local"
-            value={appointmentDateTime}
-            onChange={(e) => setAppointmentDateTime(e.target.value)}
-            className="border border-gray-300 rounded px-3 py-2 flex-1"
-          />
-          <button
-            onClick={handleBookAppointment}
-            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-all"
-          >
-            Book
-          </button>
-        </div>
-      </div>
-
       {success && <p className="text-green-600 mb-2">{success}</p>}
       {error && <p className="text-red-600 mb-2">{error}</p>}
 
@@ -110,21 +62,38 @@ const Appointments: React.FC<Props> = ({ patientEmail }) => {
           appointments.map((appt) => (
             <div
               key={appt.appointmentId}
-              className="flex justify-between items-center p-4 border rounded-lg shadow-sm"
+              className="flex justify-between items-center p-6 border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 bg-white"
             >
-              <div>
-                <p className="font-medium">Doctor Name: {appt.doctorName}</p>
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-2">
+                  <p className="font-semibold text-lg text-gray-800">Dr. {appt.doctorName}</p>
+                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                    appt.status === 'CONFIRMED' ? 'bg-green-100 text-green-800' :
+                    appt.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
+                    appt.status === 'CANCELLED' ? 'bg-red-100 text-red-800' :
+                    'bg-blue-100 text-blue-800'
+                  }`}>
+                    {appt.status?.charAt(0).toUpperCase() + appt.status?.slice(1)}
+                  </span>
+                </div>
                 <p className="text-gray-600 flex items-center">
-                  <FiClock className="mr-1" />
-                  {new Date(appt.appointmentDateTime).toLocaleString()}
+                  <FiClock className="mr-2 text-gray-400" />
+                  {new Date(appt.appointmentDateTime).toLocaleString('en-US', {
+                    weekday: 'short',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
                 </p>
               </div>
               <button
                 onClick={() => handleCancel(appt.appointmentId)}
-                className="text-red-600 hover:text-red-800 flex items-center"
+                className="flex items-center gap-2 px-4 py-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors duration-200 font-medium"
+                disabled={appt.status === 'cancelled'}
               >
-                <FiTrash2 className="mr-1" />
-                Cancel
+                <FiTrash2 className="text-base" />
+                {appt.status === 'cancelled' ? 'Cancelled' : 'Cancel'}
               </button>
             </div>
           ))
