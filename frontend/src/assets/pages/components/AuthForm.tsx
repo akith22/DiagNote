@@ -32,16 +32,6 @@ const AuthForm = ({ isRegister = false, onSubmit }: AuthFormProps) => {
 
   return (
     <>
-      {isRegister && (
-        <button
-          type="button"
-          className="mb-4 text-primary-2 hover:underline font-medium"
-          onClick={() => window.location.reload()}
-        >
-          ← Back to Role Selection
-        </button>
-      )}
-
       <form
         onSubmit={handleSubmit}
         className="bg-white p-8 rounded-2xl shadow-md w-full max-w-md"
