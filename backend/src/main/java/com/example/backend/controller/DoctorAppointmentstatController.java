@@ -33,7 +33,7 @@ public class DoctorAppointmentstatController {
      * Accept appointment
      */
     @PostMapping("/{appointmentId}/accept")
-    public ResponseEntity<AppointmentDto> acceptAppointment(@PathVariable Long appointmentId) {
+    public ResponseEntity<AppointmentDto> acceptAppointment(@PathVariable Integer appointmentId) {
         Integer doctorId = appointmentService.getAuthenticatedDoctorId();
         AppointmentDto dto = appointmentService.acceptAppointment(appointmentId, doctorId);
         return ResponseEntity.ok(dto);
@@ -44,7 +44,7 @@ public class DoctorAppointmentstatController {
      * Decline appointment
      */
     @PostMapping("/{appointmentId}/decline")
-    public ResponseEntity<AppointmentDto> declineAppointment(@PathVariable Long appointmentId) {
+    public ResponseEntity<AppointmentDto> declineAppointment(@PathVariable Integer appointmentId) {
         Integer doctorId = appointmentService.getAuthenticatedDoctorId();
         AppointmentDto dto = appointmentService.declineAppointment(appointmentId, doctorId);
         return ResponseEntity.ok(dto);

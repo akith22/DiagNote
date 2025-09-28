@@ -39,7 +39,10 @@ const DoctorProfileForm: React.FC<DoctorProfileFormProps> = ({
       // parse existing availableTimes string into array
       if (initialData.availableTimes) {
         const parsed = initialData.availableTimes.split(",").map((slot) => {
-          const match = slot.trim().match(/(\d{4}-\d{2}-\d{2}).+?(\d{2}:\d{2}).+?(\d{2}:\d{2})/);
+          // slot example: "Monday 08:00-18:00"
+          const match = slot
+            .trim()
+            .match(/^([A-Za-z]+)\s+(\d{2}:\d{2})-(\d{2}:\d{2})$/);
           return match
             ? { date: match[1], startTime: match[2], endTime: match[3] }
             : { date: "", startTime: "", endTime: "" };
@@ -140,14 +143,22 @@ const DoctorProfileForm: React.FC<DoctorProfileFormProps> = ({
 
           {/* Add new availability */}
           <div className="flex gap-2 mb-4">
-            <input
-              type="date"
+            <select
               value={newTime.date}
               onChange={(e) =>
                 setNewTime((prev) => ({ ...prev, date: e.target.value }))
               }
               className="border px-2 py-1 rounded"
-            />
+            >
+              <option value="">Select Day</option>
+              <option value="Monday">Monday</option>
+              <option value="Tuesday">Tuesday</option>
+              <option value="Wednesday">Wednesday</option>
+              <option value="Thursday">Thursday</option>
+              <option value="Friday">Friday</option>
+              <option value="Saturday">Saturday</option>
+              <option value="Sunday">Sunday</option>
+            </select>
             <input
               type="time"
               value={newTime.startTime}

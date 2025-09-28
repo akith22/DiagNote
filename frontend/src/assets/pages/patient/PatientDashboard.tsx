@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"; 
+import React, { useState, useEffect } from "react";
 import type { PatientProfile, PatientDetails, User } from "../../../types";
 import { getUser, logout } from "../../../api/auth";
 import { patientService } from "../../../services/PatientService";
@@ -7,7 +7,6 @@ import PatientProfileForm from "./PatientProfileForm";
 import PatientProfileView from "./PatientProfileView";
 import Appointments from "./Appointments";
 import { Link } from "react-router-dom";
-
 
 import {
   FiCalendar,
@@ -21,7 +20,7 @@ import {
   FiCheck,
   FiHeart,
   FiLogOut,
-  FiMapPin
+  FiMapPin,
   FiTrash2,
 } from "react-icons/fi";
 
@@ -71,7 +70,9 @@ const PatientDashboard: React.FC = () => {
   };
 
   const handleDeleteProfile = async () => {
-    if (window.confirm("Are you sure you want to delete your personal details?")) {
+    if (
+      window.confirm("Are you sure you want to delete your personal details?")
+    ) {
       try {
         setError("");
         setSuccess("");
@@ -285,7 +286,9 @@ const PatientDashboard: React.FC = () => {
               <>
                 <div className="flex justify-between items-center mb-6">
                   <h2 className="text-2xl font-bold text-gray-800 flex items-center">
-                    {editing || !profile?.profileComplete ? "Edit Profile" : "Personal Profile"}
+                    {editing || !profile?.profileComplete
+                      ? "Edit Profile"
+                      : "Personal Profile"}
                   </h2>
                   {editing && (
                     <button
@@ -297,7 +300,7 @@ const PatientDashboard: React.FC = () => {
                     </button>
                   )}
                 </div>
-                    
+
                 {editing || !profile?.profileComplete ? (
                   <PatientProfileForm
                     initialData={
@@ -323,7 +326,9 @@ const PatientDashboard: React.FC = () => {
               </>
             )}
 
-            {activeTab === "appointments" && <Appointments patientEmail={user.email} />}
+            {activeTab === "appointments" && (
+              <Appointments patientEmail={user.email} />
+            )}
           </div>
         </div>
       </div>

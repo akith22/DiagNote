@@ -176,9 +176,7 @@ const AppointmentManager: React.FC = () => {
     const q = query.trim().toLowerCase();
     if (!q) return byTab;
     return byTab.filter((a) =>
-      `${a.patientName ?? ""} ${a.patientId ?? ""}`
-        .toLowerCase()
-        .includes(q)
+      `${a.patientName ?? ""} ${a.patientId ?? ""}`.toLowerCase().includes(q)
     );
   }, [appointments, activeTab, query]);
 
@@ -280,7 +278,18 @@ const AppointmentManager: React.FC = () => {
                         <FiHash className="mr-1" /> ID: {appt.patientId}
                       </span>
                       <span className="flex items-center">
-                        <FiClock className="mr-1" /> {appt.appointmentTime}
+                        <FiClock className="mr-1" />{" "}
+                        {appt.date
+                          ? new Date(appt.date).toLocaleString("en-US", {
+                              year: "numeric",
+                              month: "short",
+                              day: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              hour12: true,
+                              timeZone: "Asia/Kolkata",
+                            })
+                          : "N/A"}
                       </span>
                     </div>
                   </div>
@@ -354,9 +363,7 @@ const AppointmentManager: React.FC = () => {
                       }`}
                     >
                       <FiCheck className="mr-2" />
-                      {actionLoading[appt.id]
-                        ? "Accepting..."
-                        : "Accept Again"}
+                      {actionLoading[appt.id] ? "Accepting..." : "Accept Again"}
                     </button>
                   )}
                 </div>
