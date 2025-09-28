@@ -5,7 +5,7 @@ export interface AppointmentDto {
   id: number;
   patientName: string;
   patientId: number; // ✅ added patientId
-  appointmentTime: string;
+  date: string;
   status: "PENDING" | "ACCEPTED" | "DECLINED" | "CANCELLED"; // ✅ added CANCELLED
 }
 
