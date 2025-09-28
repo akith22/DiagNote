@@ -7,9 +7,7 @@ import org.hibernate.annotations.DynamicUpdate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "appointments", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"doctor_id", "date"})
-})
+@Table(name = "appointments")
 @DynamicInsert
 @DynamicUpdate
 public class Appointment {

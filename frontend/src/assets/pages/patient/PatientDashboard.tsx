@@ -8,18 +8,21 @@ import PatientProfileView from "./PatientProfileView";
 import Appointments from "./Appointments";
 import { Link } from "react-router-dom";
 
-// Icons
-import { 
-  FiCalendar, 
-  FiUser, 
-  FiBarChart2, 
-  FiSettings, 
+
+import {
+  FiCalendar,
+  FiUsers,
+  FiUser,
+  FiBarChart2,
+  FiSettings,
+  FiStar,
   FiEdit3,
   FiX,
   FiCheck,
   FiHeart,
   FiLogOut,
   FiMapPin
+  FiTrash2,
 } from "react-icons/fi";
 
 const PatientDashboard: React.FC = () => {
@@ -113,7 +116,7 @@ const PatientDashboard: React.FC = () => {
             Patient Dashboard
           </h1>
         </div>
-        
+
         <div className="flex items-center space-x-4">
           {/* Doctor Search Button */}
           <Link
@@ -171,17 +174,22 @@ const PatientDashboard: React.FC = () => {
               <div className="w-24 h-24 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mb-4">
                 <div className="w-20 h-20 bg-gradient-to-br from-blue-200 to-indigo-200 rounded-full flex items-center justify-center">
                   <span className="text-2xl font-bold text-blue-600">
-                    {user.name.split(' ').map(n => n[0]).join('')}
+                    {profile?.name
+                      .split(" ")
+                      .map((n) => n[0])
+                      .join("")}
                   </span>
                 </div>
               </div>
-              <h2 className="text-xl font-bold text-gray-800">{user.name}</h2>
+              <h2 className="text-xl font-bold text-gray-800">
+                {profile?.name}
+              </h2>
               <p className="text-gray-600">{user.email}</p>
               <div className="mt-2 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">
                 Patient
               </div>
             </div>
-            
+
             <div className="space-y-4 border-t border-gray-100 pt-6">
               {profile?.gender && (
                 <div className="flex items-center text-gray-700">
@@ -189,14 +197,14 @@ const PatientDashboard: React.FC = () => {
                   <span>{profile.gender}</span>
                 </div>
               )}
-              
+
               {profile?.age && (
                 <div className="flex items-center text-gray-700">
                   <FiHeart className="text-blue-500 mr-3" />
                   <span>{profile.age} years old</span>
                 </div>
               )}
-              
+
               {profile?.address && (
                 <div className="flex items-center text-gray-700">
                   <FiMapPin className="text-blue-500 mr-3" />
@@ -212,29 +220,57 @@ const PatientDashboard: React.FC = () => {
           {/* Tabs */}
           <div className="bg-white rounded-2xl shadow-lg mb-8 overflow-hidden">
             <div className="flex overflow-x-auto">
-              <button 
-                className={`px-6 py-4 font-medium flex items-center ${activeTab === "profile" ? "text-blue-600 border-b-2 border-blue-600" : "text-gray-500"}`}
+              <button
+                className={`px-6 py-4 font-medium flex items-center ${
+                  activeTab === "profile"
+                    ? "text-blue-600 border-b-2 border-blue-600"
+                    : "text-gray-500"
+                }`}
                 onClick={() => setActiveTab("profile")}
               >
                 <FiUser className="mr-2" />
                 Profile
               </button>
-              <button 
-                className={`px-6 py-4 font-medium flex items-center ${activeTab === "appointments" ? "text-blue-600 border-b-2 border-blue-600" : "text-gray-500"}`}
+              <button
+                className={`px-6 py-4 font-medium flex items-center ${
+                  activeTab === "appointments"
+                    ? "text-blue-600 border-b-2 border-blue-600"
+                    : "text-gray-500"
+                }`}
                 onClick={() => setActiveTab("appointments")}
               >
                 <FiCalendar className="mr-2" />
                 Appointments
               </button>
-              <button 
-                className={`px-6 py-4 font-medium flex items-center ${activeTab === "reports" ? "text-blue-600 border-b-2 border-blue-600" : "text-gray-500"}`}
+
+              <button
+                className={`px-6 py-4 font-medium flex items-center ${
+                  activeTab === "prescriptions"
+                    ? "text-blue-600 border-b-2 border-blue-600"
+                    : "text-gray-500"
+                }`}
+                onClick={() => setActiveTab("prescriptions")}
+              >
+                <FiHeart className="mr-2" />
+                Prescriptions
+              </button>
+              <button
+                className={`px-6 py-4 font-medium flex items-center ${
+                  activeTab === "reports"
+                    ? "text-blue-600 border-b-2 border-blue-600"
+                    : "text-gray-500"
+                }`}
                 onClick={() => setActiveTab("reports")}
               >
                 <FiBarChart2 className="mr-2" />
                 Reports
               </button>
-              <button 
-                className={`px-6 py-4 font-medium flex items-center ${activeTab === "settings" ? "text-blue-600 border-b-2 border-blue-600" : "text-gray-500"}`}
+              <button
+                className={`px-6 py-4 font-medium flex items-center ${
+                  activeTab === "settings"
+                    ? "text-blue-600 border-b-2 border-blue-600"
+                    : "text-gray-500"
+                }`}
                 onClick={() => setActiveTab("settings")}
               >
                 <FiSettings className="mr-2" />
@@ -261,7 +297,7 @@ const PatientDashboard: React.FC = () => {
                     </button>
                   )}
                 </div>
-
+                    
                 {editing || !profile?.profileComplete ? (
                   <PatientProfileForm
                     initialData={
