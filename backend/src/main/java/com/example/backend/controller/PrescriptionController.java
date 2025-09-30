@@ -16,7 +16,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
@@ -99,7 +101,26 @@ public class PrescriptionController {
 
         if (!allowed) return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Not allowed.");
 
-        List<PrescriptionDto> list = prescriptionService.listByAppointment(appointmentId);
-        return ResponseEntity.ok(list);
+        List<PrescriptionDto> prescriptions = prescriptionService.listByAppointment(appointmentId);
+
+        User patient = userRepository.findById(appt.getPatientId().intValue()).orElse(null);
+        String patientName = patient != null ? patient.getName() : "Unknown"; // adjust if firstName + lastName
+
+        List<Map<String, Object>> response = prescriptions.stream().map(p -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", p.getId());
+            map.put("appointmentId", p.getAppointmentId());
+            map.put("dateIssued", p.getDateIssued());
+            map.put("notesJson", p.getNotesJson());
+            map.put("patientName", patientName);
+            return map;
+        }).toList();
+
+        return ResponseEntity.ok(response);
     }
+
+
+
+
+
 }
