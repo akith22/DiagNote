@@ -207,8 +207,8 @@ const DoctorDashboard: React.FC = () => {
             <div className="flex overflow-x-auto">
               {[
                 { id: "profile", icon: FiUserCheck, label: "Profile" },
-                { id: "schedule", icon: FiCalendar, label: "Schedule" },
-                { id: "patients", icon: FiUsers, label: "Patients" },
+                { id: "schedule", icon: FiCalendar, label: "Appointments" },
+                { id: "patients", icon: FiUsers, label: "Prescriptions" },
                 { id: "reports", icon: FiBarChart2, label: "Reports" },
                 { id: "settings", icon: FiSettings, label: "Settings" },
               ].map((tab) => (
