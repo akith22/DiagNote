@@ -7,10 +7,19 @@ import {
   FiSearch,
   FiHash,
   FiCalendar,
+  FiFileText,
 } from "react-icons/fi";
 import LoadingSpinner from "../../../components/common/LoadingSpinner";
 import { doctorAppointmentService } from "../../../services/DoctorAppointmenrService";
 import type { AppointmentDto } from "../../../services/DoctorAppointmenrService";
+
+interface AppointmentManagerProps {
+  onPrescribePatient?: (appointment: {
+    id: number;
+    patientId: number;
+    patientName: string;
+  }) => void;
+}
 
 const TABS = [
   { id: "ALL", label: "All" },
@@ -36,7 +45,7 @@ const normalizeStatus = (status?: string) => {
   }
 };
 
-const AppointmentManager: React.FC = () => {
+const AppointmentManager: React.FC<AppointmentManagerProps> = ({ onPrescribePatient }) => {
   const [appointments, setAppointments] = useState<AppointmentDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>("");
@@ -143,7 +152,6 @@ const AppointmentManager: React.FC = () => {
     }
   };
 
-  // FIXED: cancel now uses decline endpoint (to avoid 403)
   const handleCancel = async (id: number) => {
     try {
       setError("");
@@ -165,6 +173,16 @@ const AppointmentManager: React.FC = () => {
       );
     } finally {
       setActionFlag(id, false);
+    }
+  };
+
+  const handlePrescribe = (appointment: AppointmentDto) => {
+    if (onPrescribePatient) {
+      onPrescribePatient({
+        id: appointment.id,
+        patientId: appointment.patientId,
+        patientName: appointment.patientName || `Patient ${appointment.patientId}`
+      });
     }
   };
 
@@ -331,18 +349,28 @@ const AppointmentManager: React.FC = () => {
                       </button>
                     </>
                   ) : appt.status === "ACCEPTED" ? (
-                    <button
-                      onClick={() => handleCancel(appt.id)}
-                      disabled={!!actionLoading[appt.id]}
-                      className={`flex items-center py-2 px-4 rounded-xl shadow-sm transition-all duration-200 ${
-                        actionLoading[appt.id]
-                          ? "bg-yellow-300 text-white cursor-not-allowed"
-                          : "bg-yellow-500 text-white hover:bg-yellow-600"
-                      }`}
-                    >
-                      <FiX className="mr-2" />
-                      {actionLoading[appt.id] ? "Cancelling..." : "Cancel"}
-                    </button>
+                    <>
+                      <button
+                        onClick={() => handlePrescribe(appt)}
+                        className="flex items-center py-2 px-4 bg-blue-600 text-white rounded-xl shadow-sm hover:bg-blue-700 transition-all duration-200"
+                      >
+                        <FiFileText className="mr-2" />
+                        Prescribe
+                      </button>
+
+                      <button
+                        onClick={() => handleCancel(appt.id)}
+                        disabled={!!actionLoading[appt.id]}
+                        className={`flex items-center py-2 px-4 rounded-xl shadow-sm transition-all duration-200 ${
+                          actionLoading[appt.id]
+                            ? "bg-yellow-300 text-white cursor-not-allowed"
+                            : "bg-yellow-500 text-white hover:bg-yellow-600"
+                        }`}
+                      >
+                        <FiX className="mr-2" />
+                        {actionLoading[appt.id] ? "Cancelling..." : "Cancel"}
+                      </button>
+                    </>
                   ) : (
                     <button
                       onClick={() => handleAccept(appt.id)}
@@ -370,4 +398,3 @@ const AppointmentManager: React.FC = () => {
 };
 
 export default AppointmentManager;
-
