@@ -4,13 +4,13 @@ import java.time.LocalDateTime;
 
 public class PrescriptionDto {
     private Integer id;
-    private Long appointmentId;
+    private Integer appointmentId;  // 🔧 Changed from Long → Integer
     private LocalDateTime dateIssued;
     private String notesJson;  // contains all prescription details
 
     public PrescriptionDto() {}
 
-    public PrescriptionDto(Integer id, Long appointmentId, LocalDateTime dateIssued, String notesJson) {
+    public PrescriptionDto(Integer id, Integer appointmentId, LocalDateTime dateIssued, String notesJson) {
         this.id = id;
         this.appointmentId = appointmentId;
         this.dateIssued = dateIssued;
@@ -20,8 +20,8 @@ public class PrescriptionDto {
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
 
-    public Long getAppointmentId() { return appointmentId; }
-    public void setAppointmentId(Long appointmentId) { this.appointmentId = appointmentId; }
+    public Integer getAppointmentId() { return appointmentId; }
+    public void setAppointmentId(Integer appointmentId) { this.appointmentId = appointmentId; }
 
     public LocalDateTime getDateIssued() { return dateIssued; }
     public void setDateIssued(LocalDateTime dateIssued) { this.dateIssued = dateIssued; }

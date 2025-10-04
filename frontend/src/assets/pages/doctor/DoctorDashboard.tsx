@@ -3,8 +3,7 @@ import type { DoctorProfile, DoctorDetails, User } from "../../../types";
 import { doctorService } from "../../../services/DoctorService";
 import DoctorProfileForm from "./DoctorProfileForm";
 import DoctorProfileView from "./DoctorProfileView";
-import AppointmentManager from "./AppointmentManager";
-import PrescriptionManager from "./PrescriptionManager";
+import AppointmentManager from "./AppointmentManager"; // ✅ Import AppointmentManager
 import LoadingSpinner from "../../../components/common/LoadingSpinner";
 
 // Icons
@@ -22,7 +21,6 @@ import {
   FiAward,
   FiLogOut,
   FiHeart,
-  FiFileText,
 } from "react-icons/fi";
 import { logout } from "../../../api/auth";
 
@@ -32,11 +30,6 @@ const DoctorDashboard: React.FC = () => {
   const [editing, setEditing] = useState(false);
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState("profile");
-  const [activeAppointment, setActiveAppointment] = useState<{
-    id: number;
-    patientId: number;
-    patientName: string;
-  } | null>(null);
 
   useEffect(() => {
     fetchProfile();
@@ -71,19 +64,6 @@ const DoctorDashboard: React.FC = () => {
 
   const handleLogout = () => {
     logout();
-  };
-
-  const handlePrescribePatient = (appointment: {
-    id: number;
-    patientId: number;
-    patientName: string;
-  }) => {
-    setActiveAppointment(appointment);
-    setActiveTab("prescriptions");
-  };
-
-  const handlePrescriptionComplete = () => {
-    setActiveAppointment(null);
   };
 
   if (loading) return <LoadingSpinner />;
@@ -227,8 +207,7 @@ const DoctorDashboard: React.FC = () => {
             <div className="flex overflow-x-auto">
               {[
                 { id: "profile", icon: FiUserCheck, label: "Profile" },
-                { id: "schedule", icon: FiCalendar, label: "Appointments" },
-                { id: "prescriptions", icon: FiFileText, label: "Prescriptions" },
+                { id: "schedule", icon: FiCalendar, label: "Schedule" },
                 { id: "patients", icon: FiUsers, label: "Patients" },
                 { id: "reports", icon: FiBarChart2, label: "Reports" },
                 { id: "settings", icon: FiSettings, label: "Settings" },
@@ -312,40 +291,7 @@ const DoctorDashboard: React.FC = () => {
             </div>
           )}
 
-          {activeTab === "schedule" && (
-            <AppointmentManager onPrescribePatient={handlePrescribePatient} />
-          )}
-
-          {activeTab === "prescriptions" && (
-            <PrescriptionManager 
-              activeAppointment={activeAppointment}
-              onPrescriptionComplete={handlePrescriptionComplete}
-            />
-          )}
-
-          {activeTab === "patients" && (
-            <div className="bg-white rounded-2xl shadow-sm p-8 text-center border border-gray-100">
-              <FiUsers className="mx-auto text-4xl text-gray-300 mb-4" />
-              <h3 className="text-xl font-semibold text-gray-800 mb-2">Patients Management</h3>
-              <p className="text-gray-600">Patient management features coming soon...</p>
-            </div>
-          )}
-
-          {activeTab === "reports" && (
-            <div className="bg-white rounded-2xl shadow-sm p-8 text-center border border-gray-100">
-              <FiBarChart2 className="mx-auto text-4xl text-gray-300 mb-4" />
-              <h3 className="text-xl font-semibold text-gray-800 mb-2">Reports & Analytics</h3>
-              <p className="text-gray-600">Reporting features coming soon...</p>
-            </div>
-          )}
-
-          {activeTab === "settings" && (
-            <div className="bg-white rounded-2xl shadow-sm p-8 text-center border border-gray-100">
-              <FiSettings className="mx-auto text-4xl text-gray-300 mb-4" />
-              <h3 className="text-xl font-semibold text-gray-800 mb-2">Settings</h3>
-              <p className="text-gray-600">Settings panel coming soon...</p>
-            </div>
-          )}
+          {activeTab === "schedule" && <AppointmentManager />}
         </div>
       </div>
     </div>
