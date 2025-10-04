@@ -11,7 +11,12 @@ import {
 } from "react-icons/fi";
 import LoadingSpinner from "../../../components/common/LoadingSpinner";
 import { doctorAppointmentService } from "../../../services/DoctorAppointmenrService";
-import type { AppointmentDto } from "../../../services/DoctorAppointmenrService";
+import type { AppointmentDto as OriginalAppointmentDto } from "../../../services/DoctorAppointmenrService";
+
+// Extend AppointmentDto to allow "COMPLETED" status
+type AppointmentDto = Omit<OriginalAppointmentDto, "status"> & {
+  status: "PENDING" | "ACCEPTED" | "DECLINED" | "CANCELLED" | "COMPLETED";
+};
 
 interface AppointmentManagerProps {
   onPrescribePatient?: (appointment: {
@@ -26,11 +31,12 @@ const TABS = [
   { id: "PENDING", label: "Pending" },
   { id: "ACCEPTED", label: "Accepted" },
   { id: "DECLINED", label: "Declined" },
+  { id: "COMPLETED", label: "Completed" },
 ];
 
 const normalizeStatus = (status?: string) => {
   if (!status) return status;
-  const s = String(status).trim().toUpperCase();
+  const s = status.trim().toUpperCase();
   switch (s) {
     case "CONFIRMED":
     case "CONFIRMED_V2":
@@ -40,12 +46,17 @@ const normalizeStatus = (status?: string) => {
     case "CANCELED":
     case "DECLINED":
       return "DECLINED";
+    case "DONE":
+    case "COMPLETED":
+      return "COMPLETED";
     default:
       return s;
   }
 };
 
-const AppointmentManager: React.FC<AppointmentManagerProps> = ({ onPrescribePatient }) => {
+const AppointmentManager: React.FC<AppointmentManagerProps> = ({
+  onPrescribePatient,
+}) => {
   const [appointments, setAppointments] = useState<AppointmentDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>("");
@@ -69,9 +80,7 @@ const AppointmentManager: React.FC<AppointmentManagerProps> = ({ onPrescribePati
     } catch (err: any) {
       console.error("fetchAllAppointments error:", err);
       setError(
-        err?.response?.data?.message ||
-          err?.message ||
-          "Failed to load appointments"
+        err?.response?.data?.message || err?.message || "Failed to load appointments"
       );
     } finally {
       setLoading(false);
@@ -87,20 +96,15 @@ const AppointmentManager: React.FC<AppointmentManagerProps> = ({ onPrescribePati
 
   const unwrapServiceResult = (res: any) => {
     if (!res) return null;
-    if (res && typeof res === "object" && "data" in res) return res.data;
+    if (typeof res === "object" && "data" in res) return res.data;
     return res;
   };
 
   const applyUpdatedAppointment = (updatedRaw: any) => {
     if (!updatedRaw) return false;
-    const updated = {
-      ...updatedRaw,
-      status: normalizeStatus(updatedRaw.status),
-    };
-    if (typeof updated.id === "undefined" || updated.id === null) return false;
-    setAppointments((prev) =>
-      prev.map((a) => (a.id === updated.id ? updated : a))
-    );
+    const updated = { ...updatedRaw, status: normalizeStatus(updatedRaw.status) };
+    if (updated.id == null) return false;
+    setAppointments((prev) => prev.map((a) => (a.id === updated.id ? updated : a)));
     return true;
   };
 
@@ -109,19 +113,13 @@ const AppointmentManager: React.FC<AppointmentManagerProps> = ({ onPrescribePati
       setError("");
       setActionFlag(id, true);
       const res = await doctorAppointmentService.acceptAppointment(id);
-      const unwrapped = unwrapServiceResult(res);
-
-      const applied = applyUpdatedAppointment(unwrapped);
-      if (!applied) {
-        await fetchAllAppointments();
-      }
+      const applied = applyUpdatedAppointment(unwrapServiceResult(res));
+      if (!applied) await fetchAllAppointments();
       setActiveTab("ACCEPTED");
     } catch (err: any) {
       console.error("handleAccept error:", err);
       setError(
-        err?.response?.data?.message ||
-          err?.message ||
-          "Failed to accept appointment"
+        err?.response?.data?.message || err?.message || "Failed to accept appointment"
       );
     } finally {
       setActionFlag(id, false);
@@ -133,19 +131,13 @@ const AppointmentManager: React.FC<AppointmentManagerProps> = ({ onPrescribePati
       setError("");
       setActionFlag(id, true);
       const res = await doctorAppointmentService.declineAppointment(id);
-      const unwrapped = unwrapServiceResult(res);
-
-      const applied = applyUpdatedAppointment(unwrapped);
-      if (!applied) {
-        await fetchAllAppointments();
-      }
+      const applied = applyUpdatedAppointment(unwrapServiceResult(res));
+      if (!applied) await fetchAllAppointments();
       setActiveTab("DECLINED");
     } catch (err: any) {
       console.error("handleDecline error:", err);
       setError(
-        err?.response?.data?.message ||
-          err?.message ||
-          "Failed to decline appointment"
+        err?.response?.data?.message || err?.message || "Failed to decline appointment"
       );
     } finally {
       setActionFlag(id, false);
@@ -153,27 +145,7 @@ const AppointmentManager: React.FC<AppointmentManagerProps> = ({ onPrescribePati
   };
 
   const handleCancel = async (id: number) => {
-    try {
-      setError("");
-      setActionFlag(id, true);
-      const res = await doctorAppointmentService.declineAppointment(id);
-      const unwrapped = unwrapServiceResult(res);
-
-      const applied = applyUpdatedAppointment(unwrapped);
-      if (!applied) {
-        await fetchAllAppointments();
-      }
-      setActiveTab("DECLINED");
-    } catch (err: any) {
-      console.error("handleCancel error:", err);
-      setError(
-        err?.response?.data?.message ||
-          err?.message ||
-          "Failed to cancel appointment"
-      );
-    } finally {
-      setActionFlag(id, false);
-    }
+    await handleDecline(id);
   };
 
   const handlePrescribe = (appointment: AppointmentDto) => {
@@ -181,7 +153,7 @@ const AppointmentManager: React.FC<AppointmentManagerProps> = ({ onPrescribePati
       onPrescribePatient({
         id: appointment.id,
         patientId: appointment.patientId,
-        patientName: appointment.patientName || `Patient ${appointment.patientId}`
+        patientName: appointment.patientName || `Patient ${appointment.patientId}`,
       });
     }
   };
@@ -194,9 +166,7 @@ const AppointmentManager: React.FC<AppointmentManagerProps> = ({ onPrescribePati
     const q = query.trim().toLowerCase();
     if (!q) return byTab;
     return byTab.filter((a) =>
-      `${a.patientName ?? ""} ${a.patientId ?? ""}`
-        .toLowerCase()
-        .includes(q)
+      `${a.patientName ?? ""} ${a.patientId ?? ""}`.toLowerCase().includes(q)
     );
   }, [appointments, activeTab, query]);
 
@@ -204,14 +174,11 @@ const AppointmentManager: React.FC<AppointmentManagerProps> = ({ onPrescribePati
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-teal-50 p-4 md:p-8">
+      {/* Header */}
       <header className="bg-white rounded-2xl shadow-sm p-6 mb-6 border border-gray-100 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">
-            Manage Appointments
-          </h1>
-          <p className="text-gray-600 mt-1">
-            Manage and track patient appointments
-          </p>
+          <h1 className="text-2xl font-bold text-gray-800">Manage Appointments</h1>
+          <p className="text-gray-600 mt-1">Manage and track patient appointments</p>
         </div>
         <div className="flex items-center space-x-3 w-full md:w-auto">
           <div className="relative flex-1 md:flex-none">
@@ -241,11 +208,8 @@ const AppointmentManager: React.FC<AppointmentManagerProps> = ({ onPrescribePati
             >
               {t.label}
               <span className="ml-2 bg-gray-100 text-gray-600 rounded-full px-2 py-1 text-xs">
-                {
-                  appointments.filter((a) =>
-                    t.id === "ALL" ? true : a.status === t.id
-                  ).length
-                }
+                {appointments.filter((a) => (t.id === "ALL" ? true : a.status === t.id))
+                  .length}
               </span>
             </button>
           ))}
@@ -268,16 +232,14 @@ const AppointmentManager: React.FC<AppointmentManagerProps> = ({ onPrescribePati
         </div>
       )}
 
-      {/* Appointment list */}
+      {/* Appointments List */}
       <div className="grid gap-4">
         {displayedAppointments.length === 0 ? (
           <div className="bg-white p-8 rounded-2xl shadow text-center text-gray-500">
             <FiCalendar className="mx-auto text-4xl text-gray-300 mb-3" />
             <p className="text-lg">No appointments found</p>
             <p className="text-sm mt-1">
-              {query
-                ? "Try adjusting your search terms"
-                : `No ${activeTab.toLowerCase()} appointments`}
+              {query ? "Try adjusting your search terms" : `No ${activeTab.toLowerCase()} appointments`}
             </p>
           </div>
         ) : (
@@ -290,8 +252,7 @@ const AppointmentManager: React.FC<AppointmentManagerProps> = ({ onPrescribePati
                 <div className="flex-1">
                   <div className="flex flex-col md:flex-row md:items-center gap-2 mb-3">
                     <h3 className="font-bold text-gray-800 text-lg flex items-center">
-                      <FiUser className="mr-2 text-blue-600" />{" "}
-                      {appt.patientName}
+                      <FiUser className="mr-2 text-blue-600" /> {appt.patientName}
                     </h3>
                     <div className="flex items-center gap-4 text-sm text-gray-600">
                       <span className="flex items-center">
@@ -310,7 +271,9 @@ const AppointmentManager: React.FC<AppointmentManagerProps> = ({ onPrescribePati
                           ? "bg-yellow-50 text-yellow-700 border border-yellow-200"
                           : appt.status === "ACCEPTED"
                           ? "bg-green-50 text-green-700 border border-green-200"
-                          : "bg-red-50 text-red-700 border border-red-200"
+                          : appt.status === "DECLINED"
+                          ? "bg-red-50 text-red-700 border border-red-200"
+                          : "bg-blue-50 text-blue-700 border border-blue-200" // Completed
                       }`}
                     >
                       {appt.status}
@@ -320,7 +283,7 @@ const AppointmentManager: React.FC<AppointmentManagerProps> = ({ onPrescribePati
 
                 {/* Actions */}
                 <div className="flex items-center gap-2 flex-wrap">
-                  {appt.status === "PENDING" ? (
+                  {appt.status === "PENDING" && (
                     <>
                       <button
                         onClick={() => handleAccept(appt.id)}
@@ -348,7 +311,9 @@ const AppointmentManager: React.FC<AppointmentManagerProps> = ({ onPrescribePati
                         {actionLoading[appt.id] ? "Declining..." : "Decline"}
                       </button>
                     </>
-                  ) : appt.status === "ACCEPTED" ? (
+                  )}
+
+                  {appt.status === "ACCEPTED" && (
                     <>
                       <button
                         onClick={() => handlePrescribe(appt)}
@@ -371,7 +336,9 @@ const AppointmentManager: React.FC<AppointmentManagerProps> = ({ onPrescribePati
                         {actionLoading[appt.id] ? "Cancelling..." : "Cancel"}
                       </button>
                     </>
-                  ) : (
+                  )}
+
+                  {appt.status === "DECLINED" && (
                     <button
                       onClick={() => handleAccept(appt.id)}
                       disabled={!!actionLoading[appt.id]}
@@ -382,10 +349,14 @@ const AppointmentManager: React.FC<AppointmentManagerProps> = ({ onPrescribePati
                       }`}
                     >
                       <FiCheck className="mr-2" />
-                      {actionLoading[appt.id]
-                        ? "Accepting..."
-                        : "Accept Again"}
+                      {actionLoading[appt.id] ? "Accepting..." : "Accept Again"}
                     </button>
+                  )}
+
+                  {appt.status === "COMPLETED" && (
+                    <span className="text-sm text-gray-600">
+                      This appointment is completed
+                    </span>
                   )}
                 </div>
               </div>

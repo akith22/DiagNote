@@ -33,18 +33,32 @@ public class PrescriptionController {
     @Autowired
     private UserRepository userRepository;
 
+    /**
+     * Create a prescription for an appointment
+     * Also marks the appointment as COMPLETED
+     */
     @PostMapping("/appointments/{appointmentId}/prescriptions")
     public ResponseEntity<?> createPrescription(
             @PathVariable Long appointmentId,
             @RequestBody @Valid PrescriptionDto requestDto
     ) {
         try {
+            // 1️⃣ Create the prescription
             PrescriptionDto dto = prescriptionService.createPrescription(appointmentId, requestDto.getNotesJson());
+
+            // 2️⃣ Update the corresponding appointment status to COMPLETED using enum
+            Appointment appointment = appointmentRepository.findById(appointmentId).orElse(null);
+            if (appointment != null) {
+                appointment.setStatus(Appointment.Status.COMPLETED); // <-- use enum, not string
+                appointmentRepository.save(appointment);
+            }
+
             return ResponseEntity.status(HttpStatus.CREATED).body(dto);
         } catch (PrescriptionException ex) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
         }
     }
+
 
     @PutMapping("/prescriptions/{prescriptionId}")
     public ResponseEntity<?> updatePrescription(
@@ -104,7 +118,7 @@ public class PrescriptionController {
         List<PrescriptionDto> prescriptions = prescriptionService.listByAppointment(appointmentId);
 
         User patient = userRepository.findById(appt.getPatientId().intValue()).orElse(null);
-        String patientName = patient != null ? patient.getName() : "Unknown"; // adjust if firstName + lastName
+        String patientName = patient != null ? patient.getName() : "Unknown";
 
         List<Map<String, Object>> response = prescriptions.stream().map(p -> {
             Map<String, Object> map = new HashMap<>();
@@ -120,10 +134,48 @@ public class PrescriptionController {
     }
 
 
+    /**
+     * List all prescriptions created by the currently authenticated doctor
+     */
+    @GetMapping("/prescriptions/mine")
+    public ResponseEntity<?> listMyPrescriptions() {
+        User doctor = getAuthenticatedUser();
+        if (doctor == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Doctor must be authenticated.");
+        }
 
+        List<PrescriptionDto> prescriptions = prescriptionService.listByDoctor(doctor.getUserId().longValue());
+
+        // Optionally include patient names
+        List<Map<String, Object>> response = prescriptions.stream().map(p -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", p.getId());
+            map.put("appointmentId", p.getAppointmentId());
+            map.put("dateIssued", p.getDateIssued());
+            map.put("notesJson", p.getNotesJson());
+
+            // Fetch patient name from appointment
+            Appointment appt = appointmentRepository.findById(p.getAppointmentId()).orElse(null);
+            if (appt != null && appt.getPatientId() != null) {
+                User patient = userRepository.findById(appt.getPatientId().intValue()).orElse(null);
+                map.put("patientName", patient != null ? patient.getName() : "Unknown");
+            } else {
+                map.put("patientName", "Unknown");
+            }
+
+            return map;
+        }).toList();
+
+        return ResponseEntity.ok(response);
+    }
+
+    // Helper to get authenticated user (doctor)
+    private User getAuthenticatedUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null) return null;
+        String email = auth.getName();
+        return userRepository.findByEmail(email).orElse(null);
+    }
 
 
 }
-
-
-

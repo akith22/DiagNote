@@ -40,7 +40,9 @@ public class PrescriptionService {
         return userRepository.findByEmail(email).orElse(null);
     }
 
-    // Create prescription
+    /**
+     * Create prescription and mark appointment as COMPLETED
+     */
     public PrescriptionDto createPrescription(Long appointmentId, String notesJson) {
         if (notesJson == null || notesJson.trim().isEmpty())
             throw new PrescriptionException("Prescription details (notesJson) are required.");
@@ -48,6 +50,7 @@ public class PrescriptionService {
         Appointment appt = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new PrescriptionException("Appointment not found."));
 
+        // Ensure appointment is CONFIRMED before prescribing
         if (appt.getStatus() == null || !appt.getStatus().name().equalsIgnoreCase("CONFIRMED"))
             throw new PrescriptionException("Cannot add prescription: appointment is not CONFIRMED.");
 
@@ -56,8 +59,13 @@ public class PrescriptionService {
         if (!appt.getDoctorId().equals(doctor.getUserId().longValue()))
             throw new PrescriptionException("Not authorized to add prescription for this appointment.");
 
+        // 1️⃣ Create the prescription
         Prescription pres = new Prescription(notesJson, LocalDateTime.now(), appointmentId);
         Prescription saved = prescriptionRepository.save(pres);
+
+        // 2️⃣ Update appointment status to COMPLETED using enum
+        appt.setStatus(Appointment.Status.COMPLETED);
+        appointmentRepository.save(appt);
 
         return new PrescriptionDto(saved.getId(), saved.getAppointmentId(), saved.getDateIssued(), saved.getNotes());
     }
@@ -106,4 +114,27 @@ public class PrescriptionService {
         }
         return out;
     }
+
+
+    /**
+     * List all prescriptions created by a specific doctor
+     */
+    public List<PrescriptionDto> listByDoctor(Long doctorId) {
+        // Fetch all appointments for this doctor
+        List<Appointment> doctorAppointments = appointmentRepository.findByDoctorId(doctorId);
+
+        List<PrescriptionDto> result = new ArrayList<>();
+        for (Appointment appt : doctorAppointments) {
+            List<Prescription> presList = prescriptionRepository.findByAppointmentId(appt.getId());
+            for (Prescription p : presList) {
+                result.add(new PrescriptionDto(p.getId(), p.getAppointmentId(), p.getDateIssued(), p.getNotes()));
+            }
+        }
+
+        // Sort by date descending
+        result.sort((a, b) -> b.getDateIssued().compareTo(a.getDateIssued()));
+
+        return result;
+    }
+
 }
