@@ -12,7 +12,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class DoctorService {
@@ -82,5 +84,18 @@ public class DoctorService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         doctorRepository.deleteByUser(user);
+    }
+
+    public List<DoctorProfileResponse> searchDoctors(String name, String specization) {
+        return doctorRepository.searchDoctors(name, specization).stream()
+                .map(d -> new DoctorProfileResponse(
+                        d.getUser().getName(),
+                        d.getUser().getEmail(),
+                        d.getSpecialization(),
+                        d.getLicenseNumber(),
+                        d.getAvailableTimes(),
+                        true
+                ))
+                .collect(Collectors.toList());
     }
 }

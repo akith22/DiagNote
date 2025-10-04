@@ -3,11 +3,11 @@ import type { PatientProfile, PatientDetails, User } from "../../../types";
 import { getUser, logout } from "../../../api/auth";
 import { patientService } from "../../../services/PatientService";
 import LoadingSpinner from "../../../components/common/LoadingSpinner";
-import UserProfile from "../../../components/common/UserProfile";
 import PatientProfileForm from "./PatientProfileForm";
 import PatientProfileView from "./PatientProfileView";
+import Appointments from "./Appointments";
+import { Link } from "react-router-dom";
 
-// Icons (assuming you're using react-icons)
 import {
   FiCalendar,
   FiUsers,
@@ -18,13 +18,9 @@ import {
   FiEdit3,
   FiX,
   FiCheck,
-  FiClock,
-  FiAward,
-  FiMapPin,
-  FiPhone,
-  FiMail,
   FiHeart,
   FiLogOut,
+  FiMapPin,
   FiTrash2,
 } from "react-icons/fi";
 
@@ -94,9 +90,7 @@ const PatientDashboard: React.FC = () => {
     logout();
   };
 
-  if (loading) {
-    return <LoadingSpinner />;
-  }
+  if (loading) return <LoadingSpinner />;
 
   if (!user) {
     return (
@@ -125,6 +119,14 @@ const PatientDashboard: React.FC = () => {
         </div>
 
         <div className="flex items-center space-x-4">
+          {/* Doctor Search Button */}
+          <Link
+            to="/patient/search-doctor"
+            className="flex items-center py-2 px-4 bg-green-500 text-white rounded-lg shadow hover:bg-green-600 transition-all duration-300 hover:shadow-md"
+          >
+            Search Doctors
+          </Link>
+
           {!editing && profile?.profileComplete && (
             <button
               onClick={() => setEditing(true)}
@@ -134,6 +136,7 @@ const PatientDashboard: React.FC = () => {
               Edit Profile
             </button>
           )}
+
           <button
             onClick={handleLogout}
             className="flex items-center py-2 px-4 bg-red-100 text-red-700 rounded-lg shadow hover:bg-red-200 transition-all duration-300"
@@ -148,12 +151,8 @@ const PatientDashboard: React.FC = () => {
       {success && (
         <div className="mb-6 bg-green-50 border-l-4 border-green-500 p-4 rounded-lg shadow-sm">
           <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <FiCheck className="h-5 w-5 text-green-400" />
-            </div>
-            <div className="ml-3">
-              <p className="text-sm text-green-700">{success}</p>
-            </div>
+            <FiCheck className="h-5 w-5 text-green-400" />
+            <p className="ml-3 text-sm text-green-700">{success}</p>
           </div>
         </div>
       )}
@@ -161,19 +160,15 @@ const PatientDashboard: React.FC = () => {
       {error && (
         <div className="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-lg shadow-sm">
           <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <FiX className="h-5 w-5 text-red-400" />
-            </div>
-            <div className="ml-3">
-              <p className="text-sm text-red-700">{error}</p>
-            </div>
+            <FiX className="h-5 w-5 text-red-400" />
+            <p className="ml-3 text-sm text-red-700">{error}</p>
           </div>
         </div>
       )}
 
       {/* Main Content */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left Column - User Profile Card */}
+        {/* Left Column - Profile Card */}
         <div className="lg:col-span-1">
           <div className="bg-white rounded-2xl shadow-lg p-6 sticky top-8">
             <div className="flex flex-col items-center text-center mb-6">
@@ -218,14 +213,12 @@ const PatientDashboard: React.FC = () => {
                 </div>
               )}
             </div>
-
-            {/* F */}
           </div>
         </div>
 
-        {/* Right Column - Content Area */}
+        {/* Right Column */}
         <div className="lg:col-span-2">
-          {/* Navigation Tabs */}
+          {/* Tabs */}
           <div className="bg-white rounded-2xl shadow-lg mb-8 overflow-hidden">
             <div className="flex overflow-x-auto">
               <button
@@ -250,6 +243,7 @@ const PatientDashboard: React.FC = () => {
                 <FiCalendar className="mr-2" />
                 Appointments
               </button>
+
               <button
                 className={`px-6 py-4 font-medium flex items-center ${
                   activeTab === "prescriptions"
@@ -286,111 +280,56 @@ const PatientDashboard: React.FC = () => {
             </div>
           </div>
 
-          {/* Profile Section */}
+          {/* Content */}
           <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-800 flex items-center">
-                {editing || !profile?.profileComplete
-                  ? "Edit Profile"
-                  : "Personal Profile"}
-                {profile?.profileComplete && !editing && (
-                  <span className="ml-3 text-xs bg-green-100 text-green-800 py-1 px-2 rounded-full">
-                    Complete
-                  </span>
+            {activeTab === "profile" && (
+              <>
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-2xl font-bold text-gray-800 flex items-center">
+                    {editing || !profile?.profileComplete
+                      ? "Edit Profile"
+                      : "Personal Profile"}
+                  </h2>
+                  {editing && (
+                    <button
+                      onClick={() => setEditing(false)}
+                      className="text-gray-500 hover:text-gray-700 flex items-center"
+                    >
+                      <FiX className="mr-1" />
+                      Cancel
+                    </button>
+                  )}
+                </div>
+
+                {editing || !profile?.profileComplete ? (
+                  <PatientProfileForm
+                    initialData={
+                      profile?.profileComplete
+                        ? {
+                            gender: profile.gender || "",
+                            address: profile.address || "",
+                            age: profile.age || 0,
+                          }
+                        : undefined
+                    }
+                    onSubmit={handleSaveProfile}
+                    isEditing={profile?.profileComplete || false}
+                    onCancel={() => setEditing(false)}
+                  />
+                ) : (
+                  <PatientProfileView
+                    profile={profile}
+                    onEdit={() => setEditing(true)}
+                    onDelete={handleDeleteProfile}
+                  />
                 )}
-              </h2>
+              </>
+            )}
 
-              {editing && (
-                <button
-                  onClick={() => setEditing(false)}
-                  className="text-gray-500 hover:text-gray-700 flex items-center"
-                >
-                  <FiX className="mr-1" />
-                  Cancel
-                </button>
-              )}
-            </div>
-
-            {editing || !profile?.profileComplete ? (
-              <PatientProfileForm
-                initialData={
-                  profile?.profileComplete
-                    ? {
-                        gender: profile.gender || "",
-                        address: profile.address || "",
-                        age: profile.age || 0,
-                      }
-                    : undefined
-                }
-                onSubmit={handleSaveProfile}
-                isEditing={profile?.profileComplete || false}
-                onCancel={() => setEditing(false)}
-              />
-            ) : (
-              <PatientProfileView
-                profile={profile}
-                onEdit={() => setEditing(true)}
-                onDelete={handleDeleteProfile}
-              />
+            {activeTab === "appointments" && (
+              <Appointments patientEmail={user.email} />
             )}
           </div>
-
-          {/* Additional Dashboard Cards */}
-          {!editing && profile?.profileComplete && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
-              {/* <div className="bg-white rounded-2xl shadow-lg p-6">
-                <h3 className="font-bold text-lg text-gray-800 mb-4 flex items-center">
-                  <FiCalendar className="text-blue-500 mr-2" />
-                  Upcoming Appointments
-                </h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
-                    <div>
-                      <p className="font-medium">Dr. Sarah Johnson</p>
-                      <p className="text-sm text-gray-600">Cardiology • Tomorrow, 10:00 AM</p>
-                    </div>
-                    <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">Confirmed</span>
-                  </div>
-                  <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
-                    <div>
-                      <p className="font-medium">Dr. Michael Chen</p>
-                      <p className="text-sm text-gray-600">Dermatology • June 15, 2:30 PM</p>
-                    </div>
-                    <span className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">Pending</span>
-                  </div>
-                </div>
-                <button className="mt-4 w-full py-2 text-center text-blue-600 hover:text-blue-800 font-medium text-sm">
-                  View All Appointments →
-                </button>
-              </div>
-              
-              <div className="bg-white rounded-2xl shadow-lg p-6">
-                <h3 className="font-bold text-lg text-gray-800 mb-4 flex items-center">
-                  <FiHeart className="text-blue-500 mr-2" />
-                  Recent Prescriptions
-                </h3>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center p-2 hover:bg-gray-50 rounded">
-                    <div>
-                      <p className="font-medium">Atorvastatin</p>
-                      <p className="text-xs text-gray-600">20mg, once daily</p>
-                    </div>
-                    <span className="text-xs text-gray-500">05/20/2023</span>
-                  </div>
-                  <div className="flex justify-between items-center p-2 hover:bg-gray-50 rounded">
-                    <div>
-                      <p className="font-medium">Metformin</p>
-                      <p className="text-xs text-gray-600">500mg, twice daily</p>
-                    </div>
-                    <span className="text-xs text-gray-500">05/15/2023</span>
-                  </div>
-                </div>
-                <button className="mt-4 w-full py-2 text-center text-blue-600 hover:text-blue-800 font-medium text-sm">
-                  View Medication History →
-                </button>
-              </div> */}
-            </div>
-          )}
         </div>
       </div>
     </div>

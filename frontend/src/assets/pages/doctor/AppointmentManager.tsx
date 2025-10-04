@@ -259,7 +259,18 @@ const AppointmentManager: React.FC<AppointmentManagerProps> = ({
                         <FiHash className="mr-1" /> ID: {appt.patientId}
                       </span>
                       <span className="flex items-center">
-                        <FiClock className="mr-1" /> {appt.appointmentTime}
+                        <FiClock className="mr-1" />{" "}
+                        {appt.date
+                          ? new Date(appt.date).toLocaleString("en-US", {
+                              year: "numeric",
+                              month: "short",
+                              day: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              hour12: true,
+                              timeZone: "Asia/Kolkata",
+                            })
+                          : "N/A"}
                       </span>
                     </div>
                   </div>

@@ -3,6 +3,7 @@ package com.example.backend.service;
 import com.example.backend.dto.AppointmentDto;
 import com.example.backend.exception.AppointmentNotFoundException;
 import com.example.backend.model.Appointment;
+import com.example.backend.model.AppointmentStatus;
 import com.example.backend.model.User;
 import com.example.backend.repository.AppointmentRepository;
 import com.example.backend.repository.UserRepository;
@@ -52,7 +53,7 @@ public class DoctorAppointmentstatService {
      */
     public List<AppointmentDto> getAppointmentsForAuthenticatedDoctor(Optional<String> statusFilter) {
         Integer doctorId = getAuthenticatedDoctorId();
-        List<Appointment> appointments = appointmentRepository.findByDoctorId(doctorId.longValue());
+        List<Appointment> appointments = appointmentRepository.findByDoctorId(doctorId);
 
         if (statusFilter.isPresent()) {
             String status = statusFilter.get().toUpperCase();
@@ -69,15 +70,15 @@ public class DoctorAppointmentstatService {
     /**
      * Accept an appointment
      */
-    public AppointmentDto acceptAppointment(Long appointmentId, Integer doctorId) {
+    public AppointmentDto acceptAppointment(Integer appointmentId, Integer doctorId) {
         Appointment appt = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new AppointmentNotFoundException("Appointment not found"));
 
-        if (!appt.getDoctorId().equals(doctorId.longValue())) {
+        if (!appt.getDoctor().getId().equals(doctorId)) {
             throw new RuntimeException("You are not authorized to accept this appointment");
         }
 
-        appt.setStatus(Appointment.Status.CONFIRMED);
+        appt.setStatus(AppointmentStatus.CONFIRMED);
         appointmentRepository.save(appt);
         return mapToDto(appt);
     }
@@ -85,15 +86,15 @@ public class DoctorAppointmentstatService {
     /**
      * Decline an appointment
      */
-    public AppointmentDto declineAppointment(Long appointmentId, Integer doctorId) {
+    public AppointmentDto declineAppointment(Integer appointmentId, Integer doctorId) {
         Appointment appt = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new AppointmentNotFoundException("Appointment not found"));
 
-        if (!appt.getDoctorId().equals(doctorId.longValue())) {
+        if (!appt.getDoctor().getId().equals(doctorId)) {
             throw new RuntimeException("You are not authorized to decline this appointment");
         }
 
-        appt.setStatus(Appointment.Status.CANCELLED);
+        appt.setStatus(AppointmentStatus.CANCELLED);
         appointmentRepository.save(appt);
         return mapToDto(appt);
     }
@@ -103,8 +104,8 @@ public class DoctorAppointmentstatService {
      */
     private AppointmentDto mapToDto(Appointment a) {
         String patientName = "";
-        if (a.getPatientId() != null) {
-            User patient = userRepository.findById(a.getPatientId().intValue()).orElse(null);
+        if (a.getPatient().getId() != null) {
+            User patient = userRepository.findById(a.getPatient().getId()).orElse(null);
             if (patient != null) {
                 patientName = patient.getName(); // <-- replace with your actual User name getter
             }
@@ -112,11 +113,11 @@ public class DoctorAppointmentstatService {
 
         return new AppointmentDto(
                 a.getId(),
-                a.getDate(),
+                a.getAppointmentDateTime(),
                 a.getStatus(),
-                a.getPatientId(),
+                a.getPatient().getId(),
                 patientName,
-                a.getDoctorId()
+                a.getDoctor().getId()
         );
     }
 }
