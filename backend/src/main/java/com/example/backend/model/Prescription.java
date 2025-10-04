@@ -4,61 +4,37 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "prescriptions")
+@Table(name = "prescription")
 public class Prescription {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(columnDefinition = "TEXT", nullable = false)
+    // DB column limited to 255 chars as per your screenshot
+    @Column(name = "notes", length = 255)
     private String notes;
 
-    @Column(name = "date_issued", nullable = false)
+    @Column(name = "date_issued")
     private LocalDateTime dateIssued;
 
-    // 🔧 Changed from Long to Integer to match Appointment.id
-    @Column(name = "appointment_id", nullable = false)
-    private Integer appointmentId;
+    // link to appointments table (appointments_id)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "appointments_id", nullable = false)
+    private Appointment appointment;
 
     public Prescription() {}
 
-    public Prescription(String notes, LocalDateTime dateIssued, Integer appointmentId) {
-        this.notes = notes;
-        this.dateIssued = dateIssued;
-        this.appointmentId = appointmentId;
-    }
+    // Getters & Setters
+    public Integer getId() { return id; }
+    public void setId(Integer id) { this.id = id; }
 
-    // ✅ Getters and setters
-    public Integer getId() {
-        return id;
-    }
+    public String getNotes() { return notes; }
+    public void setNotes(String notes) { this.notes = notes; }
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
+    public LocalDateTime getDateIssued() { return dateIssued; }
+    public void setDateIssued(LocalDateTime dateIssued) { this.dateIssued = dateIssued; }
 
-    public String getNotes() {
-        return notes;
-    }
-
-    public void setNotes(String notes) {
-        this.notes = notes;
-    }
-
-    public LocalDateTime getDateIssued() {
-        return dateIssued;
-    }
-
-    public void setDateIssued(LocalDateTime dateIssued) {
-        this.dateIssued = dateIssued;
-    }
-
-    public Integer getAppointmentId() {
-        return appointmentId;
-    }
-
-    public void setAppointmentId(Integer appointmentId) {
-        this.appointmentId = appointmentId;
-    }
+    public Appointment getAppointment() { return appointment; }
+    public void setAppointment(Appointment appointment) { this.appointment = appointment; }
 }

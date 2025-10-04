@@ -1,113 +1,74 @@
 package com.example.backend.controller;
 
 import com.example.backend.dto.PrescriptionDto;
-import com.example.backend.exception.PrescriptionException;
-import com.example.backend.exception.PrescriptionNotFoundException;
-import com.example.backend.model.Appointment;
-import com.example.backend.model.Doctor;
-import com.example.backend.model.Patient;
-import com.example.backend.model.User;
-import com.example.backend.repository.AppointmentRepository;
-import com.example.backend.repository.UserRepository;
 import com.example.backend.service.PrescriptionService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/doctor")
+@PreAuthorize("hasRole('DOCTOR')") // Only logged-in doctors can access
 public class PrescriptionController {
 
-    @Autowired
-    private PrescriptionService prescriptionService;
+    private final PrescriptionService prescriptionService;
 
-    @Autowired
-    private AppointmentRepository appointmentRepository;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    private User getAuthenticatedUser() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null) return null;
-        String email = auth.getName();
-        return userRepository.findByEmail(email).orElse(null);
+    public PrescriptionController(PrescriptionService prescriptionService) {
+        this.prescriptionService = prescriptionService;
     }
 
-    @PostMapping("/appointments/{appointmentId}/prescriptions")
-    public ResponseEntity<?> createPrescription(
+    @PostMapping("/prescriptions/{appointmentId}/prescriptions")
+    public ResponseEntity<PrescriptionDto> createPrescription(
             @PathVariable Integer appointmentId,
-            @RequestBody @Valid PrescriptionDto requestDto
-    ) {
-        try {
-            PrescriptionDto dto = prescriptionService.createPrescription(appointmentId, requestDto.getNotesJson());
-            return ResponseEntity.status(HttpStatus.CREATED).body(dto);
-        } catch (PrescriptionException ex) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
-        }
+            @Valid @RequestBody PrescriptionDto dto) {
+
+        PrescriptionDto created = prescriptionService.createPrescription(appointmentId, dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @PutMapping("/prescriptions/{prescriptionId}")
-    public ResponseEntity<?> updatePrescription(
+    public ResponseEntity<PrescriptionDto> updatePrescription(
             @PathVariable Integer prescriptionId,
-            @RequestBody @Valid PrescriptionDto requestDto
-    ) {
-        try {
-            PrescriptionDto dto = prescriptionService.updatePrescription(prescriptionId, requestDto.getNotesJson());
-            return ResponseEntity.ok(dto);
-        } catch (PrescriptionException | PrescriptionNotFoundException ex) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
-        }
+            @Valid @RequestBody PrescriptionDto dto) {
+
+        PrescriptionDto updated = prescriptionService.updatePrescription(prescriptionId, dto);
+        return ResponseEntity.ok(updated);
     }
 
-    @GetMapping("/appointments/{appointmentId}/prescription")
-    public ResponseEntity<?> getLatestPrescription(@PathVariable Integer appointmentId) {
-        User loggedUser = getAuthenticatedUser();
-        if (loggedUser == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    @DeleteMapping("/prescriptions/{prescriptionId}")
+    public ResponseEntity<String> deletePrescription(@PathVariable Integer prescriptionId) {
+        prescriptionService.deletePrescription(prescriptionId);
+        return ResponseEntity.ok("Prescription deleted successfully");
+    }
 
-        Appointment appt = appointmentRepository.findById(appointmentId).orElse(null);
-        if (appt == null) return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Appointment not found.");
-
-        if (!isUserAllowed(appt, loggedUser))
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Not allowed to view this prescription.");
-
-        try {
-            PrescriptionDto dto = prescriptionService.getPrescriptionByAppointment(appointmentId);
-            return ResponseEntity.ok(dto);
-        } catch (PrescriptionNotFoundException ex) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
-        }
+    @GetMapping("/prescriptions/{prescriptionId}")
+    public ResponseEntity<PrescriptionDto> getById(@PathVariable Integer prescriptionId) {
+        PrescriptionDto dto = prescriptionService.getById(prescriptionId);
+        return ResponseEntity.ok(dto);
     }
 
     @GetMapping("/appointments/{appointmentId}/prescriptions")
-    public ResponseEntity<?> listPrescriptions(@PathVariable Integer appointmentId) {
-        User loggedUser = getAuthenticatedUser();
-        if (loggedUser == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-
-        Appointment appt = appointmentRepository.findById(appointmentId).orElse(null);
-        if (appt == null) return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Appointment not found.");
-
-        if (!isUserAllowed(appt, loggedUser))
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Not allowed to view prescriptions.");
-
-        List<PrescriptionDto> list = prescriptionService.listByAppointment(appointmentId);
-        return ResponseEntity.ok(list);
+    public ResponseEntity<List<PrescriptionDto>> getByAppointment(@PathVariable Integer appointmentId) {
+        List<PrescriptionDto> dtos = prescriptionService.getByAppointmentId(appointmentId);
+        return ResponseEntity.ok(dtos);
     }
 
-    // ✅ Helper method to check if the user is allowed (doctor or patient)
-    private boolean isUserAllowed(Appointment appt, User user) {
-        Doctor doctor = appt.getDoctor();
-        Patient patient = appt.getPatient();
+    // ---------------- New GET: Prescription + Patient Name ----------------
+    @GetMapping("/prescriptions/{prescriptionId}/details")
+    public ResponseEntity<Map<String, Object>> getPrescriptionDetails(@PathVariable Integer prescriptionId) {
+        Map<String, Object> details = prescriptionService.getPrescriptionWithPatientName(prescriptionId);
+        return ResponseEntity.ok(details);
+    }
 
-        boolean isDoctor = doctor != null && doctor.getUser() != null && doctor.getUser().getUserId().equals(user.getUserId());
-        boolean isPatient = patient != null && patient.getUser() != null && patient.getUser().getUserId().equals(user.getUserId());
-
-        return isDoctor || isPatient;
+    // ---------------- New GET: All Prescriptions by Doctor ----------------
+    @GetMapping("/prescriptions")
+    public ResponseEntity<List<PrescriptionDto>> getAllPrescriptionsByDoctor() {
+        List<PrescriptionDto> dtos = prescriptionService.getAllPrescriptionsByDoctor();
+        return ResponseEntity.ok(dtos);
     }
 }

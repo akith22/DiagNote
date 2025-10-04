@@ -1,0 +1,202 @@
+package com.example.backend.service;
+
+import com.example.backend.dto.PrescriptionDto;
+import com.example.backend.model.Appointment;
+import com.example.backend.model.AppointmentStatus;
+import com.example.backend.model.Prescription;
+import com.example.backend.model.User;
+import com.example.backend.repository.AppointmentRepository;
+import com.example.backend.repository.PrescriptionRepository;
+import com.example.backend.repository.UserRepository;
+import jakarta.transaction.Transactional;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
+
+@Service
+public class PrescriptionService {
+
+    private final PrescriptionRepository prescriptionRepository;
+    private final AppointmentRepository appointmentRepository;
+    private final UserRepository userRepository;
+
+    public PrescriptionService(PrescriptionRepository prescriptionRepository,
+                               AppointmentRepository appointmentRepository,
+                               UserRepository userRepository) {
+        this.prescriptionRepository = prescriptionRepository;
+        this.appointmentRepository = appointmentRepository;
+        this.userRepository = userRepository;
+    }
+
+    // ---------------- Helper Methods ----------------
+    private PrescriptionDto toDto(Prescription p) {
+        PrescriptionDto dto = new PrescriptionDto();
+        dto.setId(p.getId());
+        dto.setNotes(p.getNotes());
+        dto.setDateIssued(p.getDateIssued());
+        dto.setAppointmentId(p.getAppointment() != null ? p.getAppointment().getId() : null);
+        return dto;
+    }
+
+    private String safeNotes(String notes) {
+        if (notes == null) return null;
+        return notes.length() > 255 ? notes.substring(0, 255) : notes;
+    }
+
+    private User getAuthenticatedDoctor() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null) throw new RuntimeException("Not authenticated");
+
+        String email = auth.getName(); // JWT username = email
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"));
+    }
+
+    // ---------------- Create Prescription ----------------
+    @Transactional
+    public PrescriptionDto createPrescription(Integer appointmentId, PrescriptionDto dto) {
+        User doctor = getAuthenticatedDoctor();
+
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Appointment not found"));
+
+        if (!appointment.getDoctor().getUser().getUserId().equals(doctor.getUserId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not authorized for this appointment");
+        }
+
+        if (appointment.getStatus() != AppointmentStatus.CONFIRMED) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Prescription can only be created for CONFIRMED appointments");
+        }
+
+        if (dto.getNotes() == null || dto.getNotes().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Notes are required");
+        }
+
+        Prescription prescription = new Prescription();
+        prescription.setAppointment(appointment);
+        prescription.setNotes(safeNotes(dto.getNotes()));
+        prescription.setDateIssued(dto.getDateIssued() != null ? dto.getDateIssued() : LocalDateTime.now());
+
+        Prescription saved = prescriptionRepository.save(prescription);
+
+        // Mark appointment as COMPLETED
+        appointment.setStatus(AppointmentStatus.COMPLETED);
+        appointmentRepository.save(appointment);
+
+        return toDto(saved);
+    }
+
+    // ---------------- Update Prescription ----------------
+    @Transactional
+    public PrescriptionDto updatePrescription(Integer prescriptionId, PrescriptionDto dto) {
+        User doctor = getAuthenticatedDoctor();
+
+        Prescription p = prescriptionRepository.findById(prescriptionId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Prescription not found"));
+
+        if (!p.getAppointment().getDoctor().getUser().getUserId().equals(doctor.getUserId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not authorized");
+        }
+
+        if (dto.getNotes() != null && !dto.getNotes().isBlank()) {
+            p.setNotes(safeNotes(dto.getNotes()));
+        }
+
+        if (dto.getDateIssued() != null) {
+            p.setDateIssued(dto.getDateIssued());
+        }
+
+        Prescription saved = prescriptionRepository.save(p);
+        return toDto(saved);
+    }
+
+    // ---------------- Delete Prescription ----------------
+    @Transactional
+    public void deletePrescription(Integer prescriptionId) {
+        User doctor = getAuthenticatedDoctor();
+
+        Prescription p = prescriptionRepository.findById(prescriptionId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Prescription not found"));
+
+        if (!p.getAppointment().getDoctor().getUser().getUserId().equals(doctor.getUserId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not authorized");
+        }
+
+        prescriptionRepository.delete(p);
+    }
+
+    // ---------------- Get by ID ----------------
+    public PrescriptionDto getById(Integer prescriptionId) {
+        User doctor = getAuthenticatedDoctor();
+
+        Prescription p = prescriptionRepository.findById(prescriptionId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Prescription not found"));
+
+        if (!p.getAppointment().getDoctor().getUser().getUserId().equals(doctor.getUserId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not authorized");
+        }
+
+        return toDto(p);
+    }
+
+    // ---------------- Get by Appointment ----------------
+    public List<PrescriptionDto> getByAppointmentId(Integer appointmentId) {
+        User doctor = getAuthenticatedDoctor();
+
+        List<Prescription> prescriptions = prescriptionRepository.findByAppointment_Id(appointmentId);
+
+        if (prescriptions.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "No prescriptions found for this appointment");
+        }
+
+        // Authorization check
+        prescriptions.forEach(p -> {
+            if (!p.getAppointment().getDoctor().getUser().getUserId().equals(doctor.getUserId())) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not authorized");
+            }
+        });
+
+        return prescriptions.stream().map(this::toDto).collect(Collectors.toList());
+    }
+
+
+    // ---------------- New: Prescription + Patient Name ----------------
+    public Map<String, Object> getPrescriptionWithPatientName(Integer prescriptionId) {
+        User doctor = getAuthenticatedDoctor();
+
+        Prescription p = prescriptionRepository.findById(prescriptionId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Prescription not found"));
+
+        if (!p.getAppointment().getDoctor().getUser().getUserId().equals(doctor.getUserId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not authorized");
+        }
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("prescriptionId", p.getId());
+        map.put("notes", p.getNotes());
+        map.put("appointmentId", p.getAppointment().getId());
+        map.put("dateIssued", p.getDateIssued());
+        map.put("patientName", p.getAppointment().getPatient().getUser().getName());
+
+        return map;
+    }
+
+    // ---------------- New: All Prescriptions by Doctor ----------------
+    public List<PrescriptionDto> getAllPrescriptionsByDoctor() {
+        User doctor = getAuthenticatedDoctor();
+
+        List<Prescription> prescriptions = prescriptionRepository.findAll().stream()
+                .filter(p -> p.getAppointment().getDoctor().getUser().getUserId().equals(doctor.getUserId()))
+                .collect(Collectors.toList());
+
+        return prescriptions.stream().map(this::toDto).collect(Collectors.toList());
+    }
+}

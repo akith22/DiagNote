@@ -1,31 +1,31 @@
 package com.example.backend.dto;
 
+import jakarta.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
 
 public class PrescriptionDto {
+
     private Integer id;
-    private Integer appointmentId;  // 🔧 Changed from Long → Integer
+
+    @NotBlank(message = "Notes are required")
+    private String notes;
+
     private LocalDateTime dateIssued;
-    private String notesJson;  // contains all prescription details
+
+    private Integer appointmentId;
 
     public PrescriptionDto() {}
 
-    public PrescriptionDto(Integer id, Integer appointmentId, LocalDateTime dateIssued, String notesJson) {
-        this.id = id;
-        this.appointmentId = appointmentId;
-        this.dateIssued = dateIssued;
-        this.notesJson = notesJson;
-    }
-
+    // Getters and setters
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
 
-    public Integer getAppointmentId() { return appointmentId; }
-    public void setAppointmentId(Integer appointmentId) { this.appointmentId = appointmentId; }
+    public String getNotes() { return notes; }
+    public void setNotes(String notes) { this.notes = notes; }
 
     public LocalDateTime getDateIssued() { return dateIssued; }
     public void setDateIssued(LocalDateTime dateIssued) { this.dateIssued = dateIssued; }
 
-    public String getNotesJson() { return notesJson; }
-    public void setNotesJson(String notesJson) { this.notesJson = notesJson; }
+    public Integer getAppointmentId() { return appointmentId; }
+    public void setAppointmentId(Integer appointmentId) { this.appointmentId = appointmentId; }
 }
