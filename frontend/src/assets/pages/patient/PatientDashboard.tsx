@@ -21,8 +21,9 @@ import {
   FiCheck,
   FiHeart,
   FiLogOut,
-  FiMapPin
   FiTrash2,
+  FiMapPin,
+  FiFileText
 } from "react-icons/fi";
 
 const PatientDashboard: React.FC = () => {
@@ -324,6 +325,7 @@ const PatientDashboard: React.FC = () => {
             )}
 
             {activeTab === "appointments" && <Appointments patientEmail={user.email} />}
+      
           </div>
         </div>
       </div>
