@@ -1,78 +1,75 @@
 package com.example.backend.model;
 
 import jakarta.persistence.*;
-import org.hibernate.annotations.DynamicInsert;
-import org.hibernate.annotations.DynamicUpdate;
-
-import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "lab_requests")
-@DynamicInsert
-@DynamicUpdate
+@Table(name = "lab_request")
 public class LabRequest {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
-    // Doctor who requested the lab test
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "doctor_id", nullable = false)
-    private Doctor doctor;
-
-    // Patient who needs the lab test
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "patient_id", nullable = false)
-    private Patient patient;
-
-    // Lab technician who processes it (can be null until assigned)
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "labtech_id")
-    private LabTech labTech;
-
-    @Column(name = "test_name", nullable = false)
-    private String testName;
-
+    // enum('REQUESTED','COMPLETED')
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private LabRequestStatus status = LabRequestStatus.PENDING;
+    @Column(nullable = false, columnDefinition = "ENUM('REQUESTED','COMPLETED') DEFAULT 'REQUESTED'")
+    private Status status = Status.REQUESTED;
 
-    @Column(name = "requested_at", nullable = false)
-    private LocalDateTime requestedAt = LocalDateTime.now();
+    // test_type column in DB
+    @Column(name = "test_type", length = 45)
+    private String testType;
 
-    // Constructors
-    public LabRequest() {}
+    // Foreign key to appointments table
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "appointments_id", nullable = false)
+    private Appointment appointment;
 
-    public LabRequest(Doctor doctor, Patient patient, LabTech labTech,
-                      String testName, LabRequestStatus status, LocalDateTime requestedAt) {
-        this.doctor = doctor;
-        this.patient = patient;
-        this.labTech = labTech;
-        this.testName = testName;
-        this.status = status;
-        this.requestedAt = requestedAt;
+    // --- Enum for status ---
+    public enum Status {
+        REQUESTED,
+        COMPLETED
     }
 
-    // Getters / Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    // --- Constructors ---
+    public LabRequest() {
+    }
 
-    public Doctor getDoctor() { return doctor; }
-    public void setDoctor(Doctor doctor) { this.doctor = doctor; }
+    public LabRequest(Status status, String testType, Appointment appointment) {
+        this.status = status;
+        this.testType = testType;
+        this.appointment = appointment;
+    }
 
-    public Patient getPatient() { return patient; }
-    public void setPatient(Patient patient) { this.patient = patient; }
+    // --- Getters and Setters ---
+    public Integer getId() {
+        return id;
+    }
 
-    public LabTech getLabTech() { return labTech; }
-    public void setLabTech(LabTech labTech) { this.labTech = labTech; }
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
-    public String getTestName() { return testName; }
-    public void setTestName(String testName) { this.testName = testName; }
+    public Status getStatus() {
+        return status;
+    }
 
-    public LabRequestStatus getStatus() { return status; }
-    public void setStatus(LabRequestStatus status) { this.status = status; }
+    public void setStatus(Status status) {
+        this.status = status;
+    }
 
-    public LocalDateTime getRequestedAt() { return requestedAt; }
-    public void setRequestedAt(LocalDateTime requestedAt) { this.requestedAt = requestedAt; }
+    public String getTestType() {
+        return testType;
+    }
+
+    public void setTestType(String testType) {
+        this.testType = testType;
+    }
+
+    public Appointment getAppointment() {
+        return appointment;
+    }
+
+    public void setAppointment(Appointment appointment) {
+        this.appointment = appointment;
+    }
 }

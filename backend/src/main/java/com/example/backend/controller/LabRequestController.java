@@ -1,8 +1,7 @@
 package com.example.backend.controller;
 
 import com.example.backend.dto.LabRequestDto;
-import com.example.backend.dto.LabRequestResponse;
-import com.example.backend.model.LabRequestStatus;
+import com.example.backend.model.LabRequest;
 import com.example.backend.service.LabRequestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -13,51 +12,48 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/lab-requests")
-@PreAuthorize("hasRole('LABTECH')")
+@PreAuthorize("hasAnyRole('LABTECH')") // adjust roles as needed
 public class LabRequestController {
 
     @Autowired
     private LabRequestService labRequestService;
 
     /**
-     * Get all lab requests for authenticated lab tech
-     * Optional filter by status: PENDING, IN_PROGRESS, COMPLETED, CANCELLED
+     * 🔹 Create a new lab request (linked to an appointment)
+     */
+    @PostMapping
+    public ResponseEntity<LabRequestDto> createLabRequest(@RequestBody LabRequestDto dto) {
+        LabRequestDto created = labRequestService.createLabRequest(dto);
+        return ResponseEntity.ok(created);
+    }
+
+    /**
+     * 🔹 Get all lab requests
      */
     @GetMapping
-    public ResponseEntity<List<LabRequestResponse>> getLabRequests(
-            @RequestParam(name = "status", required = false) LabRequestStatus status) {
-
-        List<LabRequestResponse> requests;
-        if (status != null) {
-            // Filter by status
-            requests = labRequestService.getLabRequestsForLabTech()
-                    .stream()
-                    .filter(r -> r.getStatus().equalsIgnoreCase(status.name()))
-                    .toList();
-        } else {
-            // Get all
-            requests = labRequestService.getLabRequestsForLabTech();
-        }
-
+    public ResponseEntity<List<LabRequestDto>> getAllLabRequests() {
+        List<LabRequestDto> requests = labRequestService.getAllLabRequests();
         return ResponseEntity.ok(requests);
     }
 
     /**
-     * Update lab request status (e.g., mark as COMPLETED)
+     * 🔹 Get lab requests for a specific appointment
      */
-    @PutMapping("/{id}/status/{status}")
-    public ResponseEntity<LabRequestResponse> updateStatus(
-            @PathVariable Long id,
-            @PathVariable LabRequestStatus status) {
-
-        LabRequestResponse updated = labRequestService.updateLabRequestStatus(id, status);
-        return ResponseEntity.ok(updated);
+    @GetMapping("/appointment/{appointmentId}")
+    public ResponseEntity<List<LabRequestDto>> getLabRequestsByAppointment(@PathVariable Integer appointmentId) {
+        List<LabRequestDto> requests = labRequestService.getLabRequestsByAppointment(appointmentId);
+        return ResponseEntity.ok(requests);
     }
 
-    // You can uncomment this if you want delete functionality
-//    @DeleteMapping("/{id}")
-//    public ResponseEntity<Map<String, String>> deleteRequest(@PathVariable Long id) {
-//        labRequestService.deleteRequest(id);
-//        return ResponseEntity.ok(Map.of("message", "Lab request deleted"));
-//    }
+    /**
+     * 🔹 Update lab request status (REQUESTED → COMPLETED)
+     */
+    @PutMapping("/{id}/status/{status}")
+    public ResponseEntity<LabRequestDto> updateStatus(
+            @PathVariable Integer id,
+            @PathVariable LabRequest.Status status) {
+
+        LabRequestDto updated = labRequestService.updateLabRequestStatus(id, status);
+        return ResponseEntity.ok(updated);
+}
 }

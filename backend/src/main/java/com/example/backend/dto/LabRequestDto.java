@@ -1,50 +1,50 @@
 package com.example.backend.dto;
 
-import java.time.LocalDateTime;
-
 public class LabRequestDto {
 
-    private Long id;
-    private String patientName;
-    private String patientEmail;
-    private String doctorName;
-    private String testName;
-    private String status; // e.g., PENDING, COMPLETED
-    private LocalDateTime requestedAt;
+    private Integer id;
+    private String status;      // REQUESTED or COMPLETED
+    private String testType;    // From model
+    private Integer appointmentId; // Foreign key reference to Appointment
 
     public LabRequestDto() {}
 
-    public LabRequestDto(Long id, String patientName, String patientEmail,
-                         String doctorName, String testName,
-                         String status, LocalDateTime requestedAt) {
+    public LabRequestDto(Integer id, String status, String testType, Integer appointmentId) {
         this.id = id;
-        this.patientName = patientName;
-        this.patientEmail = patientEmail;
-        this.doctorName = doctorName;
-        this.testName = testName;
         this.status = status;
-        this.requestedAt = requestedAt;
+        this.testType = testType;
+        this.appointmentId = appointmentId;
     }
 
-    // Getters & Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    // --- Getters and Setters ---
+    public Integer getId() {
+        return id;
+    }
 
-    public String getPatientName() { return patientName; }
-    public void setPatientName(String patientName) { this.patientName = patientName; }
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
-    public String getPatientEmail() { return patientEmail; }
-    public void setPatientEmail(String patientEmail) { this.patientEmail = patientEmail; }
+    public String getStatus() {
+        return status;
+    }
 
-    public String getDoctorName() { return doctorName; }
-    public void setDoctorName(String doctorName) { this.doctorName = doctorName; }
+    public void setStatus(String status) {
+        this.status = status;
+    }
 
-    public String getTestName() { return testName; }
-    public void setTestName(String testName) { this.testName = testName; }
+    public String getTestType() {
+        return testType;
+    }
 
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+    public void setTestType(String testType) {
+        this.testType = testType;
+    }
 
-    public LocalDateTime getRequestedAt() { return requestedAt; }
-    public void setRequestedAt(LocalDateTime requestedAt) { this.requestedAt = requestedAt; }
+    public Integer getAppointmentId() {
+        return appointmentId;
+    }
+
+    public void setAppointmentId(Integer appointmentId) {
+        this.appointmentId = appointmentId;}
 }
