@@ -167,8 +167,7 @@ public class PrescriptionService {
         return prescriptions.stream().map(this::toDto).collect(Collectors.toList());
     }
 
-
-    // ---------------- New: Prescription + Patient Name ----------------
+    // ---------------- Updated: Prescription + Patient Details ----------------
     public Map<String, Object> getPrescriptionWithPatientName(Integer prescriptionId) {
         User doctor = getAuthenticatedDoctor();
 
@@ -179,19 +178,29 @@ public class PrescriptionService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not authorized");
         }
 
+        Appointment appointment = p.getAppointment();
+        var patient = appointment.getPatient();
+
         Map<String, Object> map = new HashMap<>();
         map.put("prescriptionId", p.getId());
         map.put("notes", p.getNotes());
-        map.put("appointmentId", p.getAppointment().getId());
+        map.put("appointmentId", appointment.getId());
         map.put("dateIssued", p.getDateIssued());
-        map.put("patientName", p.getAppointment().getPatient().getUser().getName());
+
+        map.put("patientName", patient.getUser().getName());
+        map.put("patientAddress", patient.getAddress());
+        map.put("patientGender", patient.getGender());
+        map.put("patientAge", patient.getAge());
 
         return map;
     }
 
-    // ---------------- New: All Prescriptions by Doctor ----------------
+    // ---------------- All Prescriptions by Doctor ----------------
     public List<PrescriptionDto> getAllPrescriptionsByDoctorId(String email) {
-        List<Prescription> prescriptions = prescriptionRepository.findPrescriptionsByAppointment_Doctor_User_Email(email).orElseThrow(() -> new RuntimeException("Doctor not found"));
+        List<Prescription> prescriptions = prescriptionRepository
+                .findPrescriptionsByAppointment_Doctor_User_Email(email)
+                .orElseThrow(() -> new RuntimeException("Doctor not found"));
+
         return prescriptions.stream().map(this::toDto).collect(Collectors.toList());
     }
 }
