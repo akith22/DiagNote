@@ -190,13 +190,8 @@ public class PrescriptionService {
     }
 
     // ---------------- New: All Prescriptions by Doctor ----------------
-    public List<PrescriptionDto> getAllPrescriptionsByDoctor() {
-        User doctor = getAuthenticatedDoctor();
-
-        List<Prescription> prescriptions = prescriptionRepository.findAll().stream()
-                .filter(p -> p.getAppointment().getDoctor().getUser().getUserId().equals(doctor.getUserId()))
-                .collect(Collectors.toList());
-
+    public List<PrescriptionDto> getAllPrescriptionsByDoctorId(String email) {
+        List<Prescription> prescriptions = prescriptionRepository.findPrescriptionsByAppointment_Doctor_User_Email(email).orElseThrow(() -> new RuntimeException("Doctor not found"));
         return prescriptions.stream().map(this::toDto).collect(Collectors.toList());
     }
 }

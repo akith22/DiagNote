@@ -22,7 +22,7 @@ public class PrescriptionController {
         this.prescriptionService = prescriptionService;
     }
 
-    @PostMapping("/prescriptions/{appointmentId}/prescriptions")
+    @PostMapping("/p/{appointmentId}/prescriptions")
     public ResponseEntity<PrescriptionDto> createPrescription(
             @PathVariable Integer appointmentId,
             @Valid @RequestBody PrescriptionDto dto) {
@@ -66,9 +66,9 @@ public class PrescriptionController {
     }
 
     // ---------------- New GET: All Prescriptions by Doctor ----------------
-    @GetMapping("/prescriptions")
-    public ResponseEntity<List<PrescriptionDto>> getAllPrescriptionsByDoctor() {
-        List<PrescriptionDto> dtos = prescriptionService.getAllPrescriptionsByDoctor();
+    @GetMapping("/prescriptions/doctor")
+    public ResponseEntity<List<PrescriptionDto>> getAllPrescriptionsByDoctor(@RequestParam String email) {
+        List<PrescriptionDto> dtos = prescriptionService.getAllPrescriptionsByDoctorId(email);
         return ResponseEntity.ok(dtos);
     }
 }

@@ -3,10 +3,9 @@ import type { DoctorProfile, DoctorDetails, User } from "../../../types";
 import { doctorService } from "../../../services/DoctorService";
 import DoctorProfileForm from "./DoctorProfileForm";
 import DoctorProfileView from "./DoctorProfileView";
-import AppointmentManager from "./AppointmentManager"; // ✅ Import AppointmentManager
+import AppointmentManager from "./AppointmentManager";
+import PrescriptionManager from "./PrescriptionManager";
 import LoadingSpinner from "../../../components/common/LoadingSpinner";
-
-// Icons
 import {
   FiCalendar,
   FiUsers,
@@ -30,6 +29,8 @@ const DoctorDashboard: React.FC = () => {
   const [editing, setEditing] = useState(false);
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState("profile");
+
+  const [prescriptionFormData, setPrescriptionFormData] = useState<any>(null);
 
   useEffect(() => {
     fetchProfile();
@@ -101,7 +102,6 @@ const DoctorDashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-teal-50 p-4 md:p-8">
-      {/* Header */}
       <header className="bg-white rounded-2xl shadow-sm p-6 mb-8 flex flex-col md:flex-row justify-between items-center border border-gray-100">
         <div className="flex items-center mb-4 md:mb-0">
           <div className="bg-blue-100 p-3 rounded-xl mr-4">
@@ -136,9 +136,7 @@ const DoctorDashboard: React.FC = () => {
         </div>
       </header>
 
-      {/* Main Content */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left Column - User Profile Card */}
         <div className="lg:col-span-1">
           <div className="bg-white rounded-2xl shadow-sm p-6 sticky top-8 border border-gray-100">
             <div className="flex flex-col items-center text-center mb-6">
@@ -146,10 +144,7 @@ const DoctorDashboard: React.FC = () => {
                 <div className="w-28 h-28 bg-gradient-to-br from-blue-100 to-teal-100 rounded-full flex items-center justify-center">
                   <div className="w-24 h-24 bg-gradient-to-br from-blue-200 to-teal-200 rounded-full flex items-center justify-center shadow-inner">
                     <span className="text-3xl font-bold text-blue-700">
-                      {user.name
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")}
+                      {user.name.split(" ").map((n) => n[0]).join("")}
                     </span>
                   </div>
                 </div>
@@ -200,15 +195,13 @@ const DoctorDashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Right Column - Content Area */}
         <div className="lg:col-span-2">
-          {/* Navigation Tabs */}
           <div className="bg-white rounded-2xl shadow-sm mb-8 overflow-hidden border border-gray-100">
             <div className="flex overflow-x-auto">
               {[
                 { id: "profile", icon: FiUserCheck, label: "Profile" },
-                { id: "schedule", icon: FiCalendar, label: "Schedule" },
-                { id: "patients", icon: FiUsers, label: "Patients" },
+                { id: "schedule", icon: FiCalendar, label: "Appointments" },
+                { id: "prescriptions", icon: FiUsers, label: "Prescriptions" },
                 { id: "reports", icon: FiBarChart2, label: "Reports" },
                 { id: "settings", icon: FiSettings, label: "Settings" },
               ].map((tab) => (
@@ -228,7 +221,6 @@ const DoctorDashboard: React.FC = () => {
             </div>
           </div>
 
-          {/* Error Message */}
           {error && (
             <div className="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-lg shadow-sm">
               <div className="flex items-center">
@@ -242,7 +234,6 @@ const DoctorDashboard: React.FC = () => {
             </div>
           )}
 
-          {/* Content Switch */}
           {activeTab === "profile" && (
             <div className="bg-white rounded-2xl shadow-sm p-6 md:p-8 border border-gray-100">
               <div className="flex justify-between items-center mb-6">
@@ -291,7 +282,39 @@ const DoctorDashboard: React.FC = () => {
             </div>
           )}
 
-          {activeTab === "schedule" && <AppointmentManager />}
+          {activeTab === "schedule" && (
+            <AppointmentManager
+              onPrescribe={(appt) => {
+                setPrescriptionFormData({
+                  open: true,
+                  appointmentId: appt.id,
+                  patientName: appt.patientName,
+                  dateIssued: new Date().toISOString().slice(0, 10),
+                });
+                setActiveTab("prescriptions");
+              }}
+            />
+          )}
+
+          {activeTab === "prescriptions" && (
+            <PrescriptionManager
+              profile={profile}
+              formDataFromAppointment={prescriptionFormData}
+              onPrescriptionCreated={() => setPrescriptionFormData(null)}
+            />
+          )}
+
+          {activeTab === "reports" && (
+            <div className="bg-white p-8 rounded-2xl text-center text-gray-600 shadow-sm">
+              <p>Reports section coming soon...</p>
+            </div>
+          )}
+
+          {activeTab === "settings" && (
+            <div className="bg-white p-8 rounded-2xl text-center text-gray-600 shadow-sm">
+              <p>Settings section coming soon...</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -6,7 +6,7 @@ export interface AppointmentDto {
   patientName: string;
   patientId: number; // ✅ added patientId
   date: string;
-  status: "PENDING" | "ACCEPTED" | "DECLINED" | "CANCELLED"; // ✅ added CANCELLED
+  status: "PENDING" | "ACCEPTED" | "DECLINED" | "CANCELLED" | "COMPLETED";
 }
 
 export const doctorAppointmentService = {

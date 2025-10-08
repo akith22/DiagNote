@@ -12,11 +12,16 @@ import LoadingSpinner from "../../../components/common/LoadingSpinner";
 import { doctorAppointmentService } from "../../../services/DoctorAppointmenrService";
 import type { AppointmentDto } from "../../../services/DoctorAppointmenrService";
 
+interface AppointmentManagerProps {
+  onPrescribe?: (appointment: AppointmentDto) => void;
+}
+
 const TABS = [
   { id: "ALL", label: "All" },
   { id: "PENDING", label: "Pending" },
   { id: "ACCEPTED", label: "Accepted" },
   { id: "DECLINED", label: "Declined" },
+  { id: "COMPLETED", label: "Completed" }, // NEW tab
 ];
 
 const normalizeStatus = (status?: string) => {
@@ -31,12 +36,16 @@ const normalizeStatus = (status?: string) => {
     case "CANCELED":
     case "DECLINED":
       return "DECLINED";
+    case "COMPLETED":
+      return "COMPLETED";
     default:
       return s;
   }
 };
 
-const AppointmentManager: React.FC = () => {
+const AppointmentManager: React.FC<AppointmentManagerProps> = ({
+  onPrescribe,
+}) => {
   const [appointments, setAppointments] = useState<AppointmentDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>("");
@@ -143,7 +152,6 @@ const AppointmentManager: React.FC = () => {
     }
   };
 
-  // FIXED: cancel now uses decline endpoint (to avoid 403)
   const handleCancel = async (id: number) => {
     try {
       setError("");
@@ -168,6 +176,19 @@ const AppointmentManager: React.FC = () => {
     }
   };
 
+  const handlePrescribeClick = (appointment: AppointmentDto) => {
+    if (onPrescribe) onPrescribe(appointment);
+
+    // Mark appointment as COMPLETED locally
+    setAppointments((prev) =>
+      prev.map((a) =>
+        a.id === appointment.id ? { ...a, status: "COMPLETED" } : a
+      )
+    );
+
+    setActiveTab("COMPLETED"); // switch tab automatically
+  };
+
   const displayedAppointments = useMemo(() => {
     const byTab =
       activeTab === "ALL"
@@ -184,6 +205,7 @@ const AppointmentManager: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-teal-50 p-4 md:p-8">
+      {/* Header */}
       <header className="bg-white rounded-2xl shadow-sm p-6 mb-6 border border-gray-100 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">
@@ -248,7 +270,7 @@ const AppointmentManager: React.FC = () => {
         </div>
       )}
 
-      {/* Appointment list */}
+      {/* Appointment List */}
       <div className="grid gap-4">
         {displayedAppointments.length === 0 ? (
           <div className="bg-white p-8 rounded-2xl shadow text-center text-gray-500">
@@ -301,7 +323,11 @@ const AppointmentManager: React.FC = () => {
                           ? "bg-yellow-50 text-yellow-700 border border-yellow-200"
                           : appt.status === "ACCEPTED"
                           ? "bg-green-50 text-green-700 border border-green-200"
-                          : "bg-red-50 text-red-700 border border-red-200"
+                          : appt.status === "DECLINED"
+                          ? "bg-red-50 text-red-700 border border-red-200"
+                          : appt.status === "COMPLETED"
+                          ? "bg-gray-50 text-gray-700 border border-gray-200"
+                          : ""
                       }`}
                     >
                       {appt.status}
@@ -340,32 +366,27 @@ const AppointmentManager: React.FC = () => {
                       </button>
                     </>
                   ) : appt.status === "ACCEPTED" ? (
-                    <button
-                      onClick={() => handleCancel(appt.id)}
-                      disabled={!!actionLoading[appt.id]}
-                      className={`flex items-center py-2 px-4 rounded-xl shadow-sm transition-all duration-200 ${
-                        actionLoading[appt.id]
-                          ? "bg-yellow-300 text-white cursor-not-allowed"
-                          : "bg-yellow-500 text-white hover:bg-yellow-600"
-                      }`}
-                    >
-                      <FiX className="mr-2" />
-                      {actionLoading[appt.id] ? "Cancelling..." : "Cancel"}
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => handleAccept(appt.id)}
-                      disabled={!!actionLoading[appt.id]}
-                      className={`flex items-center py-2 px-4 rounded-xl shadow-sm transition-all duration-200 ${
-                        actionLoading[appt.id]
-                          ? "bg-green-300 text-white cursor-not-allowed"
-                          : "bg-green-600 text-white hover:bg-green-700"
-                      }`}
-                    >
-                      <FiCheck className="mr-2" />
-                      {actionLoading[appt.id] ? "Accepting..." : "Accept Again"}
-                    </button>
-                  )}
+                    <>
+                      <button
+                        onClick={() => handleCancel(appt.id)}
+                        disabled={!!actionLoading[appt.id]}
+                        className={`flex items-center py-2 px-4 rounded-xl shadow-sm transition-all duration-200 ${
+                          actionLoading[appt.id]
+                            ? "bg-yellow-300 text-white cursor-not-allowed"
+                            : "bg-yellow-500 text-white hover:bg-yellow-600"
+                        }`}
+                      >
+                        <FiX className="mr-2" />
+                        {actionLoading[appt.id] ? "Cancelling..." : "Cancel"}
+                      </button>
+                      <button
+                        onClick={() => handlePrescribeClick(appt)}
+                        className="flex items-center py-2 px-4 rounded-xl shadow-sm transition-all duration-200 bg-blue-600 text-white hover:bg-blue-700"
+                      >
+                        Prescribe
+                      </button>
+                    </>
+                  ) : null}
                 </div>
               </div>
             </div>
