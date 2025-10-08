@@ -16,7 +16,7 @@ export const prescriptionService = {
     dto: PrescriptionDto
   ): Promise<PrescriptionDto> {
     const res = await API.post(
-      `${API_BASE}/p/${appointmentId}/prescriptions`, // fixed URL
+      `${API_BASE}/p/${appointmentId}/prescriptions`,
       dto
     );
     return res.data;
@@ -51,14 +51,46 @@ export const prescriptionService = {
     return res.data;
   },
 
+  /**
+   * Fetch detailed info for a prescription (for editing/viewing)
+   */
   async getPrescriptionDetails(
-    prescriptionId: number
-  ): Promise<Record<string, any>> {
+prescriptionId: number  ): Promise<{
+    prescriptionId: number;
+    appointmentId: number;
+    dateIssued: string;
+    notes: string;
+    patientName: string;
+    patientGender: string;
+    patientAge: number;
+    patientAddress: string;
+  }> {
     const res = await API.get(
       `${API_BASE}/prescriptions/${prescriptionId}/details`
     );
     return res.data;
   },
+
+  async getPatientDetailsByAppointment(
+  appointmentId: number
+): Promise<{
+  patientId: number;
+  name: string;
+  email: string;
+  gender: string;
+  age: number;
+  address: string;
+}> {
+  const res = await API.get(
+    `${API_BASE}/appointments/${appointmentId}/patient`
+  );
+  return res.data;
+},
+
+  /**
+   * Fetch patient info by appointment (for new prescriptions)
+   */
+  
 
   async getAllPrescriptionsByDoctor(
     doctorEmail: string

@@ -203,4 +203,32 @@ public class PrescriptionService {
 
         return prescriptions.stream().map(this::toDto).collect(Collectors.toList());
     }
+
+    // ---------------- Get Patient Details by Appointment ----------------
+    public Map<String, Object> getPatientDetailsByAppointmentId(Integer appointmentId) {
+        User doctor = getAuthenticatedDoctor();
+
+        // Fetch the appointment
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Appointment not found"));
+
+        // Ensure doctor is authorized
+        if (!appointment.getDoctor().getUser().getUserId().equals(doctor.getUserId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not authorized");
+        }
+
+        // Get patient info
+        var patient = appointment.getPatient();
+
+        Map<String, Object> patientDetails = new HashMap<>();
+        patientDetails.put("patientId", patient.getId());
+        patientDetails.put("name", patient.getUser().getName());
+        patientDetails.put("email", patient.getUser().getEmail());
+        patientDetails.put("gender", patient.getGender());
+        patientDetails.put("age", patient.getAge());
+        patientDetails.put("address", patient.getAddress());
+
+        return patientDetails;
+    }
+
 }

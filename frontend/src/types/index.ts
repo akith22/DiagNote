@@ -19,6 +19,7 @@ export interface DoctorDetails {
 }
 
 export interface DoctorProfile {
+  medicalLicense: string;
   name: string;
   email: string;
   specialization: string | null;
