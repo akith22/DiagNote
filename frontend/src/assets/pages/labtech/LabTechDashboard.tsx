@@ -558,10 +558,7 @@ const LabTechDashboard: React.FC = () => {
                 </div>
               )}
 
-              <div className="flex items-center text-gray-700">
-                <FiClock className="text-blue-500 mr-3" />
-                <span>Last login: Today, 09:42 AM</span>
-              </div>
+              
             </div>
           </div>
         </div>

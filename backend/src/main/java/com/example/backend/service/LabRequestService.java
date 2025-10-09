@@ -3,6 +3,8 @@ package com.example.backend.service;
 import com.example.backend.dto.LabRequestDto;
 import com.example.backend.model.Appointment;
 import com.example.backend.model.LabRequest;
+import com.example.backend.model.Doctor;
+import com.example.backend.model.Patient;
 import com.example.backend.repository.AppointmentRepository;
 import com.example.backend.repository.LabRequestRepository;
 import jakarta.transaction.Transactional;
@@ -63,13 +65,34 @@ public class LabRequestService {
         return mapToDto(updated);
     }
 
-    // 🔹 Helper: Map entity → DTO
+    // 🔹 Helper: Map entity → DTO with doctor and patient names
     private LabRequestDto mapToDto(LabRequest request) {
+        Appointment appointment = request.getAppointment();
+
+        String doctorName = "";
+        String patientName = "";
+
+        if (appointment != null) {
+            Doctor doctor = appointment.getDoctor();
+            Patient patient = appointment.getPatient();
+
+            if (doctor != null && doctor.getUser() != null) {
+                doctorName = doctor.getUser().getName(); // assuming User has getFullName()
+            }
+
+            if (patient != null && patient.getUser() != null) {
+                patientName = patient.getUser().getName(); // assuming User has getFullName()
+            }
+        }
+
         LabRequestDto dto = new LabRequestDto();
         dto.setId(request.getId());
-        dto.setStatus(request.getStatus().name());
         dto.setTestType(request.getTestType());
-        dto.setAppointmentId(request.getAppointment().getId());
+        dto.setStatus(request.getStatus().name());
+        dto.setAppointmentId(appointment != null ? appointment.getId() : null);
+        dto.setDoctorName(doctorName);
+        dto.setPatientName(patientName);
+
         return dto;
     }
 }

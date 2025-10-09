@@ -1,36 +1,30 @@
 package com.example.backend.dto;
 
 public class LabRequestDto {
-
     private Integer id;
-    private String status;      // REQUESTED or COMPLETED
-    private String testType;    // From model
-    private Integer appointmentId; // Foreign key reference to Appointment
+    private String testType;
+    private String status;
+    private Integer appointmentId;
+    private String doctorName;
+    private String patientName;
 
     public LabRequestDto() {}
 
-    public LabRequestDto(Integer id, String status, String testType, Integer appointmentId) {
+    public LabRequestDto(Integer id, String testType, String status, Integer appointmentId, String doctorName, String patientName) {
         this.id = id;
-        this.status = status;
         this.testType = testType;
+        this.status = status;
         this.appointmentId = appointmentId;
+        this.doctorName = doctorName;
+        this.patientName = patientName;
     }
 
-    // --- Getters and Setters ---
     public Integer getId() {
         return id;
     }
 
     public void setId(Integer id) {
         this.id = id;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
     }
 
     public String getTestType() {
@@ -41,10 +35,35 @@ public class LabRequestDto {
         this.testType = testType;
     }
 
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
     public Integer getAppointmentId() {
         return appointmentId;
     }
 
     public void setAppointmentId(Integer appointmentId) {
-        this.appointmentId = appointmentId;}
+        this.appointmentId = appointmentId;
+    }
+
+    public String getDoctorName() {
+        return doctorName;
+    }
+
+    public void setDoctorName(String doctorName) {
+        this.doctorName = doctorName;
+    }
+
+    public String getPatientName() {
+        return patientName;
+    }
+
+    public void setPatientName(String patientName) {
+        this.patientName = patientName;
+    }
 }
