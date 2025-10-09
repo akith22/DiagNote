@@ -92,12 +92,8 @@ prescriptionId: number  ): Promise<{
    */
   
 
-  async getAllPrescriptionsByDoctor(
-    doctorEmail: string
-  ): Promise<PrescriptionDto[]> {
-    const res = await API.get(`${API_BASE}/prescriptions/doctor`, {
-      params: { email: doctorEmail },
-    });
+  async getAllPrescriptionsByDoctor(): Promise<PrescriptionDto[]> {
+    const res = await API.get(`${API_BASE}/prescriptions/doctor`);
     return res.data;
   },
 };

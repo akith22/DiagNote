@@ -11,6 +11,7 @@ import {
 import LoadingSpinner from "../../../components/common/LoadingSpinner";
 import { doctorAppointmentService } from "../../../services/DoctorAppointmenrService";
 import type { AppointmentDto } from "../../../services/DoctorAppointmenrService";
+import { useNavigate } from "react-router-dom";
 
 interface AppointmentManagerProps {
   onPrescribe?: (appointment: AppointmentDto) => void;
@@ -54,6 +55,8 @@ const AppointmentManager: React.FC<AppointmentManagerProps> = ({
     {}
   );
   const [query, setQuery] = useState("");
+  const navigate = useNavigate();
+
 
   const fetchAllAppointments = async () => {
     try {
@@ -186,7 +189,8 @@ const AppointmentManager: React.FC<AppointmentManagerProps> = ({
       )
     );
 
-    setActiveTab("COMPLETED"); // switch tab automatically
+    navigate(`/doctor/create-prescription/${appointment.id}`);
+    // setActiveTab("COMPLETED"); // switch tab automatically
   };
 
   const displayedAppointments = useMemo(() => {

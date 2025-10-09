@@ -67,8 +67,8 @@ public class PrescriptionController {
 
     // ---------------- New GET: All Prescriptions by Doctor ----------------
     @GetMapping("/prescriptions/doctor")
-    public ResponseEntity<List<PrescriptionDto>> getAllPrescriptionsByDoctor(@RequestParam String email) {
-        List<PrescriptionDto> dtos = prescriptionService.getAllPrescriptionsByDoctorId(email);
+    public ResponseEntity<List<PrescriptionDto>> getAllPrescriptionsByDoctor() {
+        List<PrescriptionDto> dtos = prescriptionService.getAllPrescriptionsByDoctorId();
         return ResponseEntity.ok(dtos);
     }
     // ---------------- New GET: Patient Details by Appointment ----------------
@@ -76,7 +76,7 @@ public class PrescriptionController {
     public ResponseEntity<Map<String, Object>> getPatientDetailsByAppointment(
             @PathVariable Integer appointmentId) {
 
-        Map<String, Object> patientDetails = prescriptionService.getPatientDetailsByAppointmentId(appointmentId);
+        Map<String, Object> patientDetails = prescriptionService.getPatientDetailsByAppointmentId(appointmentId );
         return ResponseEntity.ok(patientDetails);
     }
 
