@@ -36,7 +36,6 @@ interface PrescriptionDetails {
 const Prescription: React.FC<EditCreateProps> = ({ show }) => {
   const { id } = useParams();
   const appointmentId = Number(id);
-
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
@@ -72,7 +71,6 @@ const Prescription: React.FC<EditCreateProps> = ({ show }) => {
         setLoading(false);
       }
     };
-
     fetchProfile();
   }, []);
 
@@ -115,7 +113,6 @@ const Prescription: React.FC<EditCreateProps> = ({ show }) => {
 
         setCurrentPrescription(details);
 
-        // ✅ Fill form with existing data for editing
         setFormData({
           id: details.prescriptionId,
           appointmentId: details.appointmentId,
@@ -126,7 +123,6 @@ const Prescription: React.FC<EditCreateProps> = ({ show }) => {
           patientName: details.patientName || "",
         });
 
-        // ✅ Fill patient info as well
         setPatientInfo({
           name: details.patientName,
           address: details.patientAddress,
@@ -181,228 +177,224 @@ const Prescription: React.FC<EditCreateProps> = ({ show }) => {
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-600 rounded-lg">
-              <FiFileText className="text-xl text-white" />
-            </div>
-            <div>
-              <h3 className="text-xl font-bold text-gray-900">
-                {formData.id
-                  ? "Edit Prescription"
-                  : "Create New Prescription"}
-              </h3>
-              <p className="text-gray-600 text-sm">
-                {formData.id
-                  ? "Update existing prescription details"
-                  : "Fill in the prescription details below"}
-              </p>
-            </div>
+    <div className="flex flex-col w-full min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-blue-600 rounded-lg">
+            <FiFileText className="text-xl text-white" />
+          </div>
+          <div>
+            <h3 className="text-xl font-bold text-gray-900">
+              {formData.id ? "Edit Prescription" : "Create New Prescription"}
+            </h3>
+            <p className="text-gray-600 text-sm">
+              {formData.id
+                ? "Update existing prescription details"
+                : "Fill in the prescription details below"}
+            </p>
           </div>
         </div>
+      </div>
 
-        {/* Form Content */}
-        <div className="flex-1 overflow-y-auto p-6">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Patient Info */}
-              <div className="lg:col-span-1">
-                <div className="bg-gray-50 rounded-xl p-6 border border-gray-200 h-full">
-                  <div className="flex items-center gap-2 mb-4">
-                    <FiUser className="text-blue-600" />
-                    <h4 className="font-semibold text-gray-900">
-                      Patient Information
-                    </h4>
+      {/* Main Form Section */}
+      <div className="flex-1 p-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Patient Info */}
+            <div className="lg:col-span-1">
+              <div className="bg-gray-50 rounded-xl p-6 border border-gray-200 h-full">
+                <div className="flex items-center gap-2 mb-4">
+                  <FiUser className="text-blue-600" />
+                  <h4 className="font-semibold text-gray-900">
+                    Patient Information
+                  </h4>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-200">
+                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                      <FiUser className="text-blue-600 text-sm" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Patient Name</p>
+                      <p className="font-medium text-gray-900">
+                        {patientInfo.name ||
+                          formData.patientName ||
+                          currentPrescription?.patientName ||
+                          "Not specified"}
+                      </p>
+                    </div>
                   </div>
 
-                  <div className="space-y-4">
+                  <div className="flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-200">
+                    <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                      <FiMapPin className="text-green-600 text-sm" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Address</p>
+                      <p className="font-medium text-gray-900">
+                        {patientInfo.address ||
+                          currentPrescription?.patientAddress ||
+                          "Not specified"}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
                     <div className="flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-200">
+                      <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                        <FiUser className="text-purple-600 text-sm" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">Gender</p>
+                        <p className="font-medium text-gray-900">
+                          {patientInfo.gender ||
+                            currentPrescription?.patientGender ||
+                            "Not specified"}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-200">
+                      <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
+                        <FiInfo className="text-orange-600 text-sm" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">Age</p>
+                        <p className="font-medium text-gray-900">
+                          {patientInfo.age
+                            ? `${patientInfo.age} years`
+                            : currentPrescription?.patientAge
+                            ? `${currentPrescription.patientAge} years`
+                            : "Not specified"}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {formData.appointmentId && (
+                    <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
                       <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                        <FiUser className="text-blue-600 text-sm" />
+                        <FiCalendar className="text-blue-600 text-sm" />
                       </div>
                       <div>
-                        <p className="text-xs text-gray-500">Patient Name</p>
-                        <p className="font-medium text-gray-900">
-                          {patientInfo.name ||
-                            formData.patientName ||
-                            currentPrescription?.patientName ||
-                            "Not specified"}
+                        <p className="text-xs text-blue-600">Appointment ID</p>
+                        <p className="font-medium text-blue-700">
+                          #{formData.appointmentId ||
+                            currentPrescription?.appointmentId}
                         </p>
                       </div>
                     </div>
-
-                    <div className="flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-200">
-                      <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                        <FiMapPin className="text-green-600 text-sm" />
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-500">Address</p>
-                        <p className="font-medium text-gray-900">
-                          {patientInfo.address ||
-                            currentPrescription?.patientAddress ||
-                            "Not specified"}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-200">
-                        <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                          <FiUser className="text-purple-600 text-sm" />
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-500">Gender</p>
-                          <p className="font-medium text-gray-900">
-                            {patientInfo.gender ||
-                              currentPrescription?.patientGender ||
-                              "Not specified"}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-200">
-                        <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
-                          <FiInfo className="text-orange-600 text-sm" />
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-500">Age</p>
-                          <p className="font-medium text-gray-900">
-                            {patientInfo.age
-                              ? `${patientInfo.age} years`
-                              : currentPrescription?.patientAge
-                              ? `${currentPrescription.patientAge} years`
-                              : "Not specified"}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {formData.appointmentId && (
-                      <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                          <FiCalendar className="text-blue-600 text-sm" />
-                        </div>
-                        <div>
-                          <p className="text-xs text-blue-600">Appointment ID</p>
-                          <p className="font-medium text-blue-700">
-                            #{formData.appointmentId ||
-                              currentPrescription?.appointmentId}
-                          </p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
+                  )}
                 </div>
               </div>
+            </div>
 
-              {/* Prescription Details */}
-              <div className="lg:col-span-2">
-                <div className="bg-white rounded-xl p-6 border border-gray-200 h-full">
-                  <div className="flex items-center gap-2 mb-6">
-                    <FiEdit3 className="text-blue-600" />
-                    <h4 className="font-semibold text-gray-900">
-                      Prescription Details
-                    </h4>
-                  </div>
+            {/* Prescription Details */}
+            <div className="lg:col-span-2">
+              <div className="bg-white rounded-xl p-6 border border-gray-200 h-full">
+                <div className="flex items-center gap-2 mb-6">
+                  <FiEdit3 className="text-blue-600" />
+                  <h4 className="font-semibold text-gray-900">
+                    Prescription Details
+                  </h4>
+                </div>
 
-                  <div className="space-y-6">
-                    {/* Date Issued */}
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Date Issued
-                      </label>
-                      <div className="relative">
-                        <input
-                          type="date"
-                          value={formData.dateIssued}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              dateIssued: e.target.value,
-                            })
-                          }
-                          required
-                          className="w-full border border-gray-300 rounded-xl p-4 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50"
-                        />
-                        <FiCalendar className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                      </div>
-                    </div>
-
-                    {/* Notes */}
-                    <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <label className="block text-sm font-semibold text-gray-700">
-                          Prescription Notes & Instructions
-                        </label>
-                        <span className="text-xs text-gray-500">
-                          {formData.notes.length}/2000 characters
-                        </span>
-                      </div>
-                      <textarea
-                        value={formData.notes}
+                <div className="space-y-6">
+                  {/* Date Issued */}
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Date Issued
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="date"
+                        value={formData.dateIssued}
                         onChange={(e) =>
-                          setFormData({ ...formData, notes: e.target.value })
+                          setFormData({
+                            ...formData,
+                            dateIssued: e.target.value,
+                          })
                         }
                         required
-                        className="w-full border border-gray-300 rounded-xl p-4 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50 resize-none"
-                        rows={12}
-                        placeholder="Enter detailed prescription notes, medications, dosage instructions, frequency, duration, special instructions, follow-up advice..."
-                        maxLength={2000}
+                        className="w-full border border-gray-300 rounded-xl p-4 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50"
                       />
-                      <div className="mt-2 text-xs text-gray-500">
-                        Include: Medications, Dosage, Frequency, Duration, Special
-                        Instructions, Follow-up
-                      </div>
+                      <FiCalendar className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
                     </div>
+                  </div>
 
-                    {/* Doctor Signature */}
-                    <div className="border-t pt-4 mt-4">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm font-semibold text-gray-700">
-                            Doctor's Signature
-                          </p>
-                          <p className="text-sm text-gray-500">
-                            Dr. {profile?.name}
-                          </p>
-                        </div>
+                  {/* Notes */}
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="block text-sm font-semibold text-gray-700">
+                        Prescription Notes & Instructions
+                      </label>
+                      <span className="text-xs text-gray-500">
+                        {formData.notes.length}/2000 characters
+                      </span>
+                    </div>
+                    <textarea
+                      value={formData.notes}
+                      onChange={(e) =>
+                        setFormData({ ...formData, notes: e.target.value })
+                      }
+                      required
+                      className="w-full border border-gray-300 rounded-xl p-4 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50 resize-none"
+                      rows={12}
+                      placeholder="Enter detailed prescription notes, medications, dosage instructions, frequency, duration, special instructions, follow-up advice..."
+                      maxLength={2000}
+                    />
+                    <div className="mt-2 text-xs text-gray-500">
+                      Include: Medications, Dosage, Frequency, Duration, Special
+                      Instructions, Follow-up
+                    </div>
+                  </div>
+
+                  {/* Doctor Signature */}
+                  <div className="border-t pt-4 mt-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-semibold text-gray-700">
+                          Doctor's Signature
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          Dr. {profile?.name}
+                        </p>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-          </form>
-        </div>
+          </div>
+        </form>
+      </div>
 
-        {/* Footer */}
-        <div className="flex justify-between items-center p-6 border-t border-gray-200 bg-gray-50">
-          <div className="text-sm text-gray-500">
-            {formData.id
-              ? "Editing existing prescription"
-              : "Creating new prescription"}
-          </div>
-          <div className="flex gap-3">
-            <button
-              type="button"
-              onClick={() => navigate("/doctor/dashboard")}
-              className="flex items-center gap-2 px-6 py-3 rounded-xl border border-gray-300 hover:bg-gray-100 text-gray-700 font-medium transition-all duration-200"
-            >
-              <FiX /> Cancel
-            </button>
-            <button
-              type="submit"
-              onClick={handleSubmit}
-              disabled={loading}
-              className="flex items-center gap-2 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-8 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? <LoadingSpinner /> : <FiCheck className="text-lg" />}
-              {formData.id ? "Update Prescription" : "Create Prescription"}
-            </button>
-          </div>
+      {/* Footer */}
+      <div className="flex justify-between items-center p-6 border-t border-gray-200 bg-gray-50">
+        <div className="text-sm text-gray-500">
+          {formData.id
+            ? "Editing existing prescription"
+            : "Creating new prescription"}
+        </div>
+        <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={() => navigate("/doctor/dashboard")}
+            className="flex items-center gap-2 px-6 py-3 rounded-xl border border-gray-300 hover:bg-gray-100 text-gray-700 font-medium transition-all duration-200"
+          >
+            <FiX /> Cancel
+          </button>
+          <button
+            type="submit"
+            onClick={handleSubmit}
+            disabled={loading}
+            className="flex items-center gap-2 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-8 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {loading ? <LoadingSpinner /> : <FiCheck className="text-lg" />}
+            {formData.id ? "Update Prescription" : "Create Prescription"}
+          </button>
         </div>
       </div>
     </div>
