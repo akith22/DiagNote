@@ -20,8 +20,10 @@ import {
   FiAward,
   FiLogOut,
   FiHeart,
+  FiActivity,
 } from "react-icons/fi";
 import { logout } from "../../../api/auth";
+import { LabRequestsTable } from "./DoctorLabRequests"; // Import the lab requests table
 
 const DoctorDashboard: React.FC = () => {
   const [profile, setProfile] = useState<DoctorProfile | null>(null);
@@ -31,6 +33,7 @@ const DoctorDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState("profile");
 
   const [prescriptionFormData, setPrescriptionFormData] = useState<any>(null);
+  const [refreshLabRequests, setRefreshLabRequests] = useState(0); // For refreshing lab requests table
 
   useEffect(() => {
     fetchProfile();
@@ -305,14 +308,42 @@ const DoctorDashboard: React.FC = () => {
           )}
 
           {activeTab === "reports" && (
-            <div className="bg-white p-8 rounded-2xl text-center text-gray-600 shadow-sm">
-              <p>Reports section coming soon...</p>
+            <div className="space-y-6">
+              {/* Lab Requests Section */}
+              <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-3 bg-purple-100 rounded-xl">
+                    <FiActivity className="text-purple-600 text-xl" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-gray-800">Lab Requests</h2>
+                    <p className="text-gray-600">View and manage all your lab test requests</p>
+                  </div>
+                </div>
+                
+                <LabRequestsTable 
+                  refreshTrigger={refreshLabRequests}
+                />
+              </div>
+
+              {/* Additional Reports can be added here */}
+              <div className="bg-white rounded-2xl shadow-sm p-8 text-center border border-gray-100">
+                <div className="flex flex-col items-center justify-center text-gray-500">
+                  <FiBarChart2 className="text-4xl mb-4 opacity-50" />
+                  <h3 className="text-lg font-medium mb-2">Additional Reports</h3>
+                  <p className="text-sm">More reporting features coming soon...</p>
+                </div>
+              </div>
             </div>
           )}
 
           {activeTab === "settings" && (
-            <div className="bg-white p-8 rounded-2xl text-center text-gray-600 shadow-sm">
-              <p>Settings section coming soon...</p>
+            <div className="bg-white p-8 rounded-2xl text-center text-gray-600 shadow-sm border border-gray-100">
+              <div className="flex flex-col items-center justify-center">
+                <FiSettings className="text-4xl mb-4 opacity-50" />
+                <h3 className="text-lg font-medium mb-2">Settings</h3>
+                <p className="text-sm">Settings section coming soon...</p>
+              </div>
             </div>
           )}
         </div>

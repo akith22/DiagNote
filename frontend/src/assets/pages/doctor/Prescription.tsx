@@ -7,6 +7,7 @@ import {
   FiMapPin,
   FiUser,
   FiX,
+  FiPlus,
 } from "react-icons/fi";
 import LoadingSpinner from "../../../components/common/LoadingSpinner";
 import {
@@ -17,6 +18,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import type { DoctorProfile } from "../../../types";
 import { doctorService } from "../../../services/DoctorService";
+import { LabRequestModal } from "./DoctorLabRequests";
 
 interface EditCreateProps {
   show: boolean;
@@ -57,6 +59,8 @@ const Prescription: React.FC<EditCreateProps> = ({ show }) => {
     gender?: string;
     age?: number;
   }>({});
+
+  const [isLabRequestModalOpen, setIsLabRequestModalOpen] = useState(false);
 
   // ✅ Fetch Doctor Profile
   useEffect(() => {
@@ -176,6 +180,10 @@ const Prescription: React.FC<EditCreateProps> = ({ show }) => {
     }
   };
 
+  const handleRequestTest = () => {
+    setIsLabRequestModalOpen(true);
+  };
+
   return (
     <div className="flex flex-col w-full min-h-screen bg-gray-50">
       {/* Header */}
@@ -287,6 +295,16 @@ const Prescription: React.FC<EditCreateProps> = ({ show }) => {
                       </div>
                     </div>
                   )}
+
+                  {/* Request A Test Button */}
+                  <button
+                    type="button"
+                    onClick={handleRequestTest}
+                    className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-200 mt-4"
+                  >
+                    <FiPlus className="text-lg" />
+                    Request A Test
+                  </button>
                 </div>
               </div>
             </div>
@@ -397,6 +415,14 @@ const Prescription: React.FC<EditCreateProps> = ({ show }) => {
           </button>
         </div>
       </div>
+
+      {/* Lab Request Modal */}
+      <LabRequestModal
+        isOpen={isLabRequestModalOpen}
+        onClose={() => setIsLabRequestModalOpen(false)}
+        appointmentId={appointmentId}
+        patientName={patientInfo.name || formData.patientName || currentPrescription?.patientName || "Not specified"}
+      />
     </div>
   );
 };

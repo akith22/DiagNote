@@ -4,6 +4,8 @@ import com.example.backend.dto.DoctorLabRequestDto;
 import com.example.backend.model.*;
 import com.example.backend.repository.*;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -15,11 +17,18 @@ public class DoctorLabRequestService {
 
     private final LabRequestRepository labRequestRepository;
     private final AppointmentRepository appointmentRepository;
+    private final UserRepository userRepository;
 
-    public DoctorLabRequestService(LabRequestRepository labRequestRepository, AppointmentRepository appointmentRepository) {
+
+
+    public DoctorLabRequestService(LabRequestRepository labRequestRepository,
+                                   AppointmentRepository appointmentRepository,
+                                   UserRepository userRepository) { // add this
         this.labRequestRepository = labRequestRepository;
         this.appointmentRepository = appointmentRepository;
+        this.userRepository = userRepository; // assign it!
     }
+
 
     // ✅ Create new lab request using appointmentId
     public DoctorLabRequestDto createLabRequest(Integer appointmentId, DoctorLabRequestDto dto) {
@@ -68,4 +77,27 @@ public class DoctorLabRequestService {
                 patientName
         );
     }
+
+
+    public List<DoctorLabRequestDto> getAllLabRequestsByDoctor() {
+        User doctor = getAuthenticatedDoctor();
+
+        List<LabRequest> labRequests = labRequestRepository
+                .findByAppointment_Doctor_User_Email(doctor.getEmail())
+                .orElseThrow(() -> new RuntimeException("No lab requests found for this doctor"));
+
+        return labRequests.stream()
+                .map(this::mapToDto)
+                .collect(Collectors.toList());
+    }
+
+    // Helper method to get the logged-in doctor
+    private User getAuthenticatedDoctor() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String email = auth.getName(); // assuming username is email
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Authenticated doctor not found"));
+    }
+
+
 }

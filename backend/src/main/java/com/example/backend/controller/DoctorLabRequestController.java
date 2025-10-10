@@ -43,4 +43,14 @@ public class DoctorLabRequestController {
         DoctorLabRequestDto dto = doctorLabRequestService.getLabRequestById(id);
         return ResponseEntity.ok(dto);
     }
+
+    // ---------------- New GET: All Lab Requests by Doctor ----------------
+    @GetMapping("/labrequests/doctor")
+    public ResponseEntity<List<DoctorLabRequestDto>> getAllLabRequestsByDoctor() {
+        List<DoctorLabRequestDto> dtos = doctorLabRequestService.getAllLabRequestsByDoctor();
+        return ResponseEntity.ok(dtos);
+    }
+
+
+
 }
