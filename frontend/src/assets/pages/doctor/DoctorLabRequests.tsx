@@ -1,6 +1,6 @@
 // DoctorLabRequests.tsx
 import { useState, useEffect } from "react";
-import { FiPlus, FiX, FiCheck, FiCalendar, FiUser, FiActivity, FiArrowUp, FiArrowDown } from "react-icons/fi";
+import { FiPlus, FiX, FiCheck, FiCalendar, FiUser, FiActivity, FiArrowUp, FiArrowDown, FiTrash2 } from "react-icons/fi";
 import LoadingSpinner from "../../../components/common/LoadingSpinner";
 import { doctorLabRequestService, type DoctorLabRequestDto } from "../../../services/DoctorLabRequestService";
 
@@ -23,82 +23,113 @@ export const LabRequestModal: React.FC<LabRequestModalProps> = ({
   patientName,
   onLabRequestCreated 
 }) => {
-  const [testType, setTestType] = useState("");
+  const [testTypes, setTestTypes] = useState<string[]>([""]);
   const [loading, setLoading] = useState(false);
+
+  const addTestRow = () => {
+    setTestTypes([...testTypes, ""]);
+  };
+
+  const removeTestRow = (index: number) => {
+    if (testTypes.length > 1) {
+      const updatedTests = testTypes.filter((_, i) => i !== index);
+      setTestTypes(updatedTests);
+    }
+  };
+
+  const updateTestType = (index: number, value: string) => {
+    const updatedTests = [...testTypes];
+    updatedTests[index] = value;
+    setTestTypes(updatedTests);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!testType.trim()) {
-      alert("Please enter a test type");
+    
+    // Filter out empty test types
+    const validTestTypes = testTypes.filter(testType => testType.trim() !== "");
+    
+    if (validTestTypes.length === 0) {
+      alert("Please enter at least one test type");
       return;
     }
 
     try {
       setLoading(true);
-      const payload: DoctorLabRequestDto = {
-        status: "REQUESTED",
-        testType: testType.trim(),
-        appointmentId: appointmentId,
-        patientName: patientName,
-      };
+      
+      // Create multiple lab requests - one for each test type
+      const createRequests = validTestTypes.map(testType => {
+        const payload: DoctorLabRequestDto = {
+          status: "REQUESTED",
+          testType: testType.trim(),
+          appointmentId: appointmentId,
+          patientName: patientName,
+        };
+        return doctorLabRequestService.createLabRequest(appointmentId, payload);
+      });
 
-      await doctorLabRequestService.createLabRequest(appointmentId, payload);
-      alert("Lab request submitted successfully!");
-      setTestType("");
+      // Wait for all requests to complete
+      await Promise.all(createRequests);
+      
+      alert(`Successfully submitted ${validTestTypes.length} lab request${validTestTypes.length > 1 ? 's' : ''}!`);
+      setTestTypes([""]); // Reset to one empty row
       onClose();
       onLabRequestCreated?.();
     } catch (err) {
-      console.error("❌ Error creating lab request", err);
-      alert("Failed to create lab request. Please try again.");
+      console.error("❌ Error creating lab requests", err);
+      alert("Failed to create lab requests. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
+  const hasValidTests = testTypes.some(testType => testType.trim() !== "");
+
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl w-full max-w-md">
+      <div className="bg-white rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+        <div className="flex items-center justify-between p-6 border-b border-gray-200 sticky top-0 bg-white">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-blue-600 rounded-lg">
               <FiPlus className="text-xl text-white" />
             </div>
             <div>
-              <h3 className="text-xl font-bold text-gray-900">Request A Test</h3>
-              <p className="text-gray-600 text-sm">Create a new lab test request</p>
+              <h3 className="text-xl font-bold text-gray-900">Request Lab Tests</h3>
+              <p className="text-gray-600 text-sm">Create multiple lab test requests</p>
             </div>
           </div>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          {/* Appointment ID */}
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Appointment ID
-            </label>
-            <input
-              type="text"
-              value={`#${appointmentId}`}
-              disabled
-              className="w-full border border-gray-300 rounded-xl p-3 bg-gray-100 text-gray-600"
-            />
-          </div>
+        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          {/* Appointment Info */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Appointment ID
+              </label>
+              <input
+                type="text"
+                value={`#${appointmentId}`}
+                disabled
+                className="w-full border border-gray-300 rounded-xl p-3 bg-gray-100 text-gray-600"
+              />
+            </div>
 
-          {/* Status */}
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Status
-            </label>
-            <input
-              type="text"
-              value="REQUESTED"
-              disabled
-              className="w-full border border-gray-300 rounded-xl p-3 bg-gray-100 text-gray-600"
-            />
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Status
+              </label>
+              <input
+                type="text"
+                value="REQUESTED"
+                disabled
+                className="w-full border border-gray-300 rounded-xl p-3 bg-gray-100 text-gray-600"
+              />
+            </div>
           </div>
 
           {/* Patient Name */}
@@ -114,26 +145,59 @@ export const LabRequestModal: React.FC<LabRequestModalProps> = ({
             />
           </div>
 
-          {/* Test Type */}
+          {/* Test Types */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Test Type <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={testType}
-              onChange={(e) => setTestType(e.target.value)}
-              placeholder="Enter test type (e.g., Blood Test, MRI, X-Ray)"
-              required
-              className="w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-            />
-            <div className="mt-1 text-xs text-gray-500">
-              Examples: Complete Blood Count, Lipid Profile, Liver Function Test, etc.
+            <div className="flex items-center justify-between mb-4">
+              <label className="block text-sm font-semibold text-gray-700">
+                Test Types <span className="text-red-500">*</span>
+              </label>
+              <button
+                type="button"
+                onClick={addTestRow}
+                className="flex items-center gap-2 px-3 py-2 text-sm bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors duration-200"
+              >
+                <FiPlus className="text-sm" />
+                Add Another Test
+              </button>
+            </div>
+
+            <div className="space-y-3 max-h-60 overflow-y-auto">
+              {testTypes.map((testType, index) => (
+                <div key={index} className="flex items-center gap-3">
+                  <div className="flex-1">
+                    <input
+                      type="text"
+                      value={testType}
+                      onChange={(e) => updateTestType(index, e.target.value)}
+                      placeholder="Enter test type (e.g., Blood Test, MRI, X-Ray)"
+                      className="w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                    />
+                  </div>
+                  {testTypes.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removeTestRow(index)}
+                      className="p-3 text-red-600 hover:bg-red-50 rounded-xl transition-colors duration-200"
+                    >
+                      <FiTrash2 />
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-3 text-xs text-gray-500">
+              Examples: Complete Blood Count, Lipid Profile, Liver Function Test, Urinalysis, etc.
+              {testTypes.length > 1 && (
+                <span className="block mt-1 text-blue-600">
+                  {testTypes.filter(t => t.trim() !== "").length} of {testTypes.length} tests filled
+                </span>
+              )}
             </div>
           </div>
 
           {/* Buttons */}
-          <div className="flex gap-3 pt-4">
+          <div className="flex gap-3 pt-4 border-t border-gray-200">
             <button
               type="button"
               onClick={onClose}
@@ -143,11 +207,17 @@ export const LabRequestModal: React.FC<LabRequestModalProps> = ({
             </button>
             <button
               type="submit"
-              disabled={loading || !testType.trim()}
+              disabled={loading || !hasValidTests}
               className="flex-1 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? <LoadingSpinner /> : <FiCheck className="text-lg" />}
-              Submit Request
+              {loading ? (
+                <LoadingSpinner />
+              ) : (
+                <>
+                  <FiCheck className="text-lg" />
+                  Submit {testTypes.filter(t => t.trim() !== "").length} Test{testTypes.filter(t => t.trim() !== "").length !== 1 ? 's' : ''}
+                </>
+              )}
             </button>
           </div>
         </form>
@@ -156,6 +226,7 @@ export const LabRequestModal: React.FC<LabRequestModalProps> = ({
   );
 };
 
+// The LabRequestsTable component remains the same as in your original code
 export const LabRequestsTable: React.FC<LabRequestsTableProps> = ({ refreshTrigger }) => {
   const [labRequests, setLabRequests] = useState<DoctorLabRequestDto[]>([]);
   const [loading, setLoading] = useState(true);
