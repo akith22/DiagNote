@@ -41,6 +41,12 @@ public class PrescriptionService {
         dto.setNotes(p.getNotes());
         dto.setDateIssued(p.getDateIssued());
         dto.setAppointmentId(p.getAppointment() != null ? p.getAppointment().getId() : null);
+
+        if (p.getAppointment() != null &&
+                p.getAppointment().getPatient() != null &&
+                p.getAppointment().getPatient().getUser() != null) {
+            dto.setPatientName(p.getAppointment().getPatient().getUser().getName());
+        }
         return dto;
     }
 

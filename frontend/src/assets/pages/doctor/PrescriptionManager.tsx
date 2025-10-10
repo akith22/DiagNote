@@ -14,6 +14,7 @@ import {
   FiInfo,
   FiPrinter,
   FiDownload,
+  FiSearch,
 } from "react-icons/fi";
 import {
   prescriptionService,
@@ -33,7 +34,6 @@ interface PrescriptionManagerProps {
   onPrescriptionCreated?: () => void;
 }
 
-// Add type for prescription details
 interface PrescriptionDetails {
   prescriptionId: number;
   appointmentId: number;
@@ -50,22 +50,23 @@ const PrescriptionManager: React.FC<PrescriptionManagerProps> = ({
   formDataFromAppointment,
   onPrescriptionCreated,
 }) => {
-
   const navigate = useNavigate();
 
-
   const [prescriptions, setPrescriptions] = useState<PrescriptionDto[]>([]);
+  const [filteredPrescriptions, setFilteredPrescriptions] = useState<PrescriptionDto[]>([]);
   const [loading, setLoading] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
-  const [currentPrescription, setCurrentPrescription] = useState<PrescriptionDetails | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPrescription, setCurrentPrescription] =
+    useState<PrescriptionDetails | null>(null);
 
-  
   // Load all prescriptions for the doctor
   const loadPrescriptions = async () => {
     try {
       setLoading(true);
       const data = await prescriptionService.getAllPrescriptionsByDoctor();
       setPrescriptions(data || []);
+      setFilteredPrescriptions(data || []);
     } catch (err) {
       console.error("❌ Error loading prescriptions", err);
       alert("Failed to load prescriptions.");
@@ -78,28 +79,53 @@ const PrescriptionManager: React.FC<PrescriptionManagerProps> = ({
     if (profile.email) loadPrescriptions();
   }, [profile.email]);
 
-  // Load patient info when form is opened from Appointment Manager
+  // Filter prescriptions based on search term
+  useEffect(() => {
+    if (!searchTerm.trim()) {
+      setFilteredPrescriptions(prescriptions);
+      return;
+    }
+
+    const term = searchTerm.toLowerCase().trim();
+    const filtered = prescriptions.filter(prescription => 
+      prescription.patientName?.toLowerCase().includes(term) ||
+      prescription.notes?.toLowerCase().includes(term) ||
+      prescription.appointmentId?.toString().includes(term) ||
+      prescription.dateIssued?.toLowerCase().includes(term)
+    );
+    
+    setFilteredPrescriptions(filtered);
+  }, [searchTerm, prescriptions]);
 
   const handleEdit = async (p: PrescriptionDto) => {
     navigate(`/doctor/edit-prescription/${p.id}`);
   };
 
   const handleView = async (p: PrescriptionDto) => {
+    if (!p?.id) {
+      alert("Prescription id is missing.");
+      return;
+    }
+
+    setShowViewModal(true);
+    setCurrentPrescription(null);
+    setLoading(true);
+
     try {
-      setLoading(true);
-      const details = await prescriptionService.getPrescriptionDetails(p.id!);
-      setCurrentPrescription(details);
-      setShowViewModal(true);
+      const details = await prescriptionService.getPrescriptionDetails(p.id);
+      setCurrentPrescription((details as PrescriptionDetails) || null);
     } catch (err) {
       console.error("❌ Error fetching prescription details", err);
       alert("Failed to load prescription details.");
+      setCurrentPrescription(null);
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = async (id: number) => {
-    if (!window.confirm("Are you sure you want to delete this prescription?")) return;
+    if (!window.confirm("Are you sure you want to delete this prescription?"))
+      return;
     try {
       setLoading(true);
       await prescriptionService.deletePrescription(id);
@@ -113,6 +139,10 @@ const PrescriptionManager: React.FC<PrescriptionManagerProps> = ({
     }
   };
 
+  const clearSearch = () => {
+    setSearchTerm("");
+  };
+
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
       <div className="max-w-7xl mx-auto">
@@ -123,11 +153,44 @@ const PrescriptionManager: React.FC<PrescriptionManagerProps> = ({
               <FiFileText className="text-2xl text-blue-600" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">Prescription Management</h2>
-              <p className="text-gray-600">Manage and create patient prescriptions</p>
+              <h2 className="text-2xl font-bold text-gray-900">
+                Prescription Management
+              </h2>
+              <p className="text-gray-600">
+                Manage and create patient prescriptions
+              </p>
             </div>
           </div>
-         
+        </div>
+
+        {/* Search Bar */}
+        <div className="mb-6">
+          <div className="relative max-w-md">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <FiSearch className="text-gray-400" />
+            </div>
+            <input
+              type="text"
+              placeholder="Search by patient name, notes, appointment ID, or date..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white shadow-sm transition-colors duration-200"
+            />
+            {searchTerm && (
+              <button
+                onClick={clearSearch}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors duration-200"
+              >
+                <FiX className="text-lg" />
+              </button>
+            )}
+          </div>
+          {searchTerm && (
+            <p className="text-sm text-gray-600 mt-2">
+              Showing {filteredPrescriptions.length} of {prescriptions.length} prescriptions
+              {filteredPrescriptions.length === 0 && " - No matches found"}
+            </p>
+          )}
         </div>
 
         {/* Prescriptions Table */}
@@ -135,10 +198,18 @@ const PrescriptionManager: React.FC<PrescriptionManagerProps> = ({
           <div className="flex justify-center items-center py-12">
             <LoadingSpinner />
           </div>
-        ) : prescriptions.length === 0 ? (
+        ) : filteredPrescriptions.length === 0 ? (
           <div className="text-center py-12 bg-white rounded-2xl shadow-sm border border-gray-100">
             <FiFileText className="text-4xl text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-700 mb-2">No Prescriptions Found</h3>
+            <h3 className="text-lg font-semibold text-gray-700 mb-2">
+              {searchTerm ? "No Matching Prescriptions Found" : "No Prescriptions Found"}
+            </h3>
+            <p className="text-gray-500 text-sm">
+              {searchTerm 
+                ? "Try adjusting your search terms" 
+                : "Get started by creating your first prescription"
+              }
+            </p>
           </div>
         ) : (
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
@@ -153,6 +224,9 @@ const PrescriptionManager: React.FC<PrescriptionManagerProps> = ({
                       Appointment ID
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      Patient Name
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                       Notes Preview
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
@@ -164,8 +238,11 @@ const PrescriptionManager: React.FC<PrescriptionManagerProps> = ({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                  {prescriptions.map((p, i) => (
-                    <tr key={p.id} className="hover:bg-gray-50 transition-colors duration-150">
+                  {filteredPrescriptions.map((p, i) => (
+                    <tr
+                      key={p.id}
+                      className="hover:bg-gray-50 transition-colors duration-150"
+                    >
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                         {i + 1}
                       </td>
@@ -174,8 +251,15 @@ const PrescriptionManager: React.FC<PrescriptionManagerProps> = ({
                           #{p.appointmentId}
                         </span>
                       </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                        {p.patientName || (
+                          <span className="text-gray-400 italic">Unknown</span>
+                        )}
+                      </td>
                       <td className="px-6 py-4 text-sm text-gray-700 max-w-xs truncate">
-                        {p.notes || <span className="text-gray-400 italic">No notes</span>}
+                        {p.notes || (
+                          <span className="text-gray-400 italic">No notes</span>
+                        )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                         {p.dateIssued?.slice(0, 10) || "-"}
@@ -214,7 +298,7 @@ const PrescriptionManager: React.FC<PrescriptionManagerProps> = ({
         )}
 
         {/* VIEW PRESCRIPTION MODAL */}
-        {showViewModal && currentPrescription && (
+        {showViewModal && (
           <div className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-50 p-4">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
               {/* Header */}
@@ -233,9 +317,11 @@ const PrescriptionManager: React.FC<PrescriptionManagerProps> = ({
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  
-                  <button 
-                    onClick={() => setShowViewModal(false)}
+                  <button
+                    onClick={() => {
+                      setShowViewModal(false);
+                      setCurrentPrescription(null);
+                    }}
                     className="p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200"
                   >
                     <FiX className="text-xl text-gray-600" />
@@ -245,137 +331,155 @@ const PrescriptionManager: React.FC<PrescriptionManagerProps> = ({
 
               {/* View Content */}
               <div className="flex-1 overflow-y-auto p-6">
-                <div className="space-y-6">
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {/* Patient Information */}
-                    <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
-                      <div className="flex items-center gap-2 mb-4">
-                        <FiUser className="text-green-600" />
-                        <h4 className="font-semibold text-gray-900">Patient Information</h4>
-                      </div>
-                      
-                      <div className="space-y-4">
-                        <div className="flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-200">
-                          <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                            <FiUser className="text-blue-600 text-sm" />
-                          </div>
-                          <div>
-                            <p className="text-xs text-gray-500">Patient Name</p>
-                            <p className="font-medium text-gray-900">
-                              {currentPrescription.patientName}
-                            </p>
-                          </div>
+                {loading ? (
+                  <div className="flex items-center justify-center h-60">
+                    <LoadingSpinner />
+                  </div>
+                ) : currentPrescription ? (
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      {/* Patient Information */}
+                      <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+                        <div className="flex items-center gap-2 mb-4">
+                          <FiUser className="text-green-600" />
+                          <h4 className="font-semibold text-gray-900">
+                            Patient Information
+                          </h4>
                         </div>
 
-                        <div className="flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-200">
-                          <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                            <FiMapPin className="text-green-600 text-sm" />
-                          </div>
-                          <div>
-                            <p className="text-xs text-gray-500">Address</p>
-                            <p className="font-medium text-gray-900">
-                              {currentPrescription.patientAddress}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-4">
                           <div className="flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-200">
-                            <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                              <FiUser className="text-purple-600 text-sm" />
+                            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                              <FiUser className="text-blue-600 text-sm" />
                             </div>
                             <div>
-                              <p className="text-xs text-gray-500">Gender</p>
+                              <p className="text-xs text-gray-500">Patient Name</p>
                               <p className="font-medium text-gray-900">
-                                {currentPrescription.patientGender}
+                                {currentPrescription.patientName}
                               </p>
                             </div>
                           </div>
 
                           <div className="flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-200">
-                            <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
-                              <FiInfo className="text-orange-600 text-sm" />
+                            <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                              <FiMapPin className="text-green-600 text-sm" />
                             </div>
                             <div>
-                              <p className="text-xs text-gray-500">Age</p>
+                              <p className="text-xs text-gray-500">Address</p>
                               <p className="font-medium text-gray-900">
-                                {currentPrescription.patientAge} years
+                                {currentPrescription.patientAddress}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-3">
+                            <div className="flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-200">
+                              <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                                <FiUser className="text-purple-600 text-sm" />
+                              </div>
+                              <div>
+                                <p className="text-xs text-gray-500">Gender</p>
+                                <p className="font-medium text-gray-900">
+                                  {currentPrescription.patientGender}
+                                </p>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-200">
+                              <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
+                                <FiInfo className="text-orange-600 text-sm" />
+                              </div>
+                              <div>
+                                <p className="text-xs text-gray-500">Age</p>
+                                <p className="font-medium text-gray-900">
+                                  {currentPrescription.patientAge} years
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                              <FiCalendar className="text-blue-600 text-sm" />
+                            </div>
+                            <div>
+                              <p className="text-xs text-blue-600">Appointment ID</p>
+                              <p className="font-medium text-blue-700">
+                                #{currentPrescription.appointmentId}
                               </p>
                             </div>
                           </div>
                         </div>
+                      </div>
 
-                        <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                          <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                            <FiCalendar className="text-blue-600 text-sm" />
-                          </div>
+                      {/* Prescription Details */}
+                      <div className="bg-white rounded-xl p-6 border border-gray-200">
+                        <div className="flex items-center gap-2 mb-6">
+                          <FiFileText className="text-green-600" />
+                          <h4 className="font-semibold text-gray-900">
+                            Prescription Details
+                          </h4>
+                        </div>
+
+                        <div className="space-y-6">
+                          {/* Date Issued */}
                           <div>
-                            <p className="text-xs text-blue-600">Appointment ID</p>
-                            <p className="font-medium text-blue-700">
-                              #{currentPrescription.appointmentId}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Prescription Details */}
-                    <div className="bg-white rounded-xl p-6 border border-gray-200">
-                      <div className="flex items-center gap-2 mb-6">
-                        <FiFileText className="text-green-600" />
-                        <h4 className="font-semibold text-gray-900">Prescription Details</h4>
-                      </div>
-
-                      <div className="space-y-6">
-                        {/* Date Issued */}
-                        <div>
-                          <label className="block text-sm font-semibold text-gray-700 mb-2">
-                            Date Issued
-                          </label>
-                          <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                            <FiCalendar className="text-gray-400" />
-                            <p className="font-medium text-gray-900">
-                              {new Date(currentPrescription.dateIssued).toLocaleDateString('en-US', {
-                                year: 'numeric',
-                                month: 'long',
-                                day: 'numeric'
-                              })}
-                            </p>
-                          </div>
-                        </div>
-
-                        {/* Prescription Notes */}
-                        <div>
-                          <label className="block text-sm font-semibold text-gray-700 mb-2">
-                            Prescription Notes & Instructions
-                          </label>
-                          <div className="bg-gray-50 rounded-xl p-4 border border-gray-200 min-h-[200px]">
-                            <p className="text-gray-900 whitespace-pre-wrap">
-                              {currentPrescription.notes || "No notes provided"}
-                            </p>
-                          </div>
-                        </div>
-
-                        {/* Signature Section */}
-                        <div className="border-t pt-4 mt-4">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <p className="text-sm font-semibold text-gray-700">Doctor's Signature</p>
-                              <p className="text-sm text-gray-500">Dr. {profile.name}</p>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                              Date Issued
+                            </label>
+                            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                              <FiCalendar className="text-gray-400" />
+                              <p className="font-medium text-gray-900">
+                                {currentPrescription.dateIssued
+                                  ? new Date(currentPrescription.dateIssued).toLocaleDateString(
+                                      "en-US",
+                                      {
+                                        year: "numeric",
+                                        month: "long",
+                                        day: "numeric",
+                                      }
+                                    )
+                                  : "-"}
+                              </p>
                             </div>
-                           
+                          </div>
+
+                          {/* Prescription Notes */}
+                          <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                              Prescription Notes & Instructions
+                            </label>
+                            <div className="bg-gray-50 rounded-xl p-4 border border-gray-200 min-h-[200px]">
+                              <p className="text-gray-900 whitespace-pre-wrap">
+                                {currentPrescription.notes || "No notes provided"}
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Signature Section */}
+                          <div className="border-t pt-4 mt-4">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <p className="text-sm font-semibold text-gray-700">
+                                  Doctor's Signature
+                                </p>
+                                <p className="text-sm text-gray-500">Dr. {profile.name}</p>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Action Buttons */}
-                  <div className="flex justify-center gap-4 pt-6 border-t border-gray-200">
-                   
-                   
+                    {/* Action Buttons */}
+                    <div className="flex justify-center gap-4 pt-6 border-t border-gray-200"></div>
                   </div>
-                </div>
+                ) : (
+                  // If not loading & no details loaded -> show message
+                  <div className="flex items-center justify-center h-48">
+                    <p className="text-gray-600">No prescription details available.</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>

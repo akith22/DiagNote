@@ -14,6 +14,9 @@ public class PrescriptionDto {
 
     private Integer appointmentId;
 
+    private String patientName;
+
+
     public PrescriptionDto() {}
 
     // Getters and setters
@@ -28,4 +31,14 @@ public class PrescriptionDto {
 
     public Integer getAppointmentId() { return appointmentId; }
     public void setAppointmentId(Integer appointmentId) { this.appointmentId = appointmentId; }
+
+
+    public String getPatientName() {
+        return patientName;
+    }
+
+    public void setPatientName(String patientName) {
+        this.patientName = patientName;
+    }
+
 }
