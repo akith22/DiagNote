@@ -11,8 +11,8 @@ public class Prescription {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    // DB column limited to 255 chars as per your screenshot
-    @Column(name = "notes", length = 255)
+    // DB column limited to 1000 chars as per your screenshot
+    @Column(name = "notes", length = 1000)
     private String notes;
 
     @Column(name = "date_issued")

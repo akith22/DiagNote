@@ -52,7 +52,7 @@ public class PrescriptionService {
 
     private String safeNotes(String notes) {
         if (notes == null) return null;
-        return notes.length() > 255 ? notes.substring(0, 255) : notes;
+        return notes.length() > 1000 ? notes.substring(0, 1000) : notes;
     }
 
     private User getAuthenticatedDoctor() {

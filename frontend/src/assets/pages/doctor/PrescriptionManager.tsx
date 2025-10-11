@@ -21,7 +21,10 @@ import {
   prescriptionService,
   type PrescriptionDto,
 } from "../../../services/PrescriptionService";
-import { doctorLabRequestService, type DoctorLabRequestDto } from "../../../services/DoctorLabRequestService"; // Import lab service
+import {
+  doctorLabRequestService,
+  type DoctorLabRequestDto,
+} from "../../../services/DoctorLabRequestService"; // Import lab service
 import LoadingSpinner from "../../../components/common/LoadingSpinner";
 import { useNavigate } from "react-router-dom";
 
@@ -55,11 +58,14 @@ const PrescriptionManager: React.FC<PrescriptionManagerProps> = ({
   const navigate = useNavigate();
 
   const [prescriptions, setPrescriptions] = useState<PrescriptionDto[]>([]);
-  const [filteredPrescriptions, setFilteredPrescriptions] = useState<PrescriptionDto[]>([]);
+  const [filteredPrescriptions, setFilteredPrescriptions] = useState<
+    PrescriptionDto[]
+  >([]);
   const [loading, setLoading] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [currentPrescription, setCurrentPrescription] = useState<PrescriptionDetails | null>(null);
+  const [currentPrescription, setCurrentPrescription] =
+    useState<PrescriptionDetails | null>(null);
   const [labRequests, setLabRequests] = useState<DoctorLabRequestDto[]>([]); // State for lab requests
   const [loadingLabRequests, setLoadingLabRequests] = useState(false); // Loading state for lab requests
 
@@ -82,7 +88,9 @@ const PrescriptionManager: React.FC<PrescriptionManagerProps> = ({
   const loadLabRequests = async (appointmentId: number) => {
     try {
       setLoadingLabRequests(true);
-      const data = await doctorLabRequestService.getLabRequestsByAppointment(appointmentId);
+      const data = await doctorLabRequestService.getLabRequestsByAppointment(
+        appointmentId
+      );
       setLabRequests(data || []);
     } catch (err) {
       console.error("❌ Error loading lab requests", err);
@@ -104,13 +112,14 @@ const PrescriptionManager: React.FC<PrescriptionManagerProps> = ({
     }
 
     const term = searchTerm.toLowerCase().trim();
-    const filtered = prescriptions.filter(prescription => 
-      prescription.patientName?.toLowerCase().includes(term) ||
-      prescription.notes?.toLowerCase().includes(term) ||
-      prescription.appointmentId?.toString().includes(term) ||
-      prescription.dateIssued?.toLowerCase().includes(term)
+    const filtered = prescriptions.filter(
+      (prescription) =>
+        prescription.patientName?.toLowerCase().includes(term) ||
+        prescription.notes?.toLowerCase().includes(term) ||
+        prescription.appointmentId?.toString().includes(term) ||
+        prescription.dateIssued?.toLowerCase().includes(term)
     );
-    
+
     setFilteredPrescriptions(filtered);
   }, [searchTerm, prescriptions]);
 
@@ -132,7 +141,7 @@ const PrescriptionManager: React.FC<PrescriptionManagerProps> = ({
     try {
       const details = await prescriptionService.getPrescriptionDetails(p.id);
       setCurrentPrescription((details as PrescriptionDetails) || null);
-      
+
       // Load lab requests for this appointment
       if (details?.appointmentId) {
         await loadLabRequests(details.appointmentId);
@@ -222,7 +231,8 @@ const PrescriptionManager: React.FC<PrescriptionManagerProps> = ({
           </div>
           {searchTerm && (
             <p className="text-sm text-gray-600 mt-2">
-              Showing {filteredPrescriptions.length} of {prescriptions.length} prescriptions
+              Showing {filteredPrescriptions.length} of {prescriptions.length}{" "}
+              prescriptions
               {filteredPrescriptions.length === 0 && " - No matches found"}
             </p>
           )}
@@ -237,13 +247,14 @@ const PrescriptionManager: React.FC<PrescriptionManagerProps> = ({
           <div className="text-center py-12 bg-white rounded-2xl shadow-sm border border-gray-100">
             <FiFileText className="text-4xl text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-gray-700 mb-2">
-              {searchTerm ? "No Matching Prescriptions Found" : "No Prescriptions Found"}
+              {searchTerm
+                ? "No Matching Prescriptions Found"
+                : "No Prescriptions Found"}
             </h3>
             <p className="text-gray-500 text-sm">
-              {searchTerm 
-                ? "Try adjusting your search terms" 
-                : "Get started by creating your first prescription"
-              }
+              {searchTerm
+                ? "Try adjusting your search terms"
+                : "Get started by creating your first prescription"}
             </p>
           </div>
         ) : (
@@ -315,13 +326,13 @@ const PrescriptionManager: React.FC<PrescriptionManagerProps> = ({
                           >
                             <FiEdit3 className="text-sm" />
                           </button>
-                          <button
+                          {/* <button
                             onClick={() => handleDelete(p.id!)}
                             className="inline-flex items-center gap-1 text-red-600 hover:text-red-800 p-2 rounded-lg hover:bg-red-50 transition-colors duration-200"
                             title="Delete Prescription"
                           >
                             <FiTrash2 className="text-sm" />
-                          </button>
+                          </button> */}
                         </div>
                       </td>
                     </tr>
@@ -389,7 +400,9 @@ const PrescriptionManager: React.FC<PrescriptionManagerProps> = ({
                               <FiUser className="text-blue-600 text-sm" />
                             </div>
                             <div>
-                              <p className="text-xs text-gray-500">Patient Name</p>
+                              <p className="text-xs text-gray-500">
+                                Patient Name
+                              </p>
                               <p className="font-medium text-gray-900">
                                 {currentPrescription.patientName}
                               </p>
@@ -439,7 +452,9 @@ const PrescriptionManager: React.FC<PrescriptionManagerProps> = ({
                               <FiCalendar className="text-blue-600 text-sm" />
                             </div>
                             <div>
-                              <p className="text-xs text-blue-600">Appointment ID</p>
+                              <p className="text-xs text-blue-600">
+                                Appointment ID
+                              </p>
                               <p className="font-medium text-blue-700">
                                 #{currentPrescription.appointmentId}
                               </p>
@@ -469,14 +484,13 @@ const PrescriptionManager: React.FC<PrescriptionManagerProps> = ({
                                 <FiCalendar className="text-gray-400" />
                                 <p className="font-medium text-gray-900">
                                   {currentPrescription.dateIssued
-                                    ? new Date(currentPrescription.dateIssued).toLocaleDateString(
-                                        "en-US",
-                                        {
-                                          year: "numeric",
-                                          month: "long",
-                                          day: "numeric",
-                                        }
-                                      )
+                                    ? new Date(
+                                        currentPrescription.dateIssued
+                                      ).toLocaleDateString("en-US", {
+                                        year: "numeric",
+                                        month: "long",
+                                        day: "numeric",
+                                      })
                                     : "-"}
                                 </p>
                               </div>
@@ -489,7 +503,8 @@ const PrescriptionManager: React.FC<PrescriptionManagerProps> = ({
                               </label>
                               <div className="bg-gray-50 rounded-xl p-4 border border-gray-200 min-h-[120px]">
                                 <p className="text-gray-900 whitespace-pre-wrap">
-                                  {currentPrescription.notes || "No notes provided"}
+                                  {currentPrescription.notes ||
+                                    "No notes provided"}
                                 </p>
                               </div>
                             </div>
@@ -544,9 +559,12 @@ const PrescriptionManager: React.FC<PrescriptionManagerProps> = ({
                           ) : (
                             <div className="text-center py-8 bg-gray-50 rounded-lg border border-gray-200">
                               <FiActivity className="text-3xl text-gray-400 mx-auto mb-3" />
-                              <p className="text-gray-600 font-medium">No Lab Tests Requested</p>
+                              <p className="text-gray-600 font-medium">
+                                No Lab Tests Requested
+                              </p>
                               <p className="text-gray-500 text-sm mt-1">
-                                No laboratory tests have been requested for this appointment.
+                                No laboratory tests have been requested for this
+                                appointment.
                               </p>
                             </div>
                           )}
@@ -561,7 +579,9 @@ const PrescriptionManager: React.FC<PrescriptionManagerProps> = ({
                           <p className="text-sm font-semibold text-gray-700">
                             Doctor's Signature
                           </p>
-                          <p className="text-sm text-gray-500">Dr. {profile.name}</p>
+                          <p className="text-sm text-gray-500">
+                            Dr. {profile.name}
+                          </p>
                         </div>
                         <div className="text-right">
                           <p className="text-sm font-semibold text-gray-700">
@@ -569,7 +589,9 @@ const PrescriptionManager: React.FC<PrescriptionManagerProps> = ({
                           </p>
                           <p className="text-sm text-gray-500">
                             {currentPrescription.dateIssued
-                              ? new Date(currentPrescription.dateIssued).toLocaleDateString()
+                              ? new Date(
+                                  currentPrescription.dateIssued
+                                ).toLocaleDateString()
                               : "-"}
                           </p>
                         </div>
@@ -579,7 +601,9 @@ const PrescriptionManager: React.FC<PrescriptionManagerProps> = ({
                 ) : (
                   // If not loading & no details loaded -> show message
                   <div className="flex items-center justify-center h-48">
-                    <p className="text-gray-600">No prescription details available.</p>
+                    <p className="text-gray-600">
+                      No prescription details available.
+                    </p>
                   </div>
                 )}
               </div>
