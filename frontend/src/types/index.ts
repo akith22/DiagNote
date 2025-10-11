@@ -52,3 +52,35 @@ export interface LabTechProfile {
   department: string | null;
   profileComplete: boolean;
 }
+
+export interface AppointmentRequest {
+  doctorEmail: string;
+  patientEmail: string;
+  appointmentDateTime: string;
+}
+
+export interface AppointmentResponse {
+  appointmentId: number;
+  doctorId: number;
+  doctorName: string;
+  patientId: number;
+  patientName: string;
+  appointmentDateTime: string;
+  status: string;
+  notes: string
+}
+
+export interface Prescription {
+  id: number;
+  notes: string;
+  dateIssued: string;
+  appointment: {
+    id: number;
+    date: string;
+    time: string;
+    doctor: {
+      name: string;
+      specialization: string;
+    };
+  };
+}
