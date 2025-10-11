@@ -11,6 +11,7 @@ import ProtectedRoute from "./context/ProtectedRoute";
 import PatientDashboard from "./assets/pages/patient/PatientDashboard";
 import LabTechDashboard from "./assets/pages/labtech/LabTechDashboard";
 import DoctorSearch from "./assets/pages/DoctorSearch";
+import Prescription from "./assets/pages/doctor/Prescription";
 
 function App() {
   return (
@@ -29,6 +30,10 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        <Route path="/doctor/create-prescription/:id" element={<Prescription show={true}  />} />
+
+        <Route path="/doctor/edit-prescription/:id" element={<Prescription show={false}  />} />
 
         {/* Patient Routes */}
         <Route

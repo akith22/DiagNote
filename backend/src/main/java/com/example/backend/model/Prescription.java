@@ -11,20 +11,22 @@ public class Prescription {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(length = 255)
+    // DB column limited to 1000 chars as per your screenshot
+    @Column(name = "notes", length = 1000)
     private String notes;
 
     @Column(name = "date_issued")
     private LocalDateTime dateIssued;
 
+    // link to appointments table (appointments_id)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "appointments_id", nullable = false)
     private Appointment appointment;
 
-    // Constructors
-    public Prescription() {}
+    public Prescription() {
+    }
 
-    // Getters and Setters
+    // Getters & Setters
     public Integer getId() {
         return id;
     }
