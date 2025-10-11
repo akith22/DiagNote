@@ -296,15 +296,17 @@ const Prescription: React.FC<EditCreateProps> = ({ show }) => {
                     </div>
                   )}
 
-                  {/* Request A Test Button */}
-                  <button
-                    type="button"
-                    onClick={handleRequestTest}
-                    className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-200 mt-4"
-                  >
-                    <FiPlus className="text-lg" />
-                    Request A Test
-                  </button>
+                  {/* Request A Test Button - Only show in create mode */}
+                  {!formData.id && (
+                    <button
+                      type="button"
+                      onClick={handleRequestTest}
+                      className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-200 mt-4"
+                    >
+                      <FiPlus className="text-lg" />
+                      Request A Test
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -416,13 +418,15 @@ const Prescription: React.FC<EditCreateProps> = ({ show }) => {
         </div>
       </div>
 
-      {/* Lab Request Modal */}
-      <LabRequestModal
-        isOpen={isLabRequestModalOpen}
-        onClose={() => setIsLabRequestModalOpen(false)}
-        appointmentId={appointmentId}
-        patientName={patientInfo.name || formData.patientName || currentPrescription?.patientName || "Not specified"}
-      />
+      {/* Lab Request Modal - Only show in create mode */}
+      {!formData.id && (
+        <LabRequestModal
+          isOpen={isLabRequestModalOpen}
+          onClose={() => setIsLabRequestModalOpen(false)}
+          appointmentId={appointmentId}
+          patientName={patientInfo.name || formData.patientName || currentPrescription?.patientName || "Not specified"}
+        />
+      )}
     </div>
   );
 };

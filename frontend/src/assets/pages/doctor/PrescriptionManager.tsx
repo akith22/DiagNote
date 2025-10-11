@@ -15,11 +15,13 @@ import {
   FiPrinter,
   FiDownload,
   FiSearch,
+  FiActivity, // New icon for lab tests
 } from "react-icons/fi";
 import {
   prescriptionService,
   type PrescriptionDto,
 } from "../../../services/PrescriptionService";
+import { doctorLabRequestService, type DoctorLabRequestDto } from "../../../services/DoctorLabRequestService"; // Import lab service
 import LoadingSpinner from "../../../components/common/LoadingSpinner";
 import { useNavigate } from "react-router-dom";
 
@@ -57,8 +59,9 @@ const PrescriptionManager: React.FC<PrescriptionManagerProps> = ({
   const [loading, setLoading] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [currentPrescription, setCurrentPrescription] =
-    useState<PrescriptionDetails | null>(null);
+  const [currentPrescription, setCurrentPrescription] = useState<PrescriptionDetails | null>(null);
+  const [labRequests, setLabRequests] = useState<DoctorLabRequestDto[]>([]); // State for lab requests
+  const [loadingLabRequests, setLoadingLabRequests] = useState(false); // Loading state for lab requests
 
   // Load all prescriptions for the doctor
   const loadPrescriptions = async () => {
@@ -72,6 +75,20 @@ const PrescriptionManager: React.FC<PrescriptionManagerProps> = ({
       alert("Failed to load prescriptions.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Load lab requests for a specific appointment
+  const loadLabRequests = async (appointmentId: number) => {
+    try {
+      setLoadingLabRequests(true);
+      const data = await doctorLabRequestService.getLabRequestsByAppointment(appointmentId);
+      setLabRequests(data || []);
+    } catch (err) {
+      console.error("❌ Error loading lab requests", err);
+      setLabRequests([]); // Set empty array on error
+    } finally {
+      setLoadingLabRequests(false);
     }
   };
 
@@ -109,11 +126,17 @@ const PrescriptionManager: React.FC<PrescriptionManagerProps> = ({
 
     setShowViewModal(true);
     setCurrentPrescription(null);
+    setLabRequests([]); // Reset lab requests
     setLoading(true);
 
     try {
       const details = await prescriptionService.getPrescriptionDetails(p.id);
       setCurrentPrescription((details as PrescriptionDetails) || null);
+      
+      // Load lab requests for this appointment
+      if (details?.appointmentId) {
+        await loadLabRequests(details.appointmentId);
+      }
     } catch (err) {
       console.error("❌ Error fetching prescription details", err);
       alert("Failed to load prescription details.");
@@ -141,6 +164,18 @@ const PrescriptionManager: React.FC<PrescriptionManagerProps> = ({
 
   const clearSearch = () => {
     setSearchTerm("");
+  };
+
+  // Helper function to get status badge style
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "REQUESTED":
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+      case "COMPLETED":
+        return "bg-green-100 text-green-800 border-green-200";
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-200";
+    }
   };
 
   return (
@@ -300,7 +335,7 @@ const PrescriptionManager: React.FC<PrescriptionManagerProps> = ({
         {/* VIEW PRESCRIPTION MODAL */}
         {showViewModal && (
           <div className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-50 p-4">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
               {/* Header */}
               <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-green-50 to-emerald-50">
                 <div className="flex items-center gap-3">
@@ -321,6 +356,7 @@ const PrescriptionManager: React.FC<PrescriptionManagerProps> = ({
                     onClick={() => {
                       setShowViewModal(false);
                       setCurrentPrescription(null);
+                      setLabRequests([]);
                     }}
                     className="p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200"
                   >
@@ -337,9 +373,9 @@ const PrescriptionManager: React.FC<PrescriptionManagerProps> = ({
                   </div>
                 ) : currentPrescription ? (
                   <div className="space-y-6">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                       {/* Patient Information */}
-                      <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+                      <div className="bg-gray-50 rounded-xl p-6 border border-gray-200 lg:col-span-1">
                         <div className="flex items-center gap-2 mb-4">
                           <FiUser className="text-green-600" />
                           <h4 className="font-semibold text-gray-900">
@@ -412,67 +448,133 @@ const PrescriptionManager: React.FC<PrescriptionManagerProps> = ({
                         </div>
                       </div>
 
-                      {/* Prescription Details */}
-                      <div className="bg-white rounded-xl p-6 border border-gray-200">
-                        <div className="flex items-center gap-2 mb-6">
-                          <FiFileText className="text-green-600" />
-                          <h4 className="font-semibold text-gray-900">
-                            Prescription Details
-                          </h4>
-                        </div>
-
-                        <div className="space-y-6">
-                          {/* Date Issued */}
-                          <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">
-                              Date Issued
-                            </label>
-                            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                              <FiCalendar className="text-gray-400" />
-                              <p className="font-medium text-gray-900">
-                                {currentPrescription.dateIssued
-                                  ? new Date(currentPrescription.dateIssued).toLocaleDateString(
-                                      "en-US",
-                                      {
-                                        year: "numeric",
-                                        month: "long",
-                                        day: "numeric",
-                                      }
-                                    )
-                                  : "-"}
-                              </p>
-                            </div>
+                      {/* Prescription Details & Lab Tests */}
+                      <div className="lg:col-span-2 space-y-6">
+                        {/* Prescription Details */}
+                        <div className="bg-white rounded-xl p-6 border border-gray-200">
+                          <div className="flex items-center gap-2 mb-6">
+                            <FiFileText className="text-green-600" />
+                            <h4 className="font-semibold text-gray-900">
+                              Prescription Details
+                            </h4>
                           </div>
 
-                          {/* Prescription Notes */}
-                          <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">
-                              Prescription Notes & Instructions
-                            </label>
-                            <div className="bg-gray-50 rounded-xl p-4 border border-gray-200 min-h-[200px]">
-                              <p className="text-gray-900 whitespace-pre-wrap">
-                                {currentPrescription.notes || "No notes provided"}
-                              </p>
-                            </div>
-                          </div>
-
-                          {/* Signature Section */}
-                          <div className="border-t pt-4 mt-4">
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <p className="text-sm font-semibold text-gray-700">
-                                  Doctor's Signature
+                          <div className="space-y-6">
+                            {/* Date Issued */}
+                            <div>
+                              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                Date Issued
+                              </label>
+                              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                                <FiCalendar className="text-gray-400" />
+                                <p className="font-medium text-gray-900">
+                                  {currentPrescription.dateIssued
+                                    ? new Date(currentPrescription.dateIssued).toLocaleDateString(
+                                        "en-US",
+                                        {
+                                          year: "numeric",
+                                          month: "long",
+                                          day: "numeric",
+                                        }
+                                      )
+                                    : "-"}
                                 </p>
-                                <p className="text-sm text-gray-500">Dr. {profile.name}</p>
+                              </div>
+                            </div>
+
+                            {/* Prescription Notes */}
+                            <div>
+                              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                Prescription Notes & Instructions
+                              </label>
+                              <div className="bg-gray-50 rounded-xl p-4 border border-gray-200 min-h-[120px]">
+                                <p className="text-gray-900 whitespace-pre-wrap">
+                                  {currentPrescription.notes || "No notes provided"}
+                                </p>
                               </div>
                             </div>
                           </div>
                         </div>
+
+                        {/* Lab Tests Section */}
+                        <div className="bg-white rounded-xl p-6 border border-gray-200">
+                          <div className="flex items-center gap-2 mb-6">
+                            <FiActivity className="text-blue-600" />
+                            <h4 className="font-semibold text-gray-900">
+                              Requested Lab Tests
+                            </h4>
+                          </div>
+
+                          {loadingLabRequests ? (
+                            <div className="flex justify-center items-center py-12">
+                              <LoadingSpinner />
+                            </div>
+                          ) : labRequests.length > 0 ? (
+                            <div className="space-y-4">
+                              {labRequests.map((labRequest) => (
+                                <div
+                                  key={labRequest.id}
+                                  className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors duration-150"
+                                >
+                                  <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                      <FiActivity className="text-blue-600" />
+                                    </div>
+                                    <div>
+                                      <p className="font-medium text-gray-900">
+                                        {labRequest.testType}
+                                      </p>
+                                      <p className="text-sm text-gray-500">
+                                        Test ID: {labRequest.id}
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-3">
+                                    <span
+                                      className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusBadge(
+                                        labRequest.status
+                                      )}`}
+                                    >
+                                      {labRequest.status}
+                                    </span>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="text-center py-8 bg-gray-50 rounded-lg border border-gray-200">
+                              <FiActivity className="text-3xl text-gray-400 mx-auto mb-3" />
+                              <p className="text-gray-600 font-medium">No Lab Tests Requested</p>
+                              <p className="text-gray-500 text-sm mt-1">
+                                No laboratory tests have been requested for this appointment.
+                              </p>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
 
-                    {/* Action Buttons */}
-                    <div className="flex justify-center gap-4 pt-6 border-t border-gray-200"></div>
+                    {/* Signature Section */}
+                    <div className="bg-white rounded-xl p-6 border border-gray-200">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-semibold text-gray-700">
+                            Doctor's Signature
+                          </p>
+                          <p className="text-sm text-gray-500">Dr. {profile.name}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm font-semibold text-gray-700">
+                            Date Issued
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            {currentPrescription.dateIssued
+                              ? new Date(currentPrescription.dateIssued).toLocaleDateString()
+                              : "-"}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 ) : (
                   // If not loading & no details loaded -> show message
