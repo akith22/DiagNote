@@ -71,15 +71,14 @@ public class PrescriptionController {
         List<PrescriptionDto> dtos = prescriptionService.getAllPrescriptionsByDoctorId();
         return ResponseEntity.ok(dtos);
     }
+
     // ---------------- New GET: Patient Details by Appointment ----------------
     @GetMapping("/appointments/{appointmentId}/patient")
     public ResponseEntity<Map<String, Object>> getPatientDetailsByAppointment(
             @PathVariable Integer appointmentId) {
 
-        Map<String, Object> patientDetails = prescriptionService.getPatientDetailsByAppointmentId(appointmentId );
+        Map<String, Object> patientDetails = prescriptionService.getPatientDetailsByAppointmentId(appointmentId);
         return ResponseEntity.ok(patientDetails);
     }
-
-
 
 }

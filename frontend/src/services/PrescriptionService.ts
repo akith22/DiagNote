@@ -1,3 +1,4 @@
+import type { Prescription } from "../types";
 import API from "./api";
 
 export interface PrescriptionDto {
@@ -96,4 +97,16 @@ prescriptionId: number  ): Promise<{
     const res = await API.get(`${API_BASE}/prescriptions/doctor`);
     return res.data;
   },
+
+  async getPatientPrescriptions(): Promise<Prescription[]> {
+    try {
+      const response = await API.get("/patient/prescriptions");
+      console.log("Prescription data received:", response.data);
+      return response.data;
+    } catch (error: any) {
+      console.error("Prescription fetch error:", error);
+      throw new Error(error.response?.data?.message || "Failed to fetch prescriptions");
+    }
+  },
+
 };

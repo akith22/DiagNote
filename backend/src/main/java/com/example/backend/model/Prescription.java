@@ -23,18 +23,39 @@ public class Prescription {
     @JoinColumn(name = "appointments_id", nullable = false)
     private Appointment appointment;
 
-    public Prescription() {}
+    public Prescription() {
+    }
 
     // Getters & Setters
-    public Integer getId() { return id; }
-    public void setId(Integer id) { this.id = id; }
+    public Integer getId() {
+        return id;
+    }
 
-    public String getNotes() { return notes; }
-    public void setNotes(String notes) { this.notes = notes; }
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
-    public LocalDateTime getDateIssued() { return dateIssued; }
-    public void setDateIssued(LocalDateTime dateIssued) { this.dateIssued = dateIssued; }
+    public String getNotes() {
+        return notes;
+    }
 
-    public Appointment getAppointment() { return appointment; }
-    public void setAppointment(Appointment appointment) { this.appointment = appointment; }
+    public void setNotes(String notes) {
+        this.notes = notes;
+    }
+
+    public LocalDateTime getDateIssued() {
+        return dateIssued;
+    }
+
+    public void setDateIssued(LocalDateTime dateIssued) {
+        this.dateIssued = dateIssued;
+    }
+
+    public Appointment getAppointment() {
+        return appointment;
+    }
+
+    public void setAppointment(Appointment appointment) {
+        this.appointment = appointment;
+    }
 }

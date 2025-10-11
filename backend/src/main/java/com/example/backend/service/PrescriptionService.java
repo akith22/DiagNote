@@ -17,6 +17,14 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import com.example.backend.dto.PrescriptionResponse;
+import com.example.backend.model.Prescription;
+import com.example.backend.repository.PrescriptionRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,8 +35,8 @@ public class PrescriptionService {
     private final UserRepository userRepository;
 
     public PrescriptionService(PrescriptionRepository prescriptionRepository,
-                               AppointmentRepository appointmentRepository,
-                               UserRepository userRepository) {
+            AppointmentRepository appointmentRepository,
+            UserRepository userRepository) {
         this.prescriptionRepository = prescriptionRepository;
         this.appointmentRepository = appointmentRepository;
         this.userRepository = userRepository;
@@ -51,13 +59,15 @@ public class PrescriptionService {
     }
 
     private String safeNotes(String notes) {
-        if (notes == null) return null;
+        if (notes == null)
+            return null;
         return notes.length() > 1000 ? notes.substring(0, 1000) : notes;
     }
 
     private User getAuthenticatedDoctor() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null) throw new RuntimeException("Not authenticated");
+        if (auth == null)
+            throw new RuntimeException("Not authenticated");
 
         String email = auth.getName(); // JWT username = email
         return userRepository.findByEmail(email)
@@ -240,4 +250,24 @@ public class PrescriptionService {
         return patientDetails;
     }
 
+    public List<PrescriptionResponse> getPrescriptionsForPatient(Integer patientId) {
+        List<Prescription> prescriptions = prescriptionRepository.findAllByPatientId(patientId);
+
+        return prescriptions.stream().map(prescription -> {
+            PrescriptionResponse.AppointmentInfo appointmentInfo = new PrescriptionResponse.AppointmentInfo(
+                    prescription.getAppointment().getId(),
+                    prescription.getAppointment().getAppointmentDateTime()
+                            .format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                    prescription.getAppointment().getAppointmentDateTime().format(DateTimeFormatter.ofPattern("HH:mm")),
+                    new PrescriptionResponse.DoctorInfo(
+                            prescription.getAppointment().getDoctor().getUser().getName(),
+                            prescription.getAppointment().getDoctor().getSpecialization()));
+
+            return new PrescriptionResponse(
+                    prescription.getId(),
+                    prescription.getNotes(),
+                    prescription.getDateIssued(),
+                    appointmentInfo);
+        }).collect(Collectors.toList());
+    }
 }
