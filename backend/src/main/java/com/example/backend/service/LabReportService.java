@@ -4,10 +4,14 @@ import com.example.backend.dto.LabReportDto;
 import com.example.backend.model.LabReport;
 import com.example.backend.model.LabRequest;
 import com.example.backend.model.LabTech;
+import com.example.backend.model.User;
 import com.example.backend.repository.LabReportRepository;
 import com.example.backend.repository.LabRequestRepository;
 import com.example.backend.repository.LabTechRepository;
+import com.example.backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -31,11 +35,22 @@ public class LabReportService {
     @Autowired
     private FileStorageService fileStorageService;
 
+    @Autowired
+    private UserRepository userRepository;
+
+
     /**
      * 🔹 Create and upload a new lab report (only if request status is REQUESTED)
      */
-    public LabReportDto uploadReport(MultipartFile file, Integer labTechId, Integer labRequestId) {
-        LabTech labTech = labTechRepository.findById(labTechId)
+
+    public LabReportDto uploadReport(MultipartFile file, Integer labRequestId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null) return null;
+
+        String email = auth.getName(); // JWT username = email
+        User user =  userRepository.findByEmail(email).orElse(null);
+
+        LabTech labTech = labTechRepository.findById(user.getUserId())
                 .orElseThrow(() -> new RuntimeException("Lab technician not found"));
 
         LabRequest labRequest = labRequestRepository.findById(labRequestId)

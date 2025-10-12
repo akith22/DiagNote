@@ -25,11 +25,10 @@ public class LabReportController {
     @PreAuthorize("hasRole('LABTECH')")
     public ResponseEntity<LabReportDto> uploadReport(
             @RequestParam("file") MultipartFile file,
-            @RequestParam("labTechId") Integer labTechId,
             @RequestParam("labRequestId") Integer labRequestId) {
 
         // Pass file and IDs directly to the service
-        LabReportDto created = labReportService.uploadReport(file, labTechId, labRequestId);
+        LabReportDto created = labReportService.uploadReport(file, labRequestId);
         return ResponseEntity.ok(created);
     }
 

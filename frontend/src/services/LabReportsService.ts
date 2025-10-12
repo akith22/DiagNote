@@ -1,10 +1,9 @@
 import api from "./api";
 
 export const labReportsService = {
-  uploadReport: async (file: File, labTechId: number, labRequestId: number) => {
+  uploadReport: async (file: File, labRequestId: number) => {
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("labTechId", labTechId.toString());
     formData.append("labRequestId", labRequestId.toString());
 
     const response = await api.post("/lab-reports/upload", formData, {
