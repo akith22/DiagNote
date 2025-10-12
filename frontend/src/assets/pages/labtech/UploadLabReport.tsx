@@ -280,3 +280,10 @@ const UploadLabReport: React.FC = () => {
 };
 
 export default UploadLabReport;
+
+
+
+
+
+
+

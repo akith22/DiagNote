@@ -52,3 +52,9 @@ public class LabReportController {
                 .orElse(ResponseEntity.notFound().build());
     }
 }
+
+
+
+
+
+

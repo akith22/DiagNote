@@ -8,3 +8,7 @@ import java.util.Optional;
 public interface LabReportRepository extends JpaRepository<LabReport, Integer> {
     Optional<LabReport> findByLabRequest(LabRequest labRequest);
 }
+
+
+
+

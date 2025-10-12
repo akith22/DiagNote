@@ -21,7 +21,7 @@ public class LabRequestController {
     /**
      * 🔹 Create a new lab request (linked to an appointment)
      */
-  /*  @PostMapping
+   /* @PostMapping
     public ResponseEntity<LabRequestDto> createLabRequest(@RequestBody LabRequestDto dto) {
         LabRequestDto created = labRequestService.createLabRequest(dto);
         return ResponseEntity.ok(created);
