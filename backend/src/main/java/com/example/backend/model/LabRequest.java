@@ -10,23 +10,37 @@ public class LabRequest {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    // enum('REQUESTED','COMPLETED')
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "ENUM('REQUESTED','COMPLETED') DEFAULT 'REQUESTED'")
     private Status status = Status.REQUESTED;
 
-    @Column(name = "test_type", length = 45, nullable = false)
+    // test_type column in DB
+    @Column(name = "test_type", length = 45)
     private String testType;
 
-    @ManyToOne
+    // Foreign key to appointments table
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "appointments_id", nullable = false)
     private Appointment appointment;
 
+    // --- Enum for status ---
     public enum Status {
         REQUESTED,
         COMPLETED
     }
 
-    // Getters and Setters
+    // --- Constructors ---
+    public LabRequest() {
+    }
+
+    public LabRequest(Status status, String testType, Appointment appointment) {
+        this.status = status;
+        this.testType = testType;
+        this.appointment = appointment;
+    }
+
+    // --- Getters and Setters ---
     public Integer getId() {
         return id;
     }
