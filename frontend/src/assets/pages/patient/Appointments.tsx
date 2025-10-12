@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { appointmentService } from "../../../services/AppointmentsService";
-import type { AppointmentResponse } from "../../../types/types";
+import type { AppointmentResponse } from "../../../types";
 import { FiTrash2, FiClock } from "react-icons/fi";
 
 interface Props {
