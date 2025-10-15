@@ -28,20 +28,28 @@ public class DoctorPatientHistoryService {
         this.prescriptionRepository = prescriptionRepository;
     }
 
-    public DoctorPatientHistoryDto getPatientHistoryByEmail(String email) {
+    // ✅ Fetch patient history using appointment ID (Integer)
+    public DoctorPatientHistoryDto getPatientHistoryByAppointmentId(Integer appointmentId) {
 
-        // ✅ Find patient directly by email
-        Patient patient = patientRepository.findByUser_Email(email)
-                .orElseThrow(() -> new NoSuchElementException("Patient not found with email: " + email));
+        // Find appointment
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new NoSuchElementException("Appointment not found with ID: " + appointmentId));
 
+        // Get patient from the appointment
+        Patient patient = appointment.getPatient();
+        if (patient == null) {
+            throw new NoSuchElementException("No patient associated with this appointment ID: " + appointmentId);
+        }
+
+        // Build DTO
         DoctorPatientHistoryDto dto = new DoctorPatientHistoryDto();
-        dto.setName(patient.getUser().getName()); // changed to getFullName()
+        dto.setName(patient.getUser().getName());
         dto.setEmail(patient.getUser().getEmail());
         dto.setGender(patient.getGender());
         dto.setAge(patient.getAge());
         dto.setAddress(patient.getAddress());
 
-        // ✅ Fetch appointments directly from repository
+        // ✅ Fetch all appointments of this patient
         List<Appointment> appointments = appointmentRepository.findByPatient_Id(patient.getId())
                 .orElse(List.of());
 
@@ -54,7 +62,7 @@ public class DoctorPatientHistoryService {
             return ai;
         }).collect(Collectors.toList());
 
-        // ✅ Fetch prescriptions directly from repository
+        // ✅ Fetch prescriptions related to the patient
         List<Prescription> prescriptions = prescriptionRepository.findByAppointment_Patient_Id(patient.getId())
                 .orElse(List.of());
 

@@ -6,6 +6,8 @@ export interface AppointmentDto {
   patientName: string;
   patientId: number; // ✅ added patientId
   date: string;
+  
+  
   status: "PENDING" | "ACCEPTED" | "DECLINED" | "CANCELLED" | "COMPLETED";
 }
 

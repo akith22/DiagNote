@@ -19,18 +19,16 @@ public class DoctorPatientHistoryController {
         this.doctorPatientHistoryService = doctorPatientHistoryService;
     }
 
-    // ✅ POST - Accept plain text email in body and return patient history
-    @GetMapping ("/patient-history")
-    public ResponseEntity<?> getPatientHistoryByEmail(@RequestBody String email) {
+    // Get patient history by appointment ID
+    @GetMapping("/patient-history/{appointmentId}")
+    public ResponseEntity<?> getPatientHistoryByAppointmentId(@PathVariable Integer appointmentId) {
         try {
-            // Remove quotes if Postman sends raw text
-            email = email.replace("\"", "").trim();
-
-            DoctorPatientHistoryDto dto = doctorPatientHistoryService.getPatientHistoryByEmail(email);
+            DoctorPatientHistoryDto dto = doctorPatientHistoryService.getPatientHistoryByAppointmentId(appointmentId);
             return ResponseEntity.ok(dto);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("message", "No patient found with email: " + email));
+                    .body(Map.of("message", "No patient found with appointment ID: " + appointmentId));
         }
     }
+
 }

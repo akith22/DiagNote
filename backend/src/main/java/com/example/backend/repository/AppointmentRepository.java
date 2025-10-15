@@ -37,4 +37,6 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Intege
 
     Optional<List<Appointment>> findByPatient_Id(Integer patientId);
 
+
+
 }

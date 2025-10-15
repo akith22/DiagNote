@@ -73,10 +73,13 @@ import PatientDashboard from "./assets/pages/patient/PatientDashboard";
 import LabTechDashboard from "./assets/pages/labtech/LabTechDashboard";
 import DoctorSearch from "./assets/pages/DoctorSearch";
 import Prescription from "./assets/pages/doctor/Prescription";
+import PatientHistory from './assets/pages/doctor/PatientHistory';
+
 
 // 🔹 Import new labtech pages
 import LabRequests from "./assets/pages/labtech/LabRequests";
 import UploadLabReport from "./assets/pages/labtech/UploadLabReport";
+
 
 function App() {
   return (
@@ -99,6 +102,14 @@ function App() {
         <Route path="/doctor/create-prescription/:id" element={<Prescription show={true}  />} />
 
         <Route path="/doctor/edit-prescription/:id" element={<Prescription show={false}  />} />
+
+        <Route path="/doctor/patient-history/:appointmentId" element={<PatientHistory />} />
+
+
+
+
+
+
 
         {/* Patient Routes */}
         <Route

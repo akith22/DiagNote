@@ -7,6 +7,7 @@ import {
   FiSearch,
   FiHash,
   FiCalendar,
+  FiFileText,
 } from "react-icons/fi";
 import LoadingSpinner from "../../../components/common/LoadingSpinner";
 import { doctorAppointmentService } from "../../../services/DoctorAppointmenrService";
@@ -22,7 +23,7 @@ const TABS = [
   { id: "PENDING", label: "Pending" },
   { id: "ACCEPTED", label: "Accepted" },
   { id: "DECLINED", label: "Declined" },
-  { id: "COMPLETED", label: "Completed" }, // NEW tab
+  { id: "COMPLETED", label: "Completed" },
 ];
 
 const normalizeStatus = (status?: string) => {
@@ -56,7 +57,6 @@ const AppointmentManager: React.FC<AppointmentManagerProps> = ({
   );
   const [query, setQuery] = useState("");
   const navigate = useNavigate();
-
 
   const fetchAllAppointments = async () => {
     try {
@@ -190,7 +190,10 @@ const AppointmentManager: React.FC<AppointmentManagerProps> = ({
     );
 
     navigate(`/doctor/create-prescription/${appointment.id}`);
-    // setActiveTab("COMPLETED"); // switch tab automatically
+  };
+
+  const handleViewPatientHistory = (appointmentId: number) => {
+    navigate(`/doctor/patient-history/${appointmentId}`);
   };
 
   const displayedAppointments = useMemo(() => {
@@ -388,6 +391,13 @@ const AppointmentManager: React.FC<AppointmentManagerProps> = ({
                         className="flex items-center py-2 px-4 rounded-xl shadow-sm transition-all duration-200 bg-blue-600 text-white hover:bg-blue-700"
                       >
                         Prescribe
+                      </button>
+                      <button
+                        onClick={() => handleViewPatientHistory(appt.id)}
+                        className="flex items-center py-2 px-4 rounded-xl shadow-sm transition-all duration-200 bg-purple-600 text-white hover:bg-purple-700"
+                      >
+                        <FiFileText className="mr-2" />
+                        View History
                       </button>
                     </>
                   ) : null}
