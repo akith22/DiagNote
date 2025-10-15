@@ -340,7 +340,7 @@
 // export default PatientDashboard;
 
 import React, { useState, useEffect } from "react";
-import type { PatientProfile, PatientDetails, User } from "../../../types";
+import type { PatientProfile, PatientDetails } from "../../../types";
 import { getUser, logout } from "../../../api/auth";
 import { patientService } from "../../../services/PatientService";
 import LoadingSpinner from "../../../components/common/LoadingSpinner";
@@ -360,7 +360,7 @@ import {
   FiCheck,
   FiHeart,
   FiLogOut,
-  FiMapPin
+  FiMapPin,
 } from "react-icons/fi";
 
 const PatientDashboard: React.FC = () => {
@@ -682,4 +682,3 @@ const PatientDashboard: React.FC = () => {
 };
 
 export default PatientDashboard;
-

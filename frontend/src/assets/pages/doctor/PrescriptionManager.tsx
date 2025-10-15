@@ -2,18 +2,13 @@ import React, { useEffect, useState } from "react";
 import type { DoctorProfile } from "../../../types";
 import {
   FiFileText,
-  FiPlus,
   FiEdit3,
-  FiTrash2,
   FiX,
-  FiCheck,
   FiEye,
   FiUser,
   FiCalendar,
   FiMapPin,
   FiInfo,
-  FiPrinter,
-  FiDownload,
   FiSearch,
   FiActivity, // New icon for lab tests
 } from "react-icons/fi";
@@ -52,8 +47,6 @@ interface PrescriptionDetails {
 
 const PrescriptionManager: React.FC<PrescriptionManagerProps> = ({
   profile,
-  formDataFromAppointment,
-  onPrescriptionCreated,
 }) => {
   const navigate = useNavigate();
 
@@ -155,21 +148,21 @@ const PrescriptionManager: React.FC<PrescriptionManagerProps> = ({
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (!window.confirm("Are you sure you want to delete this prescription?"))
-      return;
-    try {
-      setLoading(true);
-      await prescriptionService.deletePrescription(id);
-      await loadPrescriptions();
-      alert("Prescription deleted successfully.");
-    } catch (err) {
-      console.error("❌ Error deleting prescription", err);
-      alert("Failed to delete prescription.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  // const handleDelete = async (id: number) => {
+  //   if (!window.confirm("Are you sure you want to delete this prescription?"))
+  //     return;
+  //   try {
+  //     setLoading(true);
+  //     await prescriptionService.deletePrescription(id);
+  //     await loadPrescriptions();
+  //     alert("Prescription deleted successfully.");
+  //   } catch (err) {
+  //     console.error("❌ Error deleting prescription", err);
+  //     alert("Failed to delete prescription.");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const clearSearch = () => {
     setSearchTerm("");
