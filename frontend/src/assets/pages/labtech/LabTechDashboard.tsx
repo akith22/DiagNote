@@ -358,7 +358,7 @@
 //                   Add New Test
 //                 </button>
 //               </div>
-              
+
 //               <div className="bg-white rounded-2xl shadow-lg p-6">
 //                 <h3 className="font-bold text-lg text-gray-800 mb-4 flex items-center">
 //                   <FiBarChart2 className="text-blue-500 mr-2" />
@@ -392,13 +392,8 @@
 
 // export default LabTechDashboard;
 
-
-
-
-
-
 import React, { useState, useEffect } from "react";
-import type { LabTechProfile, LabTechDetails, User } from "../../../types";
+import type { LabTechProfile, LabTechDetails } from "../../../types";
 import { getUser, logout } from "../../../api/auth";
 import { labTechService } from "../../../services/LabTechService";
 import LoadingSpinner from "../../../components/common/LoadingSpinner";
@@ -417,7 +412,6 @@ import {
   FiCheckCircle,
   FiXCircle,
   FiAward,
-  FiClock,
   FiBell,
 } from "react-icons/fi";
 
@@ -467,7 +461,9 @@ const LabTechDashboard: React.FC = () => {
   };
 
   const handleDeleteProfile = async () => {
-    if (window.confirm("Are you sure you want to delete your department details?")) {
+    if (
+      window.confirm("Are you sure you want to delete your department details?")
+    ) {
       try {
         setError("");
         setSuccess("");
@@ -543,7 +539,9 @@ const LabTechDashboard: React.FC = () => {
                   </span>
                 </div>
               </div>
-              <h2 className="text-xl font-bold text-gray-800">{profile?.name}</h2>
+              <h2 className="text-xl font-bold text-gray-800">
+                {profile?.name}
+              </h2>
               <p className="text-gray-600">{user.email}</p>
               <div className="mt-2 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">
                 {user.role}
@@ -557,8 +555,6 @@ const LabTechDashboard: React.FC = () => {
                   <span>Department: {profile.department}</span>
                 </div>
               )}
-
-              
             </div>
           </div>
         </div>
@@ -701,9 +697,15 @@ const LabTechDashboard: React.FC = () => {
 
             {activeTab === "tests" && <LabRequests />}
 
-            {activeTab === "results" && <div>Results Section (coming soon)</div>}
-            {activeTab === "schedule" && <div>Schedule Section (coming soon)</div>}
-            {activeTab === "settings" && <div>Settings Section (coming soon)</div>}
+            {activeTab === "results" && (
+              <div>Results Section (coming soon)</div>
+            )}
+            {activeTab === "schedule" && (
+              <div>Schedule Section (coming soon)</div>
+            )}
+            {activeTab === "settings" && (
+              <div>Settings Section (coming soon)</div>
+            )}
           </div>
         </div>
       </div>

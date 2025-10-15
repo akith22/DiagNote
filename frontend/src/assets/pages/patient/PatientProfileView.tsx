@@ -9,7 +9,6 @@ interface PatientProfileViewProps {
 
 const PatientProfileView: React.FC<PatientProfileViewProps> = ({
   profile,
-  onEdit,
   onDelete,
 }) => {
   // Helper function to display "Not provided" for empty values

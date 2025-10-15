@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { FiCheckCircle, FiXCircle, FiRefreshCcw, FiUpload, FiSearch, FiFilter } from "react-icons/fi";
+import {
+  FiCheckCircle,
+  FiXCircle,
+  FiRefreshCcw,
+  FiUpload,
+  FiSearch,
+  FiFilter,
+} from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import { labRequestsService } from "../../../services/LabRequestsService";
 import type { LabRequest } from "../../../services/LabRequestsService";
@@ -10,7 +17,7 @@ const LabRequests: React.FC = () => {
   const [filteredRequests, setFilteredRequests] = useState<LabRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  // const [success, setSuccess] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const navigate = useNavigate();
@@ -34,16 +41,21 @@ const LabRequests: React.FC = () => {
     let filtered = labRequests;
 
     if (searchTerm) {
-      filtered = filtered.filter(request =>
-        request.patientName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        request.doctorName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        request.testType?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        request.id?.toString().includes(searchTerm)
+      filtered = filtered.filter(
+        (request) =>
+          request.patientName
+            ?.toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          request.doctorName
+            ?.toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          request.testType?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          request.id?.toString().includes(searchTerm)
       );
     }
 
     if (statusFilter !== "ALL") {
-      filtered = filtered.filter(request => request.status === statusFilter);
+      filtered = filtered.filter((request) => request.status === statusFilter);
     }
 
     setFilteredRequests(filtered);
@@ -55,15 +67,25 @@ const LabRequests: React.FC = () => {
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
-      REQUESTED: { color: "bg-yellow-50 text-yellow-700 border-yellow-200", label: "Requested" },
-      COMPLETED: { color: "bg-green-50 text-green-700 border-green-200", label: "Completed" }
+      REQUESTED: {
+        color: "bg-yellow-50 text-yellow-700 border-yellow-200",
+        label: "Requested",
+      },
+      COMPLETED: {
+        color: "bg-green-50 text-green-700 border-green-200",
+        label: "Completed",
+      },
     };
 
-    const config = statusConfig[status as keyof typeof statusConfig] || 
-                  { color: "bg-gray-50 text-gray-700 border-gray-200", label: status };
+    const config = statusConfig[status as keyof typeof statusConfig] || {
+      color: "bg-gray-50 text-gray-700 border-gray-200",
+      label: status,
+    };
 
     return (
-      <span className={`px-3 py-1.5 text-xs font-medium rounded-full border ${config.color}`}>
+      <span
+        className={`px-3 py-1.5 text-xs font-medium rounded-full border ${config.color}`}
+      >
         {config.label}
       </span>
     );
@@ -76,28 +98,25 @@ const LabRequests: React.FC = () => {
       {/* Header Section */}
       <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center mb-8 gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Lab Test Requests</h1>
-          <p className="text-gray-600">Manage and track laboratory test requests</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
+            Lab Test Requests
+          </h1>
+          <p className="text-gray-600">
+            Manage and track laboratory test requests
+          </p>
         </div>
         <button
           onClick={fetchLabRequests}
           className="flex items-center px-4 py-2.5 bg-white text-gray-700 rounded-lg border border-gray-300 hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 shadow-sm self-start lg:self-auto"
         >
-          <FiRefreshCcw className="mr-2 text-gray-500" /> 
+          <FiRefreshCcw className="mr-2 text-gray-500" />
           Refresh
         </button>
       </div>
 
-      {/* Messages */}
-      {success && (
-        <div className="mb-6 p-4 bg-green-50 border border-green-200 text-green-700 rounded-lg flex items-center animate-fade-in">
-          <FiCheckCircle className="mr-3 text-green-500 flex-shrink-0" /> 
-          <span className="font-medium">{success}</span>
-        </div>
-      )}
       {error && (
         <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg flex items-center animate-fade-in">
-          <FiXCircle className="mr-3 text-red-500 flex-shrink-0" /> 
+          <FiXCircle className="mr-3 text-red-500 flex-shrink-0" />
           <span className="font-medium">{error}</span>
         </div>
       )}
@@ -118,7 +137,7 @@ const LabRequests: React.FC = () => {
               className="pl-10 pr-4 py-2.5 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
             />
           </div>
-          
+
           {/* Status Filter */}
           <div className="flex items-center gap-2">
             <FiFilter className="text-gray-400" />
@@ -138,7 +157,8 @@ const LabRequests: React.FC = () => {
       {/* Results Count */}
       <div className="flex justify-between items-center mb-4">
         <p className="text-sm text-gray-600">
-          Showing <span className="font-semibold">{filteredRequests.length}</span> of{" "}
+          Showing{" "}
+          <span className="font-semibold">{filteredRequests.length}</span> of{" "}
           <span className="font-semibold">{labRequests.length}</span> requests
         </p>
       </div>
@@ -149,10 +169,12 @@ const LabRequests: React.FC = () => {
           <div className="text-gray-400 mb-3">
             <FiSearch size={48} className="mx-auto" />
           </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No lab requests found</h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">
+            No lab requests found
+          </h3>
           <p className="text-gray-600 max-w-md mx-auto">
-            {labRequests.length === 0 
-              ? "There are no lab requests available at the moment." 
+            {labRequests.length === 0
+              ? "There are no lab requests available at the moment."
               : "No requests match your current filters. Try adjusting your search criteria."}
           </p>
         </div>
@@ -162,28 +184,53 @@ const LabRequests: React.FC = () => {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="py-4 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Request ID</th>
-                  <th className="py-4 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Test Type</th>
-                  <th className="py-4 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Appointment ID</th>
-                  <th className="py-4 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Patient Name</th>
-                  <th className="py-4 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Doctor Name</th>
-                  <th className="py-4 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Status</th>
-                  <th className="py-4 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Actions</th>
+                  <th className="py-4 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    Request ID
+                  </th>
+                  <th className="py-4 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    Test Type
+                  </th>
+                  <th className="py-4 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    Appointment ID
+                  </th>
+                  <th className="py-4 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    Patient Name
+                  </th>
+                  <th className="py-4 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    Doctor Name
+                  </th>
+                  <th className="py-4 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="py-4 px-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredRequests.map((req) => (
-                  <tr key={req.id} className="hover:bg-gray-50 transition-colors duration-150 ease-in-out">
+                  <tr
+                    key={req.id}
+                    className="hover:bg-gray-50 transition-colors duration-150 ease-in-out"
+                  >
                     <td className="py-4 px-4 whitespace-nowrap">#{req.id}</td>
                     <td className="py-4 px-4">{req.testType}</td>
-                    <td className="py-4 px-4 whitespace-nowrap">#{req.appointmentId}</td>
+                    <td className="py-4 px-4 whitespace-nowrap">
+                      #{req.appointmentId}
+                    </td>
                     <td className="py-4 px-4">{req.patientName ?? "N/A"}</td>
                     <td className="py-4 px-4">{req.doctorName ?? "N/A"}</td>
-                    <td className="py-4 px-4 whitespace-nowrap">{getStatusBadge(req.status)}</td>
+                    <td className="py-4 px-4 whitespace-nowrap">
+                      {getStatusBadge(req.status)}
+                    </td>
                     <td className="py-4 px-4 whitespace-nowrap">
                       {req.status === "REQUESTED" ? (
                         <button
-                          onClick={() => navigate(`/labtech/upload-report/${req.id}`, { state: { labRequest: req } })}
+                          onClick={() =>
+                            navigate(`/labtech/upload-report/${req.id}`, {
+                              state: { labRequest: req },
+                            })
+                          }
                           className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 transition-all duration-200 shadow-sm"
                         >
                           <FiUpload className="mr-2" /> Upload Report
