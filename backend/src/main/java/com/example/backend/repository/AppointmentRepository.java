@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 
 public interface AppointmentRepository extends JpaRepository<Appointment, Integer> {
@@ -33,4 +34,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Intege
 
     // Optionally find upcoming accepted
     List<Appointment> findByDoctorIdAndStatusAndAppointmentDateTimeAfterOrderByAppointmentDateTimeAsc(Integer doctorId, AppointmentStatus status, LocalDateTime from);
+
+    Optional<List<Appointment>> findByPatient_Id(Integer patientId);
+
 }
