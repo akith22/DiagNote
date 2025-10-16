@@ -428,7 +428,7 @@ export const LabRequestsTable: React.FC<LabRequestsTableProps> = ({ refreshTrigg
                           onClick={() => doctorLabReportService.openReportFile(report.reportFileName)}
                           className="px-3 py-1 bg-blue-600 text-white rounded-lg text-xs"
                         >
-                          REPORT
+                          View Report
                         </button>
                       ) : (
                         <span className="text-gray-400 text-xs">Not uploaded</span>
