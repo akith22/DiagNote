@@ -3,43 +3,39 @@ package com.example.backend.dto;
 import java.time.LocalDateTime;
 
 public class DoctorLabReportDto {
-
-    private Integer reportId;
-    private String reportFile;
+    private Integer id;
+    private String reportFileName;
     private LocalDateTime dateIssued;
-    private Integer labTechId;
+    private String labTechName;
     private Integer labRequestId;
     private String testType;
-    private String labRequestStatus;
-    private Integer appointmentId;
+    private String patientName;
 
     public DoctorLabReportDto() {}
 
-    public DoctorLabReportDto(Integer reportId, String reportFile, LocalDateTime dateIssued,
-                              Integer labTechId, Integer labRequestId, String testType,
-                              String labRequestStatus, Integer appointmentId) {
-        this.reportId = reportId;
-        this.reportFile = reportFile;
+    public DoctorLabReportDto(Integer id, String reportFileName, LocalDateTime dateIssued,
+                              String labTechName, Integer labRequestId,
+                              String testType, String patientName) {
+        this.id = id;
+        this.reportFileName = reportFileName;
         this.dateIssued = dateIssued;
-        this.labTechId = labTechId;
+        this.labTechName = labTechName;
         this.labRequestId = labRequestId;
         this.testType = testType;
-        this.labRequestStatus = labRequestStatus;
-        this.appointmentId = appointmentId;
+        this.patientName = patientName;
     }
 
-    // --- Getters & Setters ---
-    public Integer getReportId() { return reportId; }
-    public void setReportId(Integer reportId) { this.reportId = reportId; }
+    public Integer getId() { return id; }
+    public void setId(Integer id) { this.id = id; }
 
-    public String getReportFile() { return reportFile; }
-    public void setReportFile(String reportFile) { this.reportFile = reportFile; }
+    public String getReportFileName() { return reportFileName; }
+    public void setReportFileName(String reportFileName) { this.reportFileName = reportFileName; }
 
     public LocalDateTime getDateIssued() { return dateIssued; }
     public void setDateIssued(LocalDateTime dateIssued) { this.dateIssued = dateIssued; }
 
-    public Integer getLabTechId() { return labTechId; }
-    public void setLabTechId(Integer labTechId) { this.labTechId = labTechId; }
+    public String getLabTechName() { return labTechName; }
+    public void setLabTechName(String labTechName) { this.labTechName = labTechName; }
 
     public Integer getLabRequestId() { return labRequestId; }
     public void setLabRequestId(Integer labRequestId) { this.labRequestId = labRequestId; }
@@ -47,9 +43,6 @@ public class DoctorLabReportDto {
     public String getTestType() { return testType; }
     public void setTestType(String testType) { this.testType = testType; }
 
-    public String getLabRequestStatus() { return labRequestStatus; }
-    public void setLabRequestStatus(String labRequestStatus) { this.labRequestStatus = labRequestStatus; }
-
-    public Integer getAppointmentId() { return appointmentId; }
-    public void setAppointmentId(Integer appointmentId) { this.appointmentId = appointmentId; }
+    public String getPatientName() { return patientName; }
+    public void setPatientName(String patientName) { this.patientName = patientName; }
 }
