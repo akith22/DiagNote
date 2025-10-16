@@ -14,6 +14,14 @@ public class DoctorPatientHistoryDto {
     private List<AppointmentInfo> appointments;
     private List<PrescriptionInfo> prescriptions;
 
+    public DoctorPatientHistoryDto(String name, String email, String gender, Integer age, String address) {
+        this.name = name;
+        this.email = email;
+        this.gender = gender;
+        this.age = age;
+        this.address = address;
+    }
+
     // Inner DTOs
     public static class AppointmentInfo {
         private Integer id;

@@ -103,7 +103,7 @@ function App() {
 
         <Route path="/doctor/edit-prescription/:id" element={<Prescription show={false}  />} />
 
-        <Route path="/doctor/patient-history/:appointmentId" element={<PatientHistory />} />
+        <Route path="/patient/:email" element={<PatientHistory />} />
 
 
 

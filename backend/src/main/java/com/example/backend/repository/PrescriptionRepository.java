@@ -20,4 +20,6 @@ public interface PrescriptionRepository extends JpaRepository<Prescription, Inte
 
     Optional<List<Prescription>> findByAppointment_Patient_Id(Integer patientId);
 
+
+
 }

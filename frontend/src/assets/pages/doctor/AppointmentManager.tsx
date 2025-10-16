@@ -392,13 +392,7 @@ const AppointmentManager: React.FC<AppointmentManagerProps> = ({
                       >
                         Prescribe
                       </button>
-                      <button
-                        onClick={() => handleViewPatientHistory(appt.id)}
-                        className="flex items-center py-2 px-4 rounded-xl shadow-sm transition-all duration-200 bg-purple-600 text-white hover:bg-purple-700"
-                      >
-                        <FiFileText className="mr-2" />
-                        View History
-                      </button>
+                      
                     </>
                   ) : null}
                 </div>
