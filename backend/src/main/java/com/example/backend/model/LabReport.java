@@ -73,3 +73,6 @@ public class LabReport {
         this.labRequest = labRequest;
     }
 }
+
+
+

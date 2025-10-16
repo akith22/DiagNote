@@ -1,72 +1,18 @@
-//package com.example.backend.controller;
-//
-//import com.example.backend.dto.LabReportDto;
-//import com.example.backend.service.LabReportService;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.http.ResponseEntity;
-//import org.springframework.security.access.prepost.PreAuthorize;
-//import org.springframework.web.bind.annotation.*;
-//import org.springframework.web.multipart.MultipartFile;
-//
-//import java.util.List;
-//
-//@RestController
-//@RequestMapping("/api/lab-reports")
-//@PreAuthorize("hasAnyRole('LABTECH')")
-//public class LabReportController {
-//
-//    @Autowired
-//    private LabReportService labReportService;
-//
-//    /**
-//     * 🔹 Upload a lab report (only by Lab Technician for REQUESTED tests)
-//     */
-//    @PostMapping("/upload")
-//    @PreAuthorize("hasRole('LABTECH')")
-//    public ResponseEntity<LabReportDto> uploadReport(
-//            @RequestParam("file") MultipartFile file,
-//            @RequestParam("labRequestId") Integer labRequestId) {
-//
-//        // Pass file and IDs directly to the service
-//        LabReportDto created = labReportService.uploadReport(file, labRequestId);
-//        return ResponseEntity.ok(created);
-//    }
-//
-//    /**
-//     * 🔹 Get all reports
-//     */
-//    @GetMapping
-//    public ResponseEntity<List<LabReportDto>> getAllReports() {
-//        List<LabReportDto> reports = labReportService.getAllReports();
-//        return ResponseEntity.ok(reports);
-//    }
-//
-//    /**
-//     * 🔹 Get report by LabRequest ID
-//     */
-//    @GetMapping("/lab-request/{labRequestId}")
-//    public ResponseEntity<LabReportDto> getReportByLabRequest(@PathVariable Integer labRequestId) {
-//        return labReportService.getReportByLabRequest(labRequestId)
-//                .map(ResponseEntity::ok)
-//                .orElse(ResponseEntity.notFound().build());
-//    }
-//}
-
-
-
-
-
-
 package com.example.backend.controller;
 
 import com.example.backend.dto.LabReportDto;
+import com.example.backend.service.FileStorageService;
 import com.example.backend.service.LabReportService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.springframework.core.io.Resource;
+import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 
 @RestController
@@ -77,9 +23,9 @@ public class LabReportController {
     @Autowired
     private LabReportService labReportService;
 
-    /**
-     * 🔹 Upload multiple lab reports at once (only by Lab Technician for REQUESTED tests)
-     */
+    @Autowired
+    private FileStorageService fileStorageService;
+
     @PostMapping("/upload-multiple")
     public ResponseEntity<List<LabReportDto>> uploadMultipleReports(
             @RequestParam("files") MultipartFile[] files,
@@ -89,9 +35,6 @@ public class LabReportController {
         return ResponseEntity.ok(createdReports);
     }
 
-    /**
-     * 🔹 Upload a single lab report (still supported)
-     */
     @PostMapping("/upload")
     public ResponseEntity<LabReportDto> uploadReport(
             @RequestParam("file") MultipartFile file,
@@ -101,21 +44,32 @@ public class LabReportController {
         return ResponseEntity.ok(created);
     }
 
-    /**
-     * 🔹 Get all reports
-     */
     @GetMapping
     public ResponseEntity<List<LabReportDto>> getAllReports() {
         List<LabReportDto> reports = labReportService.getAllReports();
         return ResponseEntity.ok(reports);
     }
 
-    /**
-     * 🔹 Get report by LabRequest ID
-     */
     @GetMapping("/lab-request/{labRequestId}")
     public ResponseEntity<List<LabReportDto>> getReportsByLabRequest(@PathVariable Integer labRequestId) {
         List<LabReportDto> reports = labReportService.getReportsByLabRequest(labRequestId);
         return ResponseEntity.ok(reports);
+    }
+
+    // 🔹 New endpoint to serve uploaded files
+    @GetMapping("/files/{fileName:.+}")
+    public ResponseEntity<Resource> getFile(@PathVariable String fileName) {
+        Resource resource = fileStorageService.loadFileAsResource(fileName);
+
+        String contentType = "application/octet-stream";
+        try {
+            Path path = resource.getFile().toPath();
+            contentType = Files.probeContentType(path);
+        } catch (IOException ignored) {}
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + resource.getFilename() + "\"")
+                .body(resource);
     }
 }

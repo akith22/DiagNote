@@ -1,22 +1,21 @@
 package com.example.backend.service;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.net.MalformedURLException;
+import java.nio.file.*;
 
 @Service
 public class FileStorageService {
 
     private final Path fileStorageLocation;
 
-    // Inject the folder path from application.properties or default to "uploads"
     public FileStorageService(@Value("${file.upload-dir:uploads}") String uploadDir) {
         this.fileStorageLocation = Paths.get(uploadDir).toAbsolutePath().normalize();
 
@@ -27,38 +26,39 @@ public class FileStorageService {
         }
     }
 
-    /**
-     * Save the uploaded file to the server
-     * @param file MultipartFile from request
-     * @return stored file name
-     */
     public String storeFile(MultipartFile file) {
-        // Normalize file name
         String fileName = StringUtils.cleanPath(file.getOriginalFilename());
 
         try {
-            // Check for invalid characters
             if (fileName.contains("..")) {
-                throw new RuntimeException("Filename contains invalid path sequence " + fileName);
+                throw new RuntimeException("Invalid path sequence " + fileName);
             }
 
-            // Copy file to the target location (replace existing file)
             Path targetLocation = this.fileStorageLocation.resolve(fileName);
             Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
 
             return fileName;
         } catch (IOException ex) {
-            throw new RuntimeException("Could not store file " + fileName + ". Please try again.", ex);
+            throw new RuntimeException("Could not store file " + fileName, ex);
         }
     }
 
-    /**
-     * Get the full path of a stored file
-     */
     public Path getFilePath(String fileName) {
         return this.fileStorageLocation.resolve(fileName).normalize();
     }
+
+    // 🔹 New method to load file as Resource (for download/view)
+    public Resource loadFileAsResource(String fileName) {
+        try {
+            Path filePath = getFilePath(fileName);
+            Resource resource = new UrlResource(filePath.toUri());
+            if (resource.exists()) {
+                return resource;
+            } else {
+                throw new RuntimeException("File not found: " + fileName);
+            }
+        } catch (MalformedURLException ex) {
+            throw new RuntimeException("File not found: " + fileName, ex);
+        }
+    }
 }
-
-
-
