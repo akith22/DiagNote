@@ -2,7 +2,14 @@ import React, { useEffect, useState } from "react";
 import { labReportService } from "../../../services/LabReportService";
 import type { LabReport } from "../../../services/LabReportService";
 import LoadingSpinner from "../../../components/common/LoadingSpinner";
-import { FiDownload, FiFileText, FiCalendar, FiUser, FiFile, FiBarChart2 } from "react-icons/fi";
+import {
+  FiDownload,
+  FiFileText,
+  FiCalendar,
+  FiUser,
+  FiFile,
+  FiBarChart2,
+} from "react-icons/fi";
 
 const LabReports: React.FC = () => {
   const [reports, setReports] = useState<LabReport[]>([]);
@@ -19,7 +26,8 @@ const LabReports: React.FC = () => {
       const data = await labReportService.getReports();
       setReports(
         data.sort(
-          (a, b) => new Date(b.dateIssued).getTime() - new Date(a.dateIssued).getTime()
+          (a, b) =>
+            new Date(b.dateIssued).getTime() - new Date(a.dateIssued).getTime()
         )
       );
     } catch (err: any) {
@@ -40,151 +48,43 @@ const LabReports: React.FC = () => {
           <!DOCTYPE html>
           <html>
             <head>
+              <meta name="viewport" content="width=device-width, initial-scale=1" />
               <title>${report.reportName}</title>
               <style>
-                * { margin: 0; padding: 0; box-sizing: border-box; }
-                body { 
-                  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
-                  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                  min-height: 100vh;
-                  padding: 20px;
-                  display: flex;
-                  align-items: center;
-                  justify-content: center;
-                }
-                .glass-container {
-                  background: rgba(255, 255, 255, 0.25);
-                  backdrop-filter: blur(20px);
-                  -webkit-backdrop-filter: blur(20px);
-                  border: 1px solid rgba(255, 255, 255, 0.18);
-                  border-radius: 24px;
-                  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-                  width: 95%;
-                  max-width: 1400px;
-                  overflow: hidden;
-                }
-                .header {
-                  background: rgba(255, 255, 255, 0.3);
-                  padding: 32px;
-                  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-                  backdrop-filter: blur(10px);
-                }
-                .header h2 { 
-                  color: #1e293b; 
-                  font-size: 28px; 
-                  font-weight: 700;
-                  margin-bottom: 16px;
-                  line-height: 1.3;
-                  text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                }
-                .meta-info {
-                  display: flex;
-                  flex-wrap: wrap;
-                  gap: 16px;
-                }
-                .meta-item {
-                  display: flex;
-                  align-items: center;
-                  gap: 10px;
-                  padding: 10px 16px;
-                  background: rgba(255, 255, 255, 0.4);
-                  border-radius: 12px;
-                  border: 1px solid rgba(255, 255, 255, 0.3);
-                  color: #334155;
-                  font-weight: 500;
-                  font-size: 14px;
-                  backdrop-filter: blur(10px);
-                  transition: all 0.3s ease;
-                }
-                .meta-item:hover {
-                  background: rgba(255, 255, 255, 0.6);
-                  transform: translateY(-2px);
-                }
-                .preview-container {
-                  padding: 40px;
-                  background: rgba(255, 255, 255, 0.15);
-                  min-height: 75vh;
-                  display: flex;
-                  align-items: center;
-                  justify-content: center;
-                  backdrop-filter: blur(10px);
-                }
-                iframe, img { 
-                  width: 100%; 
-                  height: 75vh; 
-                  border: none; 
-                  border-radius: 20px;
-                  box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-                  background: white;
-                  border: 1px solid rgba(255, 255, 255, 0.3);
-                }
-                .watermark {
-                  position: fixed;
-                  bottom: 30px;
-                  right: 30px;
-                  background: rgba(59, 130, 246, 0.9);
-                  color: white;
-                  padding: 14px 24px;
-                  border-radius: 16px;
-                  font-size: 14px;
-                  font-weight: 600;
-                  box-shadow: 0 8px 32px rgba(59, 130, 246, 0.3);
-                  backdrop-filter: blur(10px);
-                  border: 1px solid rgba(255, 255, 255, 0.2);
-                  z-index: 1000;
-                }
-                @media (max-width: 768px) {
-                  body { padding: 16px; }
-                  .header { padding: 24px; }
-                  .preview-container { padding: 24px; }
-                  .meta-info { gap: 12px; }
-                  .meta-item { flex: 1; min-width: 140px; }
-                }
+          html, body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            background: #f8fafc;
+            overflow: hidden;
+          }
+          .preview-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+          }
+          iframe, img {
+            width: 100vw;
+            height: 100vh;
+            border: none;
+            border-radius: 0;
+            background: white;
+            box-shadow: none;
+            object-fit: contain;
+            display: block;
+          }
               </style>
             </head>
             <body>
-              <div class="watermark">
-                🔬 Lab Report Preview
-              </div>
-              <div class="glass-container">
-                <div class="header">
-                  <h2>${report.reportName}</h2>
-                  <div class="meta-info">
-                    <span class="meta-item">
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                        <line x1="16" y1="2" x2="16" y2="6"></line>
-                        <line x1="8" y1="2" x2="8" y2="6"></line>
-                        <line x1="3" y1="10" x2="21" y2="10"></line>
-                      </svg>
-                      ${new Date(report.dateIssued).toLocaleString()}
-                    </span>
-                    <span class="meta-item">
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                        <circle cx="12" cy="7" r="4"></circle>
-                      </svg>
-                      ${report.uploadedBy}
-                    </span>
-                    <span class="meta-item">
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                        <polyline points="14,2 14,8 20,8"></polyline>
-                        <line x1="16" y1="13" x2="8" y2="13"></line>
-                        <line x1="16" y1="17" x2="8" y2="17"></line>
-                        <polyline points="10,9 9,9 8,9"></polyline>
-                      </svg>
-                      ${report.fileFormat.toUpperCase()}
-                    </span>
-                  </div>
-                </div>
-                <div class="preview-container">
-                  ${
-                    report.fileFormat.toLowerCase() === "pdf"
-                      ? `<iframe src="${fileURL}"></iframe>`
-                      : `<img src="${fileURL}" alt="${report.reportName}" />`
-                  }
-                </div>
+              <div class="preview-container">
+          ${
+            report.fileFormat.toLowerCase() === "pdf"
+              ? `<iframe src="${fileURL}"></iframe>`
+              : `<img src="${fileURL}" alt="${report.reportName}" />`
+          }
               </div>
             </body>
           </html>
@@ -258,8 +158,12 @@ const LabReports: React.FC = () => {
         <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
           <FiBarChart2 className="text-blue-500 text-3xl" />
         </div>
-        <div className="text-gray-600 text-lg font-medium mb-2">No lab reports available</div>
-        <div className="text-gray-400">There are no lab reports to display at the moment.</div>
+        <div className="text-gray-600 text-lg font-medium mb-2">
+          No lab reports available
+        </div>
+        <div className="text-gray-400">
+          There are no lab reports to display at the moment.
+        </div>
       </div>
     );
   }
@@ -275,22 +179,15 @@ const LabReports: React.FC = () => {
           {/* Card Header */}
           <div className="p-6 pb-4">
             <div className="flex items-start space-x-4">
-              <div 
-                className="flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center bg-blue-50 border-2 border-blue-100"
-              >
-                <FiFileText 
-                  size={24} 
-                  className="text-blue-500"
-                />
+              <div className="flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center bg-blue-50 border-2 border-blue-100">
+                <FiFileText size={24} className="text-blue-500" />
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className="font-semibold text-gray-900 text-lg leading-tight truncate group-hover:text-blue-600 transition-colors">
                   {report.reportName}
                 </h3>
                 <div className="flex items-center space-x-2 mt-2">
-                  <span 
-                    className="px-3 py-1 text-xs font-medium rounded-full bg-blue-50 text-blue-700 border border-blue-200"
-                  >
+                  <span className="px-3 py-1 text-xs font-medium rounded-full bg-blue-50 text-blue-700 border border-blue-200">
                     {report.fileFormat.toUpperCase()}
                   </span>
                 </div>
@@ -313,11 +210,11 @@ const LabReports: React.FC = () => {
           {/* Card Footer - Download Button */}
           <div className="px-6 py-4 bg-blue-50 border-t border-blue-100">
             <button
-              onClick={(e) => handleDownload(report, e)}
-              className="w-full flex items-center justify-center px-4 py-3 bg-blue-500 text-white rounded-lg border border-blue-500 hover:bg-blue-600 hover:border-blue-600 transition-all duration-200 group/btn font-medium shadow-sm hover:shadow-md"
+              onClick={() => handleOpenInNewTab(report)}
+              className="w-full cursor-pointer flex items-center justify-center px-4 py-3 bg-blue-500 text-white rounded-lg border border-blue-500 hover:bg-blue-600 hover:border-blue-600 transition-all duration-200 group/btn font-medium shadow-sm hover:shadow-md"
             >
               <FiDownload className="w-4 h-4 mr-2 group-hover/btn:translate-y-0.5 transition-transform" />
-              Download Report
+              View Report
             </button>
           </div>
         </div>
