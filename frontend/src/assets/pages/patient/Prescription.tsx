@@ -1,7 +1,13 @@
 import React, { useEffect, useState } from "react";
 import type { Prescription } from "../../../types";
 import { prescriptionService } from "../../../services/PrescriptionService";
-import { FiDownload, FiFileText, FiCalendar, FiUser, FiClock, FiMapPin } from "react-icons/fi";
+import {
+  FiDownload,
+  FiFileText,
+  FiCalendar,
+  FiUser,
+  FiClock,
+} from "react-icons/fi";
 
 const PrescriptionList: React.FC = () => {
   const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
@@ -29,7 +35,7 @@ const PrescriptionList: React.FC = () => {
   const downloadPrescription = async (prescription: Prescription) => {
     try {
       setDownloading(prescription.id);
-      
+
       // Create a formatted prescription document
       const prescriptionContent = `
 PRESCRIPTION
@@ -54,19 +60,18 @@ Generated on: ${new Date().toLocaleString()}
       `.trim();
 
       // Create and download the file
-      const blob = new Blob([prescriptionContent], { type: 'text/plain' });
+      const blob = new Blob([prescriptionContent], { type: "text/plain" });
       const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = url;
       link.download = `prescription-${prescription.id}-${prescription.appointment.date}.txt`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-      
     } catch (err) {
-      console.error('Download failed:', err);
-      alert('Failed to download prescription');
+      console.error("Download failed:", err);
+      alert("Failed to download prescription");
     } finally {
       setDownloading(null);
     }
@@ -101,8 +106,13 @@ Generated on: ${new Date().toLocaleString()}
         <div className="text-gray-400 mb-4">
           <FiFileText className="h-16 w-16 mx-auto" />
         </div>
-        <h3 className="text-lg font-medium text-gray-700 mb-2">No Prescriptions Found</h3>
-        <p className="text-gray-500">You don't have any prescriptions yet. Prescriptions will appear here after your appointments.</p>
+        <h3 className="text-lg font-medium text-gray-700 mb-2">
+          No Prescriptions Found
+        </h3>
+        <p className="text-gray-500">
+          You don't have any prescriptions yet. Prescriptions will appear here
+          after your appointments.
+        </p>
       </div>
     );
   }
@@ -115,10 +125,13 @@ Generated on: ${new Date().toLocaleString()}
             <FiFileText className="mr-3 text-blue-500" />
             My Prescriptions
           </h2>
-          <p className="text-gray-600 mt-1">View and download your medical prescriptions</p>
+          <p className="text-gray-600 mt-1">
+            View and download your medical prescriptions
+          </p>
         </div>
         <div className="text-sm text-gray-500">
-          {prescriptions.length} prescription{prescriptions.length !== 1 ? 's' : ''} found
+          {prescriptions.length} prescription
+          {prescriptions.length !== 1 ? "s" : ""} found
         </div>
       </div>
 
@@ -139,12 +152,16 @@ Generated on: ${new Date().toLocaleString()}
                     Prescription #{prescription.id}
                   </h3>
                   <p className="text-sm text-gray-600">
-                    Issued on {new Date(prescription.dateIssued).toLocaleDateString('en-US', {
-                      weekday: 'long',
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric'
-                    })}
+                    Issued on{" "}
+                    {new Date(prescription.dateIssued).toLocaleDateString(
+                      "en-US",
+                      {
+                        weekday: "long",
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      }
+                    )}
                   </p>
                 </div>
               </div>
@@ -178,9 +195,15 @@ Generated on: ${new Date().toLocaleString()}
                     <FiUser className="h-4 w-4 text-green-600" />
                   </div>
                   <div>
-                    <h4 className="font-medium text-gray-800 mb-1">Doctor Information</h4>
-                    <p className="text-gray-700 font-medium">Dr. {prescription.appointment.doctor.name}</p>
-                    <p className="text-sm text-gray-600">{prescription.appointment.doctor.specialization}</p>
+                    <h4 className="font-medium text-gray-800 mb-1">
+                      Doctor Information
+                    </h4>
+                    <p className="text-gray-700 font-medium">
+                      Dr. {prescription.appointment.doctor.name}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      {prescription.appointment.doctor.specialization}
+                    </p>
                   </div>
                 </div>
 
@@ -189,8 +212,12 @@ Generated on: ${new Date().toLocaleString()}
                     <FiCalendar className="h-4 w-4 text-purple-600" />
                   </div>
                   <div>
-                    <h4 className="font-medium text-gray-800 mb-1">Appointment Details</h4>
-                    <p className="text-gray-700">{prescription.appointment.date}</p>
+                    <h4 className="font-medium text-gray-800 mb-1">
+                      Appointment Details
+                    </h4>
+                    <p className="text-gray-700">
+                      {prescription.appointment.date}
+                    </p>
                     <p className="text-sm text-gray-600 flex items-center">
                       <FiClock className="mr-1" />
                       {prescription.appointment.time}
@@ -206,7 +233,9 @@ Generated on: ${new Date().toLocaleString()}
                     <FiFileText className="h-4 w-4 text-orange-600" />
                   </div>
                   <div className="flex-1">
-                    <h4 className="font-medium text-gray-800 mb-2">Prescription Notes</h4>
+                    <h4 className="font-medium text-gray-800 mb-2">
+                      Prescription Notes
+                    </h4>
                     <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
                       <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">
                         {prescription.notes}
