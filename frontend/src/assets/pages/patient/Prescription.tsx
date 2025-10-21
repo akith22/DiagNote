@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import type { Prescription } from "../../../types";
 import { prescriptionService } from "../../../services/PrescriptionService";
+import { useNavigate } from "react-router-dom";
 import {
-  FiDownload,
   FiFileText,
   FiCalendar,
   FiUser,
   FiClock,
+  FiDownload,
 } from "react-icons/fi";
 
 const PrescriptionList: React.FC = () => {
@@ -14,11 +15,11 @@ const PrescriptionList: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [downloading, setDownloading] = useState<number | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchPrescriptions = async () => {
       try {
-        setError(null);
         setLoading(true);
         const data = await prescriptionService.getPatientPrescriptions();
         setPrescriptions(data);
@@ -32,12 +33,17 @@ const PrescriptionList: React.FC = () => {
     fetchPrescriptions();
   }, []);
 
+  const goToPrescription = (prescription: Prescription) => {
+    navigate(`/patient/prescriptions/${prescription.id}`, {
+      state: { prescription },
+    });
+  };
+
   const downloadPrescription = async (prescription: Prescription) => {
     try {
       setDownloading(prescription.id);
 
-      // Create a formatted prescription document
-      const prescriptionContent = `
+      const content = `
 PRESCRIPTION
 
 Prescription ID: #${prescription.id}
@@ -59,12 +65,11 @@ ${prescription.notes}
 Generated on: ${new Date().toLocaleString()}
       `.trim();
 
-      // Create and download the file
-      const blob = new Blob([prescriptionContent], { type: "text/plain" });
+      const blob = new Blob([content], { type: "text/plain" });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `prescription-${prescription.id}-${prescription.appointment.date}.txt`;
+      link.download = `prescription-${prescription.id}.txt`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -91,9 +96,6 @@ Generated on: ${new Date().toLocaleString()}
   if (error) {
     return (
       <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
-        <div className="text-red-500 mb-2">
-          <FiFileText className="h-8 w-8 mx-auto mb-2" />
-        </div>
         <p className="text-red-700 font-medium">Error loading prescriptions</p>
         <p className="text-red-600 text-sm mt-1">{error}</p>
       </div>
@@ -118,141 +120,57 @@ Generated on: ${new Date().toLocaleString()}
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-800 flex items-center">
-            <FiFileText className="mr-3 text-blue-500" />
-            My Prescriptions
-          </h2>
-          <p className="text-gray-600 mt-1">
-            View and download your medical prescriptions
-          </p>
-        </div>
-        <div className="text-sm text-gray-500">
-          {prescriptions.length} prescription
-          {prescriptions.length !== 1 ? "s" : ""} found
-        </div>
-      </div>
-
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {prescriptions.map((prescription) => (
         <div
           key={prescription.id}
-          className="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden"
+          className="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-lg transition-all duration-200 flex flex-col justify-between overflow-hidden"
         >
           {/* Header */}
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-gray-100">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <div className="bg-blue-100 p-2 rounded-lg mr-3">
-                  <FiFileText className="h-5 w-5 text-blue-600" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-800">
-                    Prescription #{prescription.id}
-                  </h3>
-                  <p className="text-sm text-gray-600">
-                    Issued on{" "}
-                    {new Date(prescription.dateIssued).toLocaleDateString(
-                      "en-US",
-                      {
-                        weekday: "long",
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      }
-                    )}
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={() => downloadPrescription(prescription)}
-                disabled={downloading === prescription.id}
-                className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-400 transition-colors duration-200"
-              >
-                {downloading === prescription.id ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Downloading...
-                  </>
-                ) : (
-                  <>
-                    <FiDownload className="mr-2" />
-                    Download
-                  </>
-                )}
-              </button>
+          <div
+            className="px-6 py-4 cursor-pointer"
+            onClick={() => goToPrescription(prescription)}
+          >
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-lg font-semibold text-gray-800 flex items-center">
+                <FiFileText className="mr-2 text-blue-500" />
+                Prescription #{prescription.id}
+              </h3>
+              <p className="text-sm text-gray-500">
+                {new Date(prescription.dateIssued).toLocaleDateString()}
+              </p>
             </div>
-          </div>
-
-          {/* Content */}
-          <div className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Doctor Information */}
-              <div className="space-y-4">
-                <div className="flex items-start">
-                  <div className="bg-green-100 p-2 rounded-lg mr-3 mt-1">
-                    <FiUser className="h-4 w-4 text-green-600" />
-                  </div>
-                  <div>
-                    <h4 className="font-medium text-gray-800 mb-1">
-                      Doctor Information
-                    </h4>
-                    <p className="text-gray-700 font-medium">
-                      Dr. {prescription.appointment.doctor.name}
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      {prescription.appointment.doctor.specialization}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start">
-                  <div className="bg-purple-100 p-2 rounded-lg mr-3 mt-1">
-                    <FiCalendar className="h-4 w-4 text-purple-600" />
-                  </div>
-                  <div>
-                    <h4 className="font-medium text-gray-800 mb-1">
-                      Appointment Details
-                    </h4>
-                    <p className="text-gray-700">
-                      {prescription.appointment.date}
-                    </p>
-                    <p className="text-sm text-gray-600 flex items-center">
-                      <FiClock className="mr-1" />
-                      {prescription.appointment.time}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Prescription Notes */}
-              <div className="space-y-4">
-                <div className="flex items-start">
-                  <div className="bg-orange-100 p-2 rounded-lg mr-3 mt-1">
-                    <FiFileText className="h-4 w-4 text-orange-600" />
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="font-medium text-gray-800 mb-2">
-                      Prescription Notes
-                    </h4>
-                    <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
-                      <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">
-                        {prescription.notes}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <p className="text-gray-600 text-sm line-clamp-3">
+              {prescription.notes}
+            </p>
           </div>
 
           {/* Footer */}
-          <div className="bg-gray-50 px-6 py-3 border-t border-gray-100">
-            <div className="flex items-center justify-between text-sm text-gray-500">
-              <span>Appointment ID: #{prescription.appointment.id}</span>
-              <span>Generated: {new Date().toLocaleDateString()}</span>
+          <div className="px-6 py-3 border-t border-gray-100 flex items-center justify-between bg-gray-50">
+            <div className="flex items-center space-x-4 text-gray-700 text-sm">
+              <div className="flex items-center">
+                <FiUser className="mr-1 text-green-600" />
+                Dr. {prescription.appointment.doctor.name}
+              </div>
+              <div className="flex items-center">
+                <FiCalendar className="mr-1 text-purple-600" />
+                {prescription.appointment.date}
+              </div>
+              <div className="flex items-center">
+                <FiClock className="mr-1 text-orange-600" />
+                {prescription.appointment.time}
+              </div>
             </div>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                downloadPrescription(prescription);
+              }}
+              disabled={downloading === prescription.id}
+              className="flex items-center px-3 py-1 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 disabled:bg-blue-400 transition-colors duration-200"
+            >
+              {downloading === prescription.id ? "Downloading..." : <FiDownload />}
+            </button>
           </div>
         </div>
       ))}

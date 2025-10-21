@@ -16,6 +16,10 @@ import UploadLabReport from "./assets/pages/labtech/UploadLabReport";
 import LabReports from "./assets/pages/patient/LabReports";
 import LabReportPreview from "./assets/pages/patient/LabReportPreview";
 
+// 🔹 Import new patient prescription pages
+import PrescriptionList from "./assets/pages/patient/Prescription";
+import PrescriptionDetail from "./assets/pages/patient/PrescriptionDetail";
+
 function App() {
   return (
     <>
@@ -59,6 +63,24 @@ function App() {
           element={
             <ProtectedRoute requiredRole="PATIENT">
               <DoctorSearch />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* 🧾 Patient Prescriptions */}
+        <Route
+          path="/patient/prescriptions"
+          element={
+            <ProtectedRoute requiredRole="PATIENT">
+              <PrescriptionList />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/patient/prescriptions/:id"
+          element={
+            <ProtectedRoute requiredRole="PATIENT">
+              <PrescriptionDetail />
             </ProtectedRoute>
           }
         />
