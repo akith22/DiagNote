@@ -8,13 +8,23 @@ import {
   FiUser,
   FiClock,
   FiDownload,
+  FiEye,
 } from "react-icons/fi";
 
 const PrescriptionList: React.FC = () => {
   const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
+  const [filteredPrescriptions, setFilteredPrescriptions] = useState<
+    Prescription[]
+  >([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [downloading, setDownloading] = useState<number | null>(null);
+  const [filters, setFilters] = useState({
+    doctor: "",
+    dateFrom: "",
+    dateTo: "",
+  });
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -22,7 +32,13 @@ const PrescriptionList: React.FC = () => {
       try {
         setLoading(true);
         const data = await prescriptionService.getPatientPrescriptions();
-        setPrescriptions(data);
+        // Sort by latest date first
+        const sortedData = data.sort(
+          (a, b) =>
+            new Date(b.dateIssued).getTime() - new Date(a.dateIssued).getTime()
+        );
+        setPrescriptions(sortedData);
+        setFilteredPrescriptions(sortedData);
       } catch (err: any) {
         setError(err.message || "Failed to load prescriptions");
       } finally {
@@ -32,6 +48,36 @@ const PrescriptionList: React.FC = () => {
 
     fetchPrescriptions();
   }, []);
+
+  // Apply filters whenever filters or prescriptions change
+  useEffect(() => {
+    let filtered = [...prescriptions];
+
+    if (filters.doctor) {
+      filtered = filtered.filter((prescription) =>
+        prescription.appointment.doctor.name
+          .toLowerCase()
+          .includes(filters.doctor.toLowerCase())
+      );
+    }
+
+    if (filters.dateFrom) {
+      filtered = filtered.filter(
+        (prescription) =>
+          new Date(prescription.dateIssued) >= new Date(filters.dateFrom)
+      );
+    }
+
+    if (filters.dateTo) {
+      const dateTo = new Date(filters.dateTo);
+      dateTo.setHours(23, 59, 59, 999); // Include entire end date
+      filtered = filtered.filter(
+        (prescription) => new Date(prescription.dateIssued) <= dateTo
+      );
+    }
+
+    setFilteredPrescriptions(filtered);
+  }, [filters, prescriptions]);
 
   const goToPrescription = (prescription: Prescription) => {
     navigate(`/patient/prescriptions/${prescription.id}`, {
@@ -82,6 +128,21 @@ Generated on: ${new Date().toLocaleString()}
     }
   };
 
+  const handleFilterChange = (key: keyof typeof filters, value: string) => {
+    setFilters((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
+  };
+
+  const clearFilters = () => {
+    setFilters({
+      doctor: "",
+      dateFrom: "",
+      dateTo: "",
+    });
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -102,78 +163,176 @@ Generated on: ${new Date().toLocaleString()}
     );
   }
 
-  if (prescriptions.length === 0) {
-    return (
-      <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
-        <div className="text-gray-400 mb-4">
-          <FiFileText className="h-16 w-16 mx-auto" />
-        </div>
-        <h3 className="text-lg font-medium text-gray-700 mb-2">
-          No Prescriptions Found
-        </h3>
-        <p className="text-gray-500">
-          You don't have any prescriptions yet. Prescriptions will appear here
-          after your appointments.
-        </p>
-      </div>
-    );
-  }
-
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {prescriptions.map((prescription) => (
-        <div
-          key={prescription.id}
-          className="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-lg transition-all duration-200 flex flex-col justify-between overflow-hidden"
-        >
-          {/* Header */}
-          <div
-            className="px-6 py-4 cursor-pointer"
-            onClick={() => goToPrescription(prescription)}
-          >
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-lg font-semibold text-gray-800 flex items-center">
-                <FiFileText className="mr-2 text-blue-500" />
-                Prescription #{prescription.id}
-              </h3>
-              <p className="text-sm text-gray-500">
-                {new Date(prescription.dateIssued).toLocaleDateString()}
-              </p>
-            </div>
-            <p className="text-gray-600 text-sm line-clamp-3">
-              {prescription.notes}
-            </p>
+    <div className="space-y-6">
+      {/* Filter Section */}
+      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+        <div className="flex flex-col md:flex-row gap-4 items-end">
+          <div className="flex-1">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Filter by Doctor
+            </label>
+            <input
+              type="text"
+              value={filters.doctor}
+              onChange={(e) => handleFilterChange("doctor", e.target.value)}
+              placeholder="Search by doctor name..."
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
           </div>
 
-          {/* Footer */}
-          <div className="px-6 py-3 border-t border-gray-100 flex items-center justify-between bg-gray-50">
-            <div className="flex items-center space-x-4 text-gray-700 text-sm">
-              <div className="flex items-center">
-                <FiUser className="mr-1 text-green-600" />
-                Dr. {prescription.appointment.doctor.name}
+          <div className="flex-1">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Date From
+            </label>
+            <input
+              type="date"
+              value={filters.dateFrom}
+              onChange={(e) => handleFilterChange("dateFrom", e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+
+          <div className="flex-1">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Date To
+            </label>
+            <input
+              type="date"
+              value={filters.dateTo}
+              onChange={(e) => handleFilterChange("dateTo", e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+
+          <button
+            onClick={clearFilters}
+            className="px-4 py-2 text-sm text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors duration-200"
+          >
+            Clear Filters
+          </button>
+        </div>
+
+        {/* Results count */}
+        <div className="mt-3 text-sm text-gray-500">
+          Showing {filteredPrescriptions.length} of {prescriptions.length}{" "}
+          prescriptions
+        </div>
+      </div>
+
+      {/* Prescriptions List */}
+      {filteredPrescriptions.length === 0 ? (
+        <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
+          <div className="text-gray-400 mb-4">
+            <FiFileText className="h-16 w-16 mx-auto" />
+          </div>
+          <h3 className="text-lg font-medium text-gray-700 mb-2">
+            {prescriptions.length === 0
+              ? "No Prescriptions Found"
+              : "No Matching Prescriptions"}
+          </h3>
+          <p className="text-gray-500">
+            {prescriptions.length === 0
+              ? "You don't have any prescriptions yet. Prescriptions will appear here after your appointments."
+              : "No prescriptions match your current filters. Try adjusting your search criteria."}
+          </p>
+        </div>
+      ) : (
+        <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+          {/* Table Header */}
+          <div className="grid grid-cols-12 gap-4 px-6 py-3 bg-gray-50 border-b border-gray-200 text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <div className="col-span-3">Prescription Details</div>
+            <div className="col-span-2">Doctor</div>
+            <div className="col-span-2">Appointment Date</div>
+            <div className="col-span-2">Issued Date</div>
+            <div className="col-span-3 text-right">Actions</div>
+          </div>
+
+          {/* Table Body */}
+          <div className="divide-y divide-gray-200">
+            {filteredPrescriptions.map((prescription) => (
+              <div
+                key={prescription.id}
+                className="grid grid-cols-12 gap-4 px-6 py-4 hover:bg-gray-50 cursor-pointer transition-colors duration-150"
+                onClick={() => goToPrescription(prescription)}
+              >
+                {/* Prescription Details */}
+                <div className="col-span-3">
+                  <div className="flex items-center">
+                    <FiFileText className="h-5 w-5 text-blue-500 mr-3" />
+                    <div>
+                      <h3 className="font-medium text-gray-900">
+                        Prescription #{prescription.id}
+                      </h3>
+                      <p className="text-sm text-gray-500 line-clamp-2 mt-1">
+                        {prescription.notes}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Doctor */}
+                <div className="col-span-2 flex items-center">
+                  <FiUser className="h-4 w-4 text-green-600 mr-2" />
+                  <span className="text-sm text-gray-700">
+                    Dr. {prescription.appointment.doctor.name}
+                  </span>
+                </div>
+
+                {/* Appointment Date */}
+                <div className="col-span-2 flex items-center">
+                  <FiCalendar className="h-4 w-4 text-purple-600 mr-2" />
+                  <span className="text-sm text-gray-700">
+                    {prescription.appointment.date}
+                  </span>
+                </div>
+
+                {/* Issued Date */}
+                <div className="col-span-2 flex items-center">
+                  <FiClock className="h-4 w-4 text-orange-600 mr-2" />
+                  <span className="text-sm text-gray-700">
+                    {new Date(prescription.dateIssued).toLocaleDateString()}
+                  </span>
+                </div>
+
+                {/* Actions */}
+                <div className="col-span-3 flex items-center justify-end space-x-2">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      goToPrescription(prescription);
+                    }}
+                    className="flex items-center px-3 py-1 text-sm text-blue-600 border border-blue-600 rounded-md hover:bg-blue-50 transition-colors duration-200"
+                  >
+                    <FiEye className="mr-1" />
+                    View
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      downloadPrescription(prescription);
+                    }}
+                    disabled={downloading === prescription.id}
+                    className="flex items-center px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-blue-400 transition-colors duration-200"
+                  >
+                    {downloading === prescription.id ? (
+                      <>
+                        <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-1"></div>
+                        Downloading
+                      </>
+                    ) : (
+                      <>
+                        <FiDownload className="mr-1" />
+                        Download
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
-              <div className="flex items-center">
-                <FiCalendar className="mr-1 text-purple-600" />
-                {prescription.appointment.date}
-              </div>
-              <div className="flex items-center">
-                <FiClock className="mr-1 text-orange-600" />
-                {prescription.appointment.time}
-              </div>
-            </div>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                downloadPrescription(prescription);
-              }}
-              disabled={downloading === prescription.id}
-              className="flex items-center px-3 py-1 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 disabled:bg-blue-400 transition-colors duration-200"
-            >
-              {downloading === prescription.id ? "Downloading..." : <FiDownload />}
-            </button>
+            ))}
           </div>
         </div>
-      ))}
+      )}
     </div>
   );
 };
