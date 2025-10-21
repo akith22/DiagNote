@@ -1,20 +1,26 @@
 import React, { useEffect, useState } from "react";
 import {
-  FiCheckCircle,
   FiXCircle,
   FiRefreshCcw,
   FiUpload,
   FiSearch,
   FiFilter,
+  FiFileText,
+  FiEye,
 } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import { labRequestsService } from "../../../services/LabRequestsService";
+import { labReportsService } from "../../../services/LabReportsService";
+import type { LabReport } from "../../../services/LabReportsService";
 import type { LabRequest } from "../../../services/LabRequestsService";
 import LoadingSpinner from "../../../components/common/LoadingSpinner";
 
 const LabRequests: React.FC = () => {
   const [labRequests, setLabRequests] = useState<LabRequest[]>([]);
   const [filteredRequests, setFilteredRequests] = useState<LabRequest[]>([]);
+  const [labReports, setLabReports] = useState<{ [key: number]: LabReport[] }>(
+    {}
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   // const [success, setSuccess] = useState("");
@@ -29,11 +35,39 @@ const LabRequests: React.FC = () => {
       const response = await labRequestsService.getAllLabRequests();
       setLabRequests(response);
       setFilteredRequests(response);
+
+      // Fetch reports for completed requests
+      await fetchReportsForCompletedRequests(response);
     } catch (err: any) {
       setError("Failed to load lab requests.");
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchReportsForCompletedRequests = async (requests: LabRequest[]) => {
+    const completedRequests = requests.filter(
+      (req) => req.status === "COMPLETED"
+    );
+
+    const reportsMap: { [key: number]: LabReport[] } = {};
+
+    for (const request of completedRequests) {
+      try {
+        const reports = await labReportsService.getReportsByLabRequest(
+          request.id
+        );
+        reportsMap[request.id] = reports;
+      } catch (err) {
+        console.error(
+          `Failed to fetch reports for request ${request.id}:`,
+          err
+        );
+        reportsMap[request.id] = [];
+      }
+    }
+
+    setLabReports(reportsMap);
   };
 
   // Filter requests based on search term and status
@@ -88,6 +122,48 @@ const LabRequests: React.FC = () => {
       >
         {config.label}
       </span>
+    );
+  };
+
+  const handleViewReport = (report: LabReport, labRequest: LabRequest) => {
+    navigate(`/labtech/view-report/${report.id}`, {
+      state: {
+        report,
+        labRequest,
+      },
+    });
+  };
+
+  const renderFileNames = (labRequestId: number, labRequest: LabRequest) => {
+    const reports = labReports[labRequestId] || [];
+
+    if (reports.length === 0) {
+      return (
+        <span className="flex items-center text-gray-500 font-medium text-sm">
+          <FiFileText className="mr-1.5" /> No files
+        </span>
+      );
+    }
+
+    return (
+      <div className="space-y-1 max-w-xs">
+        {reports.slice(0, 3).map((report) => (
+          <div
+            key={report.id}
+            className="flex items-center text-xs text-gray-700 bg-gray-50 rounded px-2 py-1 hover:bg-blue-50 hover:text-blue-700 cursor-pointer transition-all duration-200 group"
+            onClick={() => handleViewReport(report, labRequest)}
+          >
+            <FiFileText className="mr-1.5 text-blue-600 flex-shrink-0" />
+            <span className="truncate flex-1">{report.reportFile}</span>
+            <FiEye className="ml-1 text-gray-400 group-hover:text-blue-600 flex-shrink-0" />
+          </div>
+        ))}
+        {reports.length > 3 && (
+          <div className="text-xs text-gray-500 bg-blue-50 rounded px-2 py-1">
+            +{reports.length - 3} more files
+          </div>
+        )}
+      </div>
     );
   };
 
@@ -236,9 +312,7 @@ const LabRequests: React.FC = () => {
                           <FiUpload className="mr-2" /> Upload Report
                         </button>
                       ) : (
-                        <span className="flex items-center text-green-700 font-medium text-sm">
-                          <FiCheckCircle className="mr-1.5" /> Report Uploaded
-                        </span>
+                        renderFileNames(req.id, req)
                       )}
                     </td>
                   </tr>
