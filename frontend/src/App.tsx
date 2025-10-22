@@ -11,6 +11,7 @@ import Prescription from "./assets/pages/doctor/Prescription";
 // 🔹 Import new labtech pages
 import LabRequests from "./assets/pages/labtech/LabRequests";
 import UploadLabReport from "./assets/pages/labtech/UploadLabReport";
+import ViewLabReport from "./assets/pages/labtech/ViewLabReport";
 
 // 🔹 Import new patient lab report pages
 import LabReports from "./assets/pages/patient/LabReports";
@@ -125,6 +126,16 @@ function App() {
           element={
             <ProtectedRoute requiredRole="LABTECH">
               <UploadLabReport />
+            </ProtectedRoute>
+          }
+        />
+        
+        {/* 🔹 NEW: View Lab Report Route */}
+        <Route
+          path="/labtech/view-report/:reportId"
+          element={
+            <ProtectedRoute requiredRole="LABTECH">
+              <ViewLabReport />
             </ProtectedRoute>
           }
         />
