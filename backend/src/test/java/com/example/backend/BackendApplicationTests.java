@@ -23,32 +23,6 @@ class BackendApplicationTests {
     }
 
     @Autowired
-    private MockMvc mockMvc;
-
-
-    /**
-     * Business Evaluvation testing
-     * @throws Exception
-     */
-    @Test
-    public void testLoginAndPostReview() throws Exception {
-        // Step 1: Login and get token
-        String loginPayload = """
-				    {
-				        "email": "sathindu@gmail.com",
-				        "password": "123456"
-				    }
-				""";
-
-        MvcResult loginResult = mockMvc.perform(post("/api/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(loginPayload))
-                .andExpect(status().isOk())
-                .andReturn();
-
-    }
-
-	@Autowired
 	private MockMvc mockMvc;
 
 
