@@ -2,14 +2,13 @@ import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import {
   FiArrowLeft,
-  FiFileText,
   FiCalendar,
   FiUser,
   FiClock,
   FiDownload,
   FiAlertCircle,
   FiPlusSquare,
-  FiActivity
+  FiActivity,
 } from "react-icons/fi";
 import type { Prescription } from "../../../types";
 import { prescriptionService } from "../../../services/PrescriptionService";
@@ -94,7 +93,9 @@ Generated on: ${new Date().toLocaleString()}
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 font-medium">Loading prescription details...</p>
+          <p className="text-gray-600 font-medium">
+            Loading prescription details...
+          </p>
         </div>
       </div>
     );
@@ -108,8 +109,12 @@ Generated on: ${new Date().toLocaleString()}
             <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <FiAlertCircle className="text-red-500 text-2xl" />
             </div>
-            <h3 className="text-xl font-bold text-gray-800 mb-2">Unable to Load Prescription</h3>
-            <p className="text-gray-600 mb-6">{error || "Prescription not found"}</p>
+            <h3 className="text-xl font-bold text-gray-800 mb-2">
+              Unable to Load Prescription
+            </h3>
+            <p className="text-gray-600 mb-6">
+              {error || "Prescription not found"}
+            </p>
             <button
               onClick={() => navigate(-1)}
               className="w-full px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors duration-200 font-medium"
@@ -134,10 +139,14 @@ Generated on: ${new Date().toLocaleString()}
             <FiArrowLeft className="text-lg" />
             Back to Prescriptions
           </button>
-          
+
           <div className="text-right">
-            <div className="text-sm text-gray-500 font-medium">Prescription ID</div>
-            <div className="text-xl font-bold text-gray-800">#{prescription.id}</div>
+            <div className="text-sm text-gray-500 font-medium">
+              Prescription ID
+            </div>
+            <div className="text-xl font-bold text-gray-800">
+              #{prescription.id}
+            </div>
           </div>
         </div>
 
@@ -153,12 +162,16 @@ Generated on: ${new Date().toLocaleString()}
                 <div>
                   <h1 className="text-2xl font-bold">Medical Prescription</h1>
                   <p className="text-blue-100 opacity-90">
-                    Issued on {new Date(prescription.dateIssued).toLocaleDateString('en-US', { 
-                      weekday: 'long', 
-                      year: 'numeric', 
-                      month: 'long', 
-                      day: 'numeric' 
-                    })}
+                    Issued on{" "}
+                    {new Date(prescription.dateIssued).toLocaleDateString(
+                      "en-US",
+                      {
+                        weekday: "long",
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      }
+                    )}
                   </p>
                 </div>
               </div>
@@ -191,16 +204,26 @@ Generated on: ${new Date().toLocaleString()}
                   <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
                     <FiUser className="text-blue-600 text-lg" />
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-800">Doctor Information</h3>
+                  <h3 className="text-lg font-semibold text-gray-800">
+                    Doctor Information
+                  </h3>
                 </div>
                 <div className="space-y-3">
                   <div>
-                    <p className="text-sm text-gray-600 font-medium">Doctor Name</p>
-                    <p className="text-lg font-bold text-gray-800">Dr. {prescription.appointment.doctor.name}</p>
+                    <p className="text-sm text-gray-600 font-medium">
+                      Doctor Name
+                    </p>
+                    <p className="text-lg font-bold text-gray-800">
+                      Dr. {prescription.appointment.doctor.name}
+                    </p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600 font-medium">Specialization</p>
-                    <p className="text-gray-700 font-medium">{prescription.appointment.doctor.specialization}</p>
+                    <p className="text-sm text-gray-600 font-medium">
+                      Specialization
+                    </p>
+                    <p className="text-gray-700 font-medium">
+                      {prescription.appointment.doctor.specialization}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -211,12 +234,16 @@ Generated on: ${new Date().toLocaleString()}
                   <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
                     <FiCalendar className="text-green-600 text-lg" />
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-800">Appointment Details</h3>
+                  <h3 className="text-lg font-semibold text-gray-800">
+                    Appointment Details
+                  </h3>
                 </div>
                 <div className="space-y-3">
                   <div>
                     <p className="text-sm text-gray-600 font-medium">Date</p>
-                    <p className="text-gray-700 font-medium">{prescription.appointment.date}</p>
+                    <p className="text-gray-700 font-medium">
+                      {prescription.appointment.date}
+                    </p>
                   </div>
                   <div className="flex items-center gap-6">
                     <div>
@@ -227,8 +254,12 @@ Generated on: ${new Date().toLocaleString()}
                       </p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-600 font-medium">Appointment ID</p>
-                      <p className="text-gray-700 font-medium">#{prescription.appointment.id}</p>
+                      <p className="text-sm text-gray-600 font-medium">
+                        Appointment ID
+                      </p>
+                      <p className="text-gray-700 font-medium">
+                        #{prescription.appointment.id}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -241,7 +272,9 @@ Generated on: ${new Date().toLocaleString()}
                 <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
                   <FiPlusSquare className="text-purple-600 text-lg" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-800">Prescription Notes & Instructions</h3>
+                <h3 className="text-lg font-semibold text-gray-800">
+                  Prescription Notes & Instructions
+                </h3>
               </div>
               <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-6 border border-purple-100">
                 <div className="prose prose-lg max-w-none">
@@ -273,7 +306,8 @@ Generated on: ${new Date().toLocaleString()}
         {/* Additional Info */}
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-500">
-            For any questions regarding this prescription, please contact your healthcare provider.
+            For any questions regarding this prescription, please contact your
+            healthcare provider.
           </p>
         </div>
       </div>

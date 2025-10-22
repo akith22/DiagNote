@@ -7,7 +7,6 @@ import {
   FiFileText,
   FiCalendar,
   FiUser,
-  FiFile,
   FiBarChart2,
 } from "react-icons/fi";
 
@@ -94,29 +93,6 @@ const LabReports: React.FC = () => {
     } catch (err) {
       console.error("Failed to open report", err);
     }
-  };
-
-  const handleDownload = async (report: LabReport, event: React.MouseEvent) => {
-    event.stopPropagation();
-    try {
-      const blob = await labReportService.downloadReportBlob(report.reportFile);
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = `${report.reportName}.${report.fileFormat}`;
-      link.click();
-      URL.revokeObjectURL(link.href);
-    } catch (err) {
-      console.error("Failed to download report", err);
-    }
-  };
-
-  const getFileIconColor = (fileFormat: string) => {
-    const format = fileFormat.toLowerCase();
-    // Pleasant blue color scheme
-    if (format === "pdf") return "#3b82f6";
-    if (["jpg", "jpeg", "png", "gif"].includes(format)) return "#60a5fa";
-    if (["doc", "docx"].includes(format)) return "#2563eb";
-    return "#1d4ed8"; // Default blue
   };
 
   const formatDate = (dateString: string) => {
