@@ -22,7 +22,7 @@ const TABS = [
   { id: "PENDING", label: "Pending" },
   { id: "ACCEPTED", label: "Accepted" },
   { id: "DECLINED", label: "Declined" },
-  { id: "COMPLETED", label: "Completed" }, // NEW tab
+  { id: "COMPLETED", label: "Completed" },
 ];
 
 const normalizeStatus = (status?: string) => {
@@ -56,7 +56,6 @@ const AppointmentManager: React.FC<AppointmentManagerProps> = ({
   );
   const [query, setQuery] = useState("");
   const navigate = useNavigate();
-
 
   const fetchAllAppointments = async () => {
     try {
@@ -190,7 +189,6 @@ const AppointmentManager: React.FC<AppointmentManagerProps> = ({
     );
 
     navigate(`/doctor/create-prescription/${appointment.id}`);
-    // setActiveTab("COMPLETED"); // switch tab automatically
   };
 
   const displayedAppointments = useMemo(() => {

@@ -24,4 +24,6 @@ public interface LabRequestRepository extends JpaRepository<LabRequest, Integer>
     List<LabRequest> findByAppointmentId(Integer appointmentId);
 
     Optional<List<LabRequest>> findByAppointment_Doctor_User_Email(String email);
+
+
 }

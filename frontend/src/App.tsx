@@ -7,6 +7,7 @@ import PatientDashboard from "./assets/pages/patient/PatientDashboard";
 import LabTechDashboard from "./assets/pages/labtech/LabTechDashboard";
 import DoctorSearch from "./assets/pages/DoctorSearch";
 import Prescription from "./assets/pages/doctor/Prescription";
+import PatientHistory from "./assets/pages/doctor/PatientHistory";
 
 // 🔹 Import new labtech pages
 import LabRequests from "./assets/pages/labtech/LabRequests";
@@ -49,6 +50,8 @@ function App() {
           path="/doctor/edit-prescription/:id"
           element={<Prescription show={false} />}
         />
+
+        <Route path="/patient/:email" element={<PatientHistory />} />
 
         {/* Patient Routes */}
         <Route
@@ -129,7 +132,7 @@ function App() {
             </ProtectedRoute>
           }
         />
-        
+
         {/* 🔹 NEW: View Lab Report Route */}
         <Route
           path="/labtech/view-report/:reportId"

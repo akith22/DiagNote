@@ -8,6 +8,7 @@ import {
   FiUser,
   FiX,
   FiPlus,
+  FiClock,
 } from "react-icons/fi";
 import LoadingSpinner from "../../../components/common/LoadingSpinner";
 import {
@@ -58,6 +59,7 @@ const Prescription: React.FC<EditCreateProps> = ({ show }) => {
     address?: string;
     gender?: string;
     age?: number;
+    email?: string;
   }>({});
 
   const [isLabRequestModalOpen, setIsLabRequestModalOpen] = useState(false);
@@ -92,6 +94,7 @@ const Prescription: React.FC<EditCreateProps> = ({ show }) => {
           address: details.address,
           gender: details.gender,
           age: details.age,
+          email: details.email, // Make sure email is included
         });
 
         setFormData({
@@ -132,6 +135,7 @@ const Prescription: React.FC<EditCreateProps> = ({ show }) => {
           address: details.patientAddress,
           gender: details.patientGender,
           age: details.patientAge,
+          // Note: Email might not be available in edit mode
         });
       } catch (err) {
         console.error("❌ Error fetching prescription details", err);
@@ -182,6 +186,15 @@ const Prescription: React.FC<EditCreateProps> = ({ show }) => {
 
   const handleRequestTest = () => {
     setIsLabRequestModalOpen(true);
+  };
+
+  const handleViewHistory = () => {
+    if (patientInfo.email) {
+      // Navigate to patient history page with patient email using the correct route
+      navigate(`/patient/${encodeURIComponent(patientInfo.email)}`);
+    } else {
+      alert("Patient email not available to view history");
+    }
   };
 
   return (
@@ -281,6 +294,20 @@ const Prescription: React.FC<EditCreateProps> = ({ show }) => {
                     </div>
                   </div>
 
+                  {patientInfo.email && (
+                    <div className="flex items-center gap-3 p-3 bg-indigo-50 rounded-lg border border-indigo-200">
+                      <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
+                        <FiUser className="text-indigo-600 text-sm" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-indigo-600">Patient Email</p>
+                        <p className="font-medium text-indigo-700 text-sm">
+                          {patientInfo.email}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
                   {formData.appointmentId && (
                     <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
                       <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
@@ -296,16 +323,27 @@ const Prescription: React.FC<EditCreateProps> = ({ show }) => {
                     </div>
                   )}
 
-                  {/* Request A Test Button - Only show in create mode */}
+                  {/* Action Buttons - Only show in create mode */}
                   {!formData.id && (
-                    <button
-                      type="button"
-                      onClick={handleRequestTest}
-                      className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-200 mt-4"
-                    >
-                      <FiPlus className="text-lg" />
-                      Request A Test
-                    </button>
+                    <div className="space-y-3 mt-4">
+                      <button
+                        type="button"
+                        onClick={handleRequestTest}
+                        className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
+                      >
+                        <FiPlus className="text-lg" />
+                        Request A Test
+                      </button>
+                      
+                      <button
+                        type="button"
+                        onClick={handleViewHistory}
+                        className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
+                      >
+                        <FiClock className="text-lg" />
+                        View Patient History
+                      </button>
+                    </div>
                   )}
                 </div>
               </div>
