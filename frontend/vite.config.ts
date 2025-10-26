@@ -2,13 +2,24 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 
-// https://vite.dev/config/
+const API_URL = process.env.VITE_API_URL || 'http://localhost:8080';
+
 export default defineConfig({
+  plugins: [react(), tailwindcss()],
+  
+  base: './',
+
+  build: {
+    outDir: 'dist',
+  },
+
   server: {
     proxy: {
-      // '/api': 'http://localhost:8080',
-      '/api': 'http://3.133.159.42:80',
+      '/api': {
+        target: API_URL,
+        changeOrigin: true,
+        secure: false,
+      }
     }
   },
-  plugins: [react(), tailwindcss()],
 });
