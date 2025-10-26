@@ -33,7 +33,6 @@ const DoctorDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState("profile");
 
   const [prescriptionFormData, setPrescriptionFormData] = useState<any>(null);
-  const [refreshLabRequests, setRefreshLabRequests] = useState(0); // For refreshing lab requests table
 
   useEffect(() => {
     fetchProfile();
@@ -147,7 +146,10 @@ const DoctorDashboard: React.FC = () => {
                 <div className="w-28 h-28 bg-gradient-to-br from-blue-100 to-teal-100 rounded-full flex items-center justify-center">
                   <div className="w-24 h-24 bg-gradient-to-br from-blue-200 to-teal-200 rounded-full flex items-center justify-center shadow-inner">
                     <span className="text-3xl font-bold text-blue-700">
-                      {user.name.split(" ").map((n) => n[0]).join("")}
+                      {user.name
+                        .split(" ")
+                        .map((n) => n[0])
+                        .join("")}
                     </span>
                   </div>
                 </div>
@@ -157,7 +159,9 @@ const DoctorDashboard: React.FC = () => {
                   </div>
                 )}
               </div>
-              <h2 className="text-xl font-bold text-gray-800 mb-1">{user.name}</h2>
+              <h2 className="text-xl font-bold text-gray-800 mb-1">
+                {user.name}
+              </h2>
               <p className="text-gray-600 text-sm mb-2">{user.email}</p>
               <div className="px-4 py-1.5 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
                 {user.role}
@@ -316,22 +320,28 @@ const DoctorDashboard: React.FC = () => {
                     <FiActivity className="text-purple-600 text-xl" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold text-gray-800">Lab Requests</h2>
-                    <p className="text-gray-600">View and manage all your lab test requests</p>
+                    <h2 className="text-xl font-bold text-gray-800">
+                      Lab Requests
+                    </h2>
+                    <p className="text-gray-600">
+                      View and manage all your lab test requests
+                    </p>
                   </div>
                 </div>
-                
-                <LabRequestsTable 
-                  refreshTrigger={refreshLabRequests}
-                />
+
+                <LabRequestsTable />
               </div>
 
               {/* Additional Reports can be added here */}
               <div className="bg-white rounded-2xl shadow-sm p-8 text-center border border-gray-100">
                 <div className="flex flex-col items-center justify-center text-gray-500">
                   <FiBarChart2 className="text-4xl mb-4 opacity-50" />
-                  <h3 className="text-lg font-medium mb-2">Additional Reports</h3>
-                  <p className="text-sm">More reporting features coming soon...</p>
+                  <h3 className="text-lg font-medium mb-2">
+                    Additional Reports
+                  </h3>
+                  <p className="text-sm">
+                    More reporting features coming soon...
+                  </p>
                 </div>
               </div>
             </div>

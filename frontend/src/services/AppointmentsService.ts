@@ -1,5 +1,4 @@
-import axios from "axios";
-import type { AppointmentRequest, AppointmentResponse } from "../types";
+import type { AppointmentRequest, AppointmentResponse } from "../types/index";
 import API from "./api";
 
 

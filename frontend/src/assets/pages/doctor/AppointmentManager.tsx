@@ -7,7 +7,6 @@ import {
   FiSearch,
   FiHash,
   FiCalendar,
-  FiFileText,
 } from "react-icons/fi";
 import LoadingSpinner from "../../../components/common/LoadingSpinner";
 import { doctorAppointmentService } from "../../../services/DoctorAppointmenrService";
@@ -190,10 +189,6 @@ const AppointmentManager: React.FC<AppointmentManagerProps> = ({
     );
 
     navigate(`/doctor/create-prescription/${appointment.id}`);
-  };
-
-  const handleViewPatientHistory = (appointmentId: number) => {
-    navigate(`/doctor/patient-history/${appointmentId}`);
   };
 
   const displayedAppointments = useMemo(() => {
@@ -392,7 +387,6 @@ const AppointmentManager: React.FC<AppointmentManagerProps> = ({
                       >
                         Prescribe
                       </button>
-                      
                     </>
                   ) : null}
                 </div>
