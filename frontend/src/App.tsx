@@ -23,7 +23,6 @@ import LabReportPreview from "./assets/pages/patient/LabReportPreview";
 import PrescriptionList from "./assets/pages/patient/Prescription";
 import PrescriptionDetail from "./assets/pages/patient/PrescriptionDetail";
 
-
 function App() {
   return (
     <>
@@ -52,6 +51,7 @@ function App() {
           path="/doctor/edit-prescription/:id"
           element={<Prescription show={false} />}
         />
+<<<<<<< HEAD
 
         <Route path="/patient/:email" element={<PatientHistory />} />
 
@@ -60,6 +60,8 @@ function App() {
 
 
 
+=======
+>>>>>>> origin/main
 
         {/* Patient Routes */}
         <Route
