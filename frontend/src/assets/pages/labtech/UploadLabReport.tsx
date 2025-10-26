@@ -9,6 +9,7 @@ import {
   FiCalendar,
   FiClipboard,
   FiCheckCircle,
+  FiX,
 } from "react-icons/fi";
 
 const UploadLabReport: React.FC = () => {
@@ -16,33 +17,48 @@ const UploadLabReport: React.FC = () => {
   const navigate = useNavigate();
   const labRequest = state?.labRequest;
 
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const [message, setMessage] = useState("");
   const [isUploading, setIsUploading] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0] || null;
-    setFile(selectedFile);
-    if (selectedFile) setMessage("");
+    const selectedFiles = Array.from(e.target.files || []);
+    
+    if (selectedFiles.length > 0) {
+      setFiles(prevFiles => [...prevFiles, ...selectedFiles]);
+      setMessage("");
+      
+      // Reset file input
+      e.target.value = "";
+    }
+  };
+
+  const removeFile = (index: number) => {
+    setFiles(prevFiles => prevFiles.filter((_, i) => i !== index));
   };
 
   const handleUpload = async () => {
-    if (!file) {
-      setMessage("Please select a file first.");
+    if (files.length === 0) {
+      setMessage("Please select at least one file first.");
       return;
     }
 
     setIsUploading(true);
     try {
-      await labReportsService.uploadReport(file, labRequest.id);
-      setMessage("Report uploaded successfully!");
-      setFile(null);
-      const fileInput = document.getElementById(
-        "file-upload"
-      ) as HTMLInputElement;
-      if (fileInput) fileInput.value = "";
-    } catch (err) {
-      setMessage("Failed to upload report. Please try again.");
+      await labReportsService.uploadMultipleReports(files, labRequest.id);
+      setMessage(`Successfully uploaded ${files.length} report(s)!`);
+      setFiles([]);
+      
+      // Optional: Redirect after successful upload
+      setTimeout(() => {
+        navigate(-1);
+      }, 2000);
+    } catch (err: any) {
+      console.error("Upload error:", err);
+      setMessage(
+        err.response?.data?.message || 
+        "Failed to upload reports. Please try again."
+      );
     } finally {
       setIsUploading(false);
     }
@@ -59,7 +75,7 @@ const UploadLabReport: React.FC = () => {
             No Lab Request Selected
           </h2>
           <p className="text-gray-600 mb-6">
-            Please go back and select a lab request to upload a report.
+            Please go back and select a lab request to upload reports.
           </p>
           <button
             onClick={() => navigate(-1)}
@@ -94,7 +110,7 @@ const UploadLabReport: React.FC = () => {
               </div>
               <div>
                 <h1 className="text-3xl font-bold text-gray-900">
-                  Upload Lab Report
+                  Upload Lab Reports
                 </h1>
                 <p className="text-gray-600 mt-1">
                   Upload test results and laboratory findings
@@ -180,8 +196,7 @@ const UploadLabReport: React.FC = () => {
               <div className="mt-6 pt-6 border-t border-gray-200">
                 <div className="bg-blue-50 rounded-lg p-4">
                   <p className="text-sm text-blue-700">
-                    <strong>Note:</strong> Ensure the report is in PDF format
-                    and contains all required test results before uploading.
+                    <strong>Note:</strong> You can upload multiple reports. Supported formats: PDF, DOC, DOCX, TXT, Images
                   </p>
                 </div>
               </div>
@@ -195,11 +210,10 @@ const UploadLabReport: React.FC = () => {
                 <div className="text-center py-16">
                   <FiCheckCircle className="text-green-600 text-5xl mx-auto mb-4" />
                   <h3 className="text-2xl font-semibold text-gray-900 mb-2">
-                    Report Already Uploaded
+                    Reports Already Uploaded
                   </h3>
                   <p className="text-gray-600 mb-6">
-                    This lab request has already been completed. You cannot
-                    upload another report.
+                    This lab request has already been completed. You cannot upload more reports.
                   </p>
                   <button
                     onClick={() => navigate(-1)}
@@ -211,7 +225,7 @@ const UploadLabReport: React.FC = () => {
               ) : (
                 <>
                   <h3 className="text-xl font-semibold text-gray-900 mb-6">
-                    Upload Report File
+                    Upload Report Files ({files.length} selected)
                   </h3>
 
                   {/* File Upload Area */}
@@ -221,7 +235,8 @@ const UploadLabReport: React.FC = () => {
                       type="file"
                       onChange={handleFileChange}
                       className="hidden"
-                      accept=".pdf,.doc,.docx,.txt"
+                      accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.gif"
+                      multiple
                     />
 
                     <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
@@ -229,11 +244,14 @@ const UploadLabReport: React.FC = () => {
                     </div>
 
                     <p className="text-lg font-medium text-gray-900 mb-2">
-                      {file ? file.name : "Choose a file to upload"}
+                      {files.length === 0 
+                        ? "Choose files to upload" 
+                        : `Add more files (${files.length} selected)`
+                      }
                     </p>
 
                     <p className="text-gray-500 mb-4">
-                      Supported formats: PDF, DOC, DOCX, TXT
+                      Supported formats: PDF, DOC, DOCX, TXT, JPG, PNG, GIF
                     </p>
 
                     <label
@@ -245,20 +263,37 @@ const UploadLabReport: React.FC = () => {
                     </label>
                   </div>
 
-                  {/* File Info */}
-                  {file && (
-                    <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-6 animate-fade-in">
-                      <div className="flex items-center">
-                        <FiFileText className="text-green-600 mr-3 flex-shrink-0" />
-                        <div className="flex-1">
-                          <p className="font-medium text-green-900">
-                            File Selected
-                          </p>
-                          <p className="text-sm text-green-700 mt-1">
-                            {file.name} • {(file.size / 1024 / 1024).toFixed(2)}{" "}
-                            MB
-                          </p>
-                        </div>
+                  {/* Selected Files List */}
+                  {files.length > 0 && (
+                    <div className="mb-6">
+                      <h4 className="text-sm font-medium text-gray-700 mb-3">
+                        Selected Files:
+                      </h4>
+                      <div className="space-y-2 max-h-60 overflow-y-auto">
+                        {files.map((file, index) => (
+                          <div
+                            key={index}
+                            className="bg-gray-50 border border-gray-200 rounded-xl p-4 flex items-center justify-between animate-fade-in"
+                          >
+                            <div className="flex items-center flex-1 min-w-0">
+                              <FiFileText className="text-blue-600 mr-3 flex-shrink-0" />
+                              <div className="flex-1 min-w-0">
+                                <p className="font-medium text-gray-900 truncate">
+                                  {file.name}
+                                </p>
+                                <p className="text-sm text-gray-500">
+                                  {(file.size / 1024 / 1024).toFixed(2)} MB
+                                </p>
+                              </div>
+                            </div>
+                            <button
+                              onClick={() => removeFile(index)}
+                              className="ml-3 p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all duration-200 flex-shrink-0"
+                            >
+                              <FiX className="text-lg" />
+                            </button>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   )}
@@ -274,18 +309,18 @@ const UploadLabReport: React.FC = () => {
 
                     <button
                       onClick={handleUpload}
-                      disabled={!file || isUploading}
+                      disabled={files.length === 0 || isUploading}
                       className="flex items-center px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all duration-200 shadow-sm hover:shadow-md"
                     >
                       {isUploading ? (
                         <>
                           <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                          Uploading...
+                          Uploading {files.length} file(s)...
                         </>
                       ) : (
                         <>
                           <FiUpload className="mr-2" />
-                          Upload Report
+                          Upload {files.length > 1 ? `${files.length} Reports` : 'Report'}
                         </>
                       )}
                     </button>
@@ -295,14 +330,14 @@ const UploadLabReport: React.FC = () => {
                   {message && (
                     <div
                       className={`mt-6 p-4 rounded-xl border ${
-                        message.includes("successfully")
+                        message.includes("Successfully") || message.includes("successfully")
                           ? "bg-green-50 border-green-200 text-green-700"
                           : "bg-red-50 border-red-200 text-red-700"
                       } animate-fade-in`}
                     >
                       <div className="flex items-center">
-                        {message.includes("successfully") ? (
-                          <FiFileText className="mr-3 flex-shrink-0" />
+                        {message.includes("Successfully") || message.includes("successfully") ? (
+                          <FiCheckCircle className="mr-3 flex-shrink-0" />
                         ) : (
                           <FiUpload className="mr-3 flex-shrink-0" />
                         )}

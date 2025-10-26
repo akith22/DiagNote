@@ -109,4 +109,18 @@ prescriptionId: number  ): Promise<{
     }
   },
 
+  async getPatientPrescriptionById(prescriptionId: number): Promise<Prescription> {
+  try {
+    const res = await API.get(`/patient/prescriptions/${prescriptionId}`);
+    console.log("Patient prescription received:", res.data);
+    return res.data;
+  } catch (error: any) {
+    console.error("Fetch patient prescription error:", error);
+    throw new Error(
+      error.response?.data?.message || "Failed to fetch prescription"
+    );
+  }
+}
+
+
 };
