@@ -22,6 +22,9 @@ import LabReportPreview from "./assets/pages/patient/LabReportPreview";
 import PrescriptionList from "./assets/pages/patient/Prescription";
 import PrescriptionDetail from "./assets/pages/patient/PrescriptionDetail";
 
+import { Toaster } from "react-hot-toast";
+
+
 function App() {
   return (
     <>
@@ -146,5 +149,9 @@ function App() {
     </>
   );
 }
+
+
+
+
 
 export default App;

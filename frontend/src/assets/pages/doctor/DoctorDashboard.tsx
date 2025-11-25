@@ -320,12 +320,8 @@ const DoctorDashboard: React.FC = () => {
                     <FiActivity className="text-purple-600 text-xl" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold text-gray-800">
-                      Lab Requests
-                    </h2>
-                    <p className="text-gray-600">
-                      View and manage all your lab test requests
-                    </p>
+                    <h2 className="text-xl font-bold text-gray-800">Lab Requests</h2>
+                    <p className="text-gray-600">View and manage all your lab test requests</p>
                   </div>
                 </div>
 

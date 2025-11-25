@@ -20,6 +20,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import type { DoctorProfile } from "../../../types";
 import { doctorService } from "../../../services/DoctorService";
 import { LabRequestModal } from "./DoctorLabRequests";
+import toast from "react-hot-toast";   
 
 interface EditCreateProps {
   show: boolean;

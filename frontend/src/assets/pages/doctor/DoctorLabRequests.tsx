@@ -320,7 +320,7 @@ export const LabRequestsTable: React.FC<LabRequestsTableProps> = ({ refreshTrigg
             <FiActivity className="text-xl text-white" />
           </div>
           <div>
-            <h3 className="text-xl font-bold text-gray-900">Lab Requests</h3>
+            <h3 className="text-xl font-bold text-gray-900">Lab Requests & Lab Reports</h3>
             <p className="text-gray-600 text-sm">
               {labRequests.length} request{labRequests.length !== 1 ? 's' : ''} total
             </p>
